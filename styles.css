@@ -39,6 +39,11 @@ body {
 }
 
 @media (max-width: 900px) { body { cursor: auto; } }
+/* Desktop with a fine pointer: hide the native cursor everywhere so only the
+   gold spatula shows (links, buttons, inputs all default to it). */
+@media (hover: hover) and (pointer: fine) and (min-width: 901px) {
+  *, *::before, *::after { cursor: none !important; }
+}
 
 img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
