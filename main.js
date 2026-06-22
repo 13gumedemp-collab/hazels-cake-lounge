@@ -413,11 +413,26 @@
       mcar.after(dotsWrap);
 
       const step = () => (slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : galTrack.clientWidth) || 1;
+      // Continuous, scroll-linked scaling: each slide's size tracks its distance
+      // from the focused position 1:1, so there is no transition lag or popping.
+      const render = () => {
+        const prog = galTrack.scrollLeft / step();
+        for (let i = 0; i < slides.length; i++) {
+          const d = Math.min(1, Math.abs(i - prog));
+          slides[i].style.transform = 'scale(' + (1 - 0.14 * d).toFixed(4) + ')';
+          slides[i].style.opacity = (1 - 0.5 * d).toFixed(4);
+        }
+      };
       const update = () => {
         slides.forEach((s, i) => s.classList.toggle('is-active', i === current));
         dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
         prevBtn.disabled = current <= 0;
         nextBtn.disabled = current >= maxIndex;
+      };
+      const syncIndex = () => {
+        const atEnd = galTrack.scrollLeft + galTrack.clientWidth >= galTrack.scrollWidth - 2;
+        const i = atEnd ? maxIndex : clamp(Math.round(galTrack.scrollLeft / step()));
+        if (i !== current) { current = i; update(); }
       };
       function goTo(i) {
         current = clamp(i);
@@ -429,14 +444,11 @@
       }
       let raf;
       galTrack.addEventListener('scroll', () => {
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(() => {
-          const atEnd = galTrack.scrollLeft + galTrack.clientWidth >= galTrack.scrollWidth - 2;
-          current = atEnd ? maxIndex : clamp(Math.round(galTrack.scrollLeft / step()));
-          update();
-        });
+        if (raf) return;
+        raf = requestAnimationFrame(() => { raf = 0; render(); syncIndex(); });
       }, { passive: true });
-      addEventListener('resize', update, { passive: true });
+      addEventListener('resize', () => { render(); syncIndex(); }, { passive: true });
+      render();
       update();
     }
   }
