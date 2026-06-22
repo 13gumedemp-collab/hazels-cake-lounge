@@ -481,6 +481,66 @@ section { position: relative; }
   transition: background 0.3s var(--ease); }
 .filepreview__clear:hover { background: var(--gold); color: #0b0a08; }
 
+/* ----------  Reviews: cinematic rating stage  ---------- */
+.review-stage { position: relative; overflow: hidden; isolation: isolate;
+  --rate: 0;
+  padding: clamp(2.5rem, 7vh, 5.5rem) clamp(1.4rem, 5vw, 4rem) clamp(3rem, 8vh, 6rem);
+  display: flex; justify-content: center;
+  background: radial-gradient(120% 90% at 50% 0%, rgba(212,175,55,0.05), transparent 60%); }
+.review-stage__glow { position: absolute; left: 50%; top: 18%; z-index: -1;
+  width: min(70vw, 640px); aspect-ratio: 1; transform: translate(-50%, -50%) scale(calc(0.5 + 0.16 * var(--rate)));
+  background: radial-gradient(circle, rgba(212,175,55,0.32), rgba(212,175,55,0.06) 45%, transparent 70%);
+  opacity: calc(0.12 + 0.16 * var(--rate)); filter: blur(8px);
+  transition: transform 0.7s var(--ease), opacity 0.7s var(--ease); pointer-events: none; }
+.reviewform { width: min(680px, 100%); text-align: center; }
+.reviewform__prompt { font-family: 'Fraunces', serif; font-weight: 300; line-height: 1.05;
+  font-size: clamp(1.8rem, 5vw, 3rem); color: var(--cream); }
+
+.rating { display: inline-flex; gap: clamp(0.5rem, 2.4vw, 1.1rem); margin: clamp(1.6rem, 4vh, 2.6rem) 0 1rem; }
+.rating__star { background: none; border: none; padding: 0; cursor: none; line-height: 0;
+  transform: scale(1); transition: transform 0.35s var(--ease); }
+.rating__star svg { width: clamp(40px, 9vw, 64px); height: clamp(40px, 9vw, 64px);
+  fill: rgba(244,236,221,0.1); stroke: rgba(212,175,55,0.45); stroke-width: 1;
+  transition: fill 0.4s var(--ease), stroke 0.4s var(--ease), filter 0.4s var(--ease); }
+.rating__star.is-on svg { fill: var(--gold); stroke: var(--gold);
+  filter: drop-shadow(0 6px 18px rgba(212,175,55,0.5)); }
+.rating:hover .rating__star:not(.is-on) svg { stroke: rgba(212,175,55,0.3); }
+.rating__star.is-on { transform: scale(1.08); }
+.rating__star.pulse { animation: starPulse 0.5s var(--ease); }
+@keyframes starPulse { 0% { transform: scale(1); } 45% { transform: scale(1.4); } 100% { transform: scale(1.08); } }
+
+.rating__word { font-family: 'Fraunces', serif; font-style: italic; font-size: clamp(1.1rem, 3vw, 1.6rem);
+  color: var(--gold); min-height: 1.6em; letter-spacing: 0.01em;
+  opacity: 0; transform: translateY(8px); transition: opacity 0.4s var(--ease), transform 0.4s var(--ease); }
+.rating__word.show { opacity: 1; transform: none; }
+
+.reviewform__fields { max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height 0.8s var(--ease), opacity 0.6s var(--ease), margin-top 0.6s var(--ease);
+  text-align: left; margin-top: 0; }
+.reviewform__fields.open { max-height: 720px; opacity: 1; margin-top: clamp(1.6rem, 4vh, 2.6rem); }
+.reviewform__fields .field { gap: 0.5rem; margin-bottom: 1.4rem; }
+.reviewform__fields .btn { margin-top: 0.4rem; }
+
+/* ----------  Reviews wall  ---------- */
+.reviews { padding: clamp(2rem, 6vh, 4rem) clamp(1.4rem, 5vw, 4rem) clamp(4rem, 10vh, 7rem); }
+.reviews__wall { columns: 3 280px; column-gap: clamp(1rem, 2vw, 1.6rem); max-width: 1100px; margin: 0 auto; }
+.review { break-inside: avoid; margin: 0 0 clamp(1rem, 2vw, 1.6rem); padding: clamp(1.4rem, 3vw, 2rem);
+  border: 1px solid var(--line-soft); border-radius: 4px; background: rgba(244,236,221,0.02); }
+.review__stars { display: flex; gap: 0.25rem; margin-bottom: 0.9rem; }
+.review__stars svg { width: 16px; height: 16px; fill: var(--gold); }
+.review__stars svg.off { fill: rgba(244,236,221,0.16); }
+.review__text { font-family: 'Fraunces', serif; font-size: 1.05rem; line-height: 1.5; color: var(--cream); }
+.review__meta { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.15rem; }
+.review__name { font-family: 'Jost', sans-serif; font-size: 0.84rem; letter-spacing: 0.04em; color: var(--cream); }
+.review__order { font-family: 'Jost', sans-serif; font-size: 0.66rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--gold); }
+.review.enter { animation: reviewEnter 0.7s var(--ease) both; }
+@keyframes reviewEnter { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
+.reviews__empty { text-align: center; color: var(--cream-soft); font-family: 'Fraunces', serif;
+  font-style: italic; font-size: 1.05rem; padding: 1rem 0; }
+@media (max-width: 880px) { .reviews__wall { columns: 2 220px; } }
+@media (max-width: 560px) { .reviews__wall { columns: 1; } }
+
 /* ----------  Footer  ---------- */
 .footer { background: var(--bg); color: var(--cream); border-top: 1px solid var(--line);
   padding: 0 clamp(1.4rem,5vw,4rem) 2rem; }

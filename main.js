@@ -480,6 +480,141 @@
     }
   }
 
+  /* ---- Reviews: cinematic rating + wall ---- */
+  const ratingEl = $('#rating');
+  if (ratingEl) {
+    const stage = $('#reviewStage');
+    const stars = $$('.rating__star', ratingEl);
+    const word = $('#rateWord');
+    const prompt = $('#ratePrompt');
+    const fields = $('#reviewFields');
+    const form = $('#reviewForm');
+    const status = $('#reviewStatus');
+    const wall = $('#reviewsWall');
+    const empty = $('#reviewsEmpty');
+    const summary = $('#reviewsSummary');
+    const STORE = 'hcl_reviews';
+    let selected = 0;
+
+    const WORDS = {
+      1: 'Noted, tell me what happened',
+      2: 'Fair, I want to do better',
+      3: 'Good, I am glad you enjoyed it',
+      4: 'Lovely to hear',
+      5: 'Unforgettable, thank you',
+    };
+
+    const paint = (n) => stars.forEach((s, i) => s.classList.toggle('is-on', i < n));
+    const setGlow = (n) => { if (stage) stage.style.setProperty('--rate', String(n)); };
+    const showWord = (n) => {
+      if (!word) return;
+      word.textContent = n ? WORDS[n] : 'Tap a star to begin';
+      word.classList.toggle('show', n > 0);
+    };
+
+    stars.forEach((star, i) => {
+      const val = i + 1;
+      star.addEventListener('mouseenter', () => { paint(val); showWord(val); setGlow(val); });
+      star.addEventListener('focus', () => { paint(val); showWord(val); setGlow(val); });
+      star.addEventListener('click', () => {
+        selected = val;
+        paint(val); showWord(val); setGlow(val);
+        stars.forEach((s) => s.setAttribute('aria-checked', 'false'));
+        star.setAttribute('aria-checked', 'true');
+        star.classList.remove('pulse'); void star.offsetWidth; star.classList.add('pulse');
+        if (prompt) prompt.textContent = val >= 4 ? 'Wonderful. Tell me more.' : 'Thank you. Tell me more.';
+        if (fields) fields.classList.add('open');
+        if (status) status.textContent = '';
+      });
+    });
+    ratingEl.addEventListener('mouseleave', () => { paint(selected); showWord(selected); setGlow(selected); });
+
+    const STAR_PATH = 'M12 2.5l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.6 6.1 21.8l1.2-6.6L2.5 9.5l6.6-.9z';
+    const starsSvg = (n) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'review__stars';
+      wrap.setAttribute('aria-label', n + ' out of 5');
+      for (let i = 0; i < 5; i++) {
+        wrap.insertAdjacentHTML('beforeend',
+          '<svg viewBox="0 0 24 24" class="' + (i < n ? '' : 'off') + '"><path d="' + STAR_PATH + '"/></svg>');
+      }
+      return wrap;
+    };
+
+    const buildCard = (r, animate) => {
+      const card = document.createElement('article');
+      card.className = 'review' + (animate ? ' enter' : '');
+      card.appendChild(starsSvg(r.rating));
+      const text = document.createElement('p');
+      text.className = 'review__text';
+      text.textContent = '“' + r.comment + '”';
+      card.appendChild(text);
+      const meta = document.createElement('div');
+      meta.className = 'review__meta';
+      const name = document.createElement('span');
+      name.className = 'review__name';
+      name.textContent = r.name || 'A happy customer';
+      meta.appendChild(name);
+      if (r.order) {
+        const order = document.createElement('span');
+        order.className = 'review__order';
+        order.textContent = r.order;
+        meta.appendChild(order);
+      }
+      card.appendChild(meta);
+      return card;
+    };
+
+    const load = () => { try { return JSON.parse(localStorage.getItem(STORE)) || []; } catch (e) { return []; } };
+    const save = (list) => { try { localStorage.setItem(STORE, JSON.stringify(list)); } catch (e) {} };
+
+    const updateSummary = (list) => {
+      if (!summary) return;
+      if (!list.length) { summary.textContent = ''; return; }
+      const avg = list.reduce((a, r) => a + r.rating, 0) / list.length;
+      summary.textContent = avg.toFixed(1) + ' out of 5, from ' + list.length + (list.length === 1 ? ' review' : ' reviews');
+    };
+
+    const render = () => {
+      const list = load();
+      if (wall) wall.innerHTML = '';
+      list.forEach((r) => wall && wall.appendChild(buildCard(r, false)));
+      if (empty) empty.style.display = list.length ? 'none' : '';
+      updateSummary(list);
+    };
+    render();
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form));
+      if (!selected) { if (status) status.textContent = 'Please tap a star to rate your order.'; return; }
+      if (!data.name || !data.comment) { if (status) status.textContent = 'Please add your name and a few words.'; return; }
+      const review = {
+        rating: selected,
+        name: String(data.name).trim(),
+        order: String(data.order || '').trim(),
+        comment: String(data.comment).trim(),
+        date: new Date().toISOString(),
+      };
+      const list = load();
+      list.unshift(review);
+      save(list);
+      if (wall) {
+        const card = buildCard(review, true);
+        wall.prepend(card);
+      }
+      if (empty) empty.style.display = 'none';
+      updateSummary(list);
+      const first = review.name.split(' ')[0];
+      if (status) status.textContent = 'Thank you ' + first + ', your review is shared. It means the world.';
+      form.reset();
+      selected = 0; paint(0); showWord(0); setGlow(0);
+      if (fields) fields.classList.remove('open');
+      if (prompt) prompt.textContent = 'How was it?';
+      if (wall) wall.firstChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
   /* ---- Year ---- */
   $$('#year').forEach((el) => { el.textContent = new Date().getFullYear(); });
 })();

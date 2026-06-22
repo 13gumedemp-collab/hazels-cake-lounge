@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>Hazel's Community | Hazel's Cake Lounge</title>
+  <meta name="description" content="Hazel's Community. Share your experience with Hazel's Cake Lounge, rate your order and leave a few words about the cake or bake I made for you." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner">
+      <span class="loader__name">Hazel's</span>
+      <span class="loader__sub">Cake Lounge</span>
+    </div>
+    <div class="loader__count"><span id="loaderCount">00</span></div>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link">
+      <span>Hazel's</span><em>Cake Lounge</em>
+    </a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a>
+      <a href="work.html" data-cursor="link">My Work</a>
+      <a href="story.html" data-cursor="link">Story</a>
+      <a href="reviews.html" class="is-active" data-cursor="link">Community</a>
+      <a href="contact.html" data-cursor="link">Enquire</a>
+      <a href="contact-me.html" data-cursor="link">Contact</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false" data-cursor="link">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <main id="top">
+    <section class="page-hero">
+      <p class="page-hero__eyebrow reveal-up">Hazel's Community</p>
+      <h1 class="page-hero__title">
+        <span class="kinetic" data-split="words" data-stagger="0.06" data-distance="24">Every cake</span>
+        <span class="kinetic gold" data-split="words" data-stagger="0.06" data-distance="24" data-delay="0.14">leaves a memory.</span>
+      </h1>
+      <p class="page-hero__lede reveal-up">If I baked for your day, I would love to hear how it went. Rate your order and leave a few words below.</p>
+    </section>
+
+    <!-- Cinematic rating stage -->
+    <section class="review-stage" id="reviewStage">
+      <div class="review-stage__glow" id="stageGlow" aria-hidden="true"></div>
+      <form class="reviewform" id="reviewForm" novalidate>
+        <p class="reviewform__prompt" id="ratePrompt">How was it?</p>
+
+        <div class="rating" id="rating" role="radiogroup" aria-label="Your rating out of five">
+          <button type="button" class="rating__star" data-value="1" role="radio" aria-checked="false" aria-label="1 star" data-cursor="link">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.6 6.1 21.8l1.2-6.6L2.5 9.5l6.6-.9z"/></svg>
+          </button>
+          <button type="button" class="rating__star" data-value="2" role="radio" aria-checked="false" aria-label="2 stars" data-cursor="link">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.6 6.1 21.8l1.2-6.6L2.5 9.5l6.6-.9z"/></svg>
+          </button>
+          <button type="button" class="rating__star" data-value="3" role="radio" aria-checked="false" aria-label="3 stars" data-cursor="link">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.6 6.1 21.8l1.2-6.6L2.5 9.5l6.6-.9z"/></svg>
+          </button>
+          <button type="button" class="rating__star" data-value="4" role="radio" aria-checked="false" aria-label="4 stars" data-cursor="link">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.6 6.1 21.8l1.2-6.6L2.5 9.5l6.6-.9z"/></svg>
+          </button>
+          <button type="button" class="rating__star" data-value="5" role="radio" aria-checked="false" aria-label="5 stars" data-cursor="link">
+            <svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 18.6 6.1 21.8l1.2-6.6L2.5 9.5l6.6-.9z"/></svg>
+          </button>
+        </div>
+
+        <p class="rating__word" id="rateWord">Tap a star to begin</p>
+
+        <div class="reviewform__fields" id="reviewFields">
+          <div class="form__row">
+            <label class="field">
+              <span>Your name</span>
+              <input type="text" name="name" autocomplete="name" required />
+            </label>
+            <label class="field">
+              <span>What did I bake for you?</span>
+              <input type="text" name="order" placeholder="Birthday cake, rusks, cupcakes" />
+            </label>
+          </div>
+          <label class="field">
+            <span>Your words</span>
+            <textarea name="comment" rows="4" placeholder="Tell me how it looked, how it tasted, how the day went" required></textarea>
+          </label>
+          <button type="submit" class="btn btn--solid" data-cursor="link">Share my review</button>
+          <p class="form__status" id="reviewStatus" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </section>
+
+    <!-- Reviews wall -->
+    <section class="reviews" id="reviews">
+      <div class="section-head section-head--center">
+        <span class="section-head__index reveal-up">Kind words</span>
+        <h2 class="section-head__title reveal-up">From my table to yours</h2>
+        <p class="section-head__note reveal-up" id="reviewsSummary"></p>
+      </div>
+      <div class="reviews__wall" id="reviewsWall"></div>
+      <p class="reviews__empty" id="reviewsEmpty">No reviews yet. Yours could be the first.</p>
+    </section>
+
+    <section class="cta-band">
+      <p class="cta-band__kicker reveal-up">Ready when you are</p>
+      <h2 class="reveal-up">If you can dream it, <em>I can bake it.</em></h2>
+      <div class="cta-band__actions reveal-up">
+        <a href="menu.html" class="btn" data-cursor="link">View the menu</a>
+        <a href="contact.html" class="btn btn--ghost" data-cursor="link">Start an enquiry</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__grid">
+      <div class="footer__brandcol">
+        <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
+        <p class="footer__tag">Made slowly, by hand.</p>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Explore</span>
+        <a href="menu.html" data-cursor="link">Menu</a>
+        <a href="work.html" data-cursor="link">My Work</a>
+        <a href="story.html" data-cursor="link">Story</a>
+        <a href="reviews.html" data-cursor="link">Community</a>
+        <a href="contact.html" data-cursor="link">Enquire</a>
+        <a href="contact-me.html" data-cursor="link">Contact</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Get in touch</span>
+        <a href="contact-me.html" data-cursor="link">Contact me</a>
+        <span class="footer__muted" data-placeholder>Email coming soon</span>
+        <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Follow</span>
+        <div class="footer__socials">
+          <a href="https://www.instagram.com/hazelscakelounge/" target="_blank" rel="noopener" aria-label="Instagram" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61580675897079" target="_blank" rel="noopener" aria-label="Facebook" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M14.5 8.5H17V5h-2.5C12.6 5 11 6.6 11 8.5V11H8.5v3.5H11V21h3.5v-6.5H17l.5-3.5h-3V8.9c0-.3.2-.4.5-.4z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
+    </div>
+  </footer>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

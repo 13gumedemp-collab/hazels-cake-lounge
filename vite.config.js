@@ -9,6 +9,7 @@ export default defineConfig({
         menu: 'menu.html',
         work: 'work.html',
         story: 'story.html',
+        reviews: 'reviews.html',
         contact: 'contact.html',
         contactme: 'contact-me.html',
       },
