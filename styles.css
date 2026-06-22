@@ -180,6 +180,13 @@ section { position: relative; }
   color: var(--cream); border-color: rgba(244,236,221,0.55); }
 .btn--ghost::before { background: var(--cream); }
 .btn--ghost:hover { border-color: var(--cream); }
+/* Touch devices have no real hover: fill fully on tap and keep it filled */
+@media (hover: none) {
+  .btn::before { transition: height 0.32s var(--ease); }
+  .btn:active::before, .btn:focus::before, .btn:focus-visible::before { height: 100%; }
+  .btn:active, .btn:focus, .btn:focus-visible { color: var(--liquid-button-color); }
+  .btn:active { transform: scale(0.97); }
+}
 .link-underline { display: inline-block; position: relative; font-size: 0.92rem; letter-spacing: 0.08em;
   padding-bottom: 4px; color: var(--gold); }
 .link-underline::after { content: ''; position: absolute; left: 0; bottom: 0; height: 1.5px; width: 100%;
@@ -398,6 +405,11 @@ section { position: relative; }
 .page-hero__title .line:nth-child(2) > span { animation-delay: 0.45s; }
 .page-hero__lede { max-width: 54ch; margin-top: 1.6rem; color: var(--cream-soft); font-size: 1.05rem; }
 
+/* Slow fade-in title (gentle, not too slow) */
+.fade-title { opacity: 0; transform: translateY(14px); animation: fadeInSlow 1.2s var(--ease) 1s forwards; }
+.fade-title .line { display: block; }
+@keyframes fadeInSlow { to { opacity: 1; transform: none; } }
+
 /* ----------  Contact layout  ---------- */
 .contactwrap { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: clamp(2.5rem, 6vw, 6rem);
   padding: 0 clamp(1.4rem,5vw,4rem) clamp(5rem,12vh,9rem); align-items: start; }
@@ -444,6 +456,32 @@ section { position: relative; }
 .kin-seg.in { opacity: 1; transform: translate(0, 0); filter: blur(0); }
 .kinetic.gold .kin-seg { background: var(--gold-grad); -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent; font-style: italic; }
+
+/* ----------  Cinematic dropdown (custom select)  ---------- */
+.cselect { position: relative; width: 100%; }
+.cselect__trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  background: transparent; border: none; border-bottom: 1px solid rgba(244,236,221,0.22); color: var(--cream);
+  font-family: 'Jost', sans-serif; font-size: 1rem; padding: 0.6rem 0; cursor: none; text-align: left;
+  transition: border-color 0.4s var(--ease); }
+.cselect.open .cselect__trigger, .cselect__trigger:focus { outline: none; border-color: var(--gold); }
+.cselect__label.is-placeholder { color: rgba(244,236,221,0.4); }
+.cselect__caret { color: var(--gold); display: inline-flex; transition: transform 0.45s var(--ease); }
+.cselect.open .cselect__caret { transform: rotate(180deg); }
+.cselect__panel { position: absolute; left: 0; right: 0; top: calc(100% + 10px); z-index: 40;
+  background: #14110d; border: 1px solid var(--line); border-radius: 5px; overflow: hidden auto; max-height: 320px;
+  transform-origin: top center; opacity: 0; transform: translateY(-10px) scaleY(0.96);
+  pointer-events: none; box-shadow: 0 26px 55px -22px rgba(0,0,0,0.75);
+  transition: opacity 0.4s var(--ease), transform 0.4s var(--ease); }
+.cselect.open .cselect__panel { opacity: 1; transform: translateY(0) scaleY(1); pointer-events: auto; }
+.cselect__list { display: flex; flex-direction: column; padding: 0.4rem; }
+.cselect__opt { text-align: left; background: transparent; border: none; color: var(--cream-soft);
+  font-family: 'Jost', sans-serif; font-size: 0.98rem; letter-spacing: 0.02em; padding: 0.72rem 0.9rem;
+  border-radius: 4px; cursor: none; opacity: 0; transform: translateY(10px);
+  transition: background 0.25s var(--ease), color 0.25s var(--ease); }
+.cselect.open .cselect__opt { animation: optIn 0.5s var(--ease) forwards; animation-delay: calc(var(--i) * 0.04s + 0.08s); }
+.cselect__opt:hover { background: rgba(212,175,55,0.12); color: var(--gold-bright); }
+.cselect__opt.is-active { color: var(--gold); }
+@keyframes optIn { to { opacity: 1; transform: none; } }
 
 /* ----------  Floating Enquire (landing)  ---------- */
 .float-enquire { position: fixed; z-index: 90;
@@ -511,6 +549,7 @@ section { position: relative; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
   .reveal-up, .reveal-card { opacity: 1; transform: none; }
+  .fade-title, .kin-seg, .cselect__opt { opacity: 1 !important; transform: none !important; }
   .card__media, .gallery__item { clip-path: none; }
   html { scroll-behavior: auto; }
 }

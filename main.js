@@ -212,11 +212,57 @@
   const status = $('#formStatus');
   const select = $('#productSelect');
 
+  /* Cinematic dropdown: replace native <select> with an animated custom menu
+     that stays synced to the hidden select (so form value + pre-select still work) */
+  const enhanceSelect = (sel) => {
+    if (sel.dataset.enhanced) return; sel.dataset.enhanced = '1';
+    const phOpt = [...sel.options].find((o) => o.disabled) || sel.options[0];
+    const placeholder = phOpt ? phOpt.text : 'Select';
+    const wrap = document.createElement('div'); wrap.className = 'cselect';
+    const trigger = document.createElement('button');
+    trigger.type = 'button'; trigger.className = 'cselect__trigger';
+    trigger.setAttribute('data-cursor', 'link'); trigger.setAttribute('aria-haspopup', 'listbox'); trigger.setAttribute('aria-expanded', 'false');
+    trigger.innerHTML = '<span class="cselect__label"></span><span class="cselect__caret"><svg viewBox="0 0 14 8" width="14" height="8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 1l6 6 6-6"/></svg></span>';
+    const panel = document.createElement('div'); panel.className = 'cselect__panel';
+    const list = document.createElement('div'); list.className = 'cselect__list'; list.setAttribute('role', 'listbox');
+    [...sel.options].forEach((o, i) => {
+      if (o.disabled) return;
+      const opt = document.createElement('button');
+      opt.type = 'button'; opt.className = 'cselect__opt'; opt.textContent = o.text;
+      opt.dataset.value = o.value || o.text; opt.style.setProperty('--i', i);
+      opt.setAttribute('data-cursor', 'link'); opt.setAttribute('role', 'option');
+      opt.addEventListener('click', () => {
+        sel.value = opt.dataset.value;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        close();
+      });
+      list.appendChild(opt);
+    });
+    panel.appendChild(list); wrap.append(trigger, panel);
+    sel.style.display = 'none'; sel.setAttribute('tabindex', '-1'); sel.setAttribute('aria-hidden', 'true');
+    sel.after(wrap);
+    const label = trigger.querySelector('.cselect__label');
+    const sync = () => {
+      const v = sel.value;
+      const cur = [...sel.options].find((o) => !o.disabled && (o.value || o.text) === v);
+      if (v && cur) { label.textContent = cur.text; label.classList.remove('is-placeholder'); }
+      else { label.textContent = placeholder; label.classList.add('is-placeholder'); }
+      [...list.children].forEach((c) => c.classList.toggle('is-active', c.dataset.value === v));
+    };
+    const open = () => { wrap.classList.add('open'); trigger.setAttribute('aria-expanded', 'true'); };
+    function close() { wrap.classList.remove('open'); trigger.setAttribute('aria-expanded', 'false'); }
+    trigger.addEventListener('click', (e) => { e.stopPropagation(); wrap.classList.contains('open') ? close() : open(); });
+    document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    sel.addEventListener('change', sync);
+    sync();
+  };
+  $$('select').forEach(enhanceSelect);
+
   const setProduct = (product) => {
     if (select && product) {
       const opt = [...select.options].find((o) => o.value === product || o.text === product);
-      if (opt) { select.value = opt.value || opt.text; select.classList.add('is-set', 'flash');
-        setTimeout(() => select.classList.remove('flash'), 1200); }
+      if (opt) { select.value = opt.value || opt.text; select.dispatchEvent(new Event('change', { bubbles: true })); }
     }
   };
 
