@@ -7,11 +7,17 @@
   const $  = (s, c = document) => c.querySelector(s);
   const $$ = (s, c = document) => [...c.querySelectorAll(s)];
 
-  /* ---- Image fallback: swap broken images for a gold monogram tile ---- */
+  /* ---- Image fallback: if a local photo is missing, load a stock photo,
+     and only show the gold monogram tile if that fails too ---- */
   $$('img[data-fallback]').forEach((img) => {
-    const fail = () => img.closest('[class]')?.classList.add('fallback') || img.parentElement?.classList.add('fallback');
+    const alt = img.getAttribute('data-fallback-src');
+    let usedAlt = false;
+    const fail = () => {
+      if (alt && !usedAlt) { usedAlt = true; img.src = alt; return; }
+      (img.closest('.card__media, .gallery__item, .hero__media, .teaser__media, .story__media, .article__media') || img.parentElement)?.classList.add('fallback');
+    };
     if (img.complete && img.naturalWidth === 0) fail();
-    img.addEventListener('error', fail, { once: true });
+    img.addEventListener('error', fail);
   });
 
   /* ---- Loader curtain ---- */
