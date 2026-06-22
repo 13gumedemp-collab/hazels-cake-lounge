@@ -297,13 +297,26 @@
     select?.classList.remove('is-set');
   });
 
-  /* ---- Liquid buttons: guarantee a full fill on tap (touch lacks reliable hover/focus) ---- */
+  /* ---- Liquid buttons: guarantee the fill completes on tap ----
+     Touch has no reliable hover/focus, and link buttons navigate before the
+     animation finishes. On touch we hold the tap, let the fill flood fully,
+     then follow the link. */
+  const isTouch = window.matchMedia('(hover: none)').matches;
   $$('.btn').forEach((b) => {
     b.addEventListener('pointerdown', () => {
       b.classList.add('btn--fill');
       clearTimeout(b._fillT);
-      b._fillT = setTimeout(() => b.classList.remove('btn--fill'), 900);
+      b._fillT = setTimeout(() => b.classList.remove('btn--fill'), 1100);
     });
+    const href = b.tagName === 'A' ? b.getAttribute('href') : null;
+    const external = b.target === '_blank' || (href && /^(https?:|mailto:|tel:|#)/.test(href));
+    if (isTouch && href && !external) {
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        b.classList.add('btn--fill');
+        setTimeout(() => { window.location.href = href; }, 380);
+      });
+    }
   });
 
   /* ---- Menu carousel (mobile + tablet only) ---- */
