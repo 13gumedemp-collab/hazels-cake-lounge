@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>Enquire | Hazel's Cake Lounge</title>
+  <meta name="description" content="Tell Hazel's Cake Lounge what you would love. Enquire about any cake, cupcake or bake, in any flavour, for any occasion." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner">
+      <span class="loader__name">Hazel's</span>
+      <span class="loader__sub">Cake Lounge</span>
+    </div>
+    <div class="loader__count"><span id="loaderCount">00</span></div>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link">
+      <span>Hazel's</span><em>Cake Lounge</em>
+    </a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a>
+      <a href="story.html" data-cursor="link">Story</a>
+      <a href="contact.html" class="is-active" data-cursor="link">Enquire</a>
+      <a href="contact-me.html" data-cursor="link">Contact</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false" data-cursor="link">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <main id="top">
+    <!-- Page header -->
+    <section class="page-hero">
+      <p class="page-hero__eyebrow reveal-up">Contact &amp; enquiries</p>
+      <h1 class="page-hero__title">
+        <span class="kinetic" data-split="words" data-stagger="0.05" data-distance="28">Tell us what</span>
+        <span class="kinetic gold" data-split="words" data-stagger="0.05" data-distance="28" data-delay="0.12">you would love.</span>
+      </h1>
+      <p class="page-hero__lede reveal-up">Whether it is a single cake, a box of biscuits or a full spread of treats, share the details below and we will reply within two days. Any flavour, any occasion, made just for you.</p>
+    </section>
+
+    <!-- Contact + form -->
+    <section class="contactwrap">
+      <!-- Details (placeholders, to be supplied) -->
+      <aside class="info reveal-up">
+        <h2 class="info__title">Get in touch</h2>
+
+        <div class="info__row">
+          <span class="info__label">Email</span>
+          <a href="mailto:hello@hazelscakelounge.com" data-cursor="link" data-placeholder>hello@hazelscakelounge.com</a>
+          <span class="info__hint">Details coming soon</span>
+        </div>
+
+        <div class="info__row">
+          <span class="info__label">Phone / WhatsApp</span>
+          <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+        </div>
+
+        <div class="info__row">
+          <span class="info__label">Orders</span>
+          <p>Made to order. Please allow a few days notice so each bake is fresh for your date.</p>
+        </div>
+
+        <div class="info__row">
+          <span class="info__label">Find us</span>
+          <p data-placeholder>Location coming soon</p>
+        </div>
+
+        <div class="info__row">
+          <span class="info__label">Follow</span>
+          <div class="socials">
+            <a href="https://www.instagram.com/hazelscakelounge/" target="_blank" rel="noopener" aria-label="Instagram" data-cursor="link">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61580675897079" target="_blank" rel="noopener" aria-label="Facebook" data-cursor="link">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M14.5 8.5H17V5h-2.5C12.6 5 11 6.6 11 8.5V11H8.5v3.5H11V21h3.5v-6.5H17l.5-3.5h-3V8.9c0-.3.2-.4.5-.4z"/></svg>
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Enquiry form -->
+      <div class="formwrap">
+        <form class="form" id="enquiryForm" novalidate>
+          <label class="field">
+            <span>What can we bake for you?</span>
+            <select name="product" id="productSelect" required>
+              <option value="" disabled selected>Choose a bake</option>
+              <option>Cakes</option>
+              <option>Cupcakes</option>
+              <option>Loaf cakes</option>
+              <option>Muffins</option>
+              <option>Scones</option>
+              <option>Biscuits</option>
+              <option>Rusks</option>
+              <option>A custom bake</option>
+              <option>A mix of treats</option>
+              <option>Not sure yet</option>
+            </select>
+          </label>
+
+          <div class="form__row">
+            <label class="field">
+              <span>Name</span>
+              <input type="text" name="name" autocomplete="name" required />
+            </label>
+            <label class="field">
+              <span>Email</span>
+              <input type="email" name="email" autocomplete="email" required />
+            </label>
+          </div>
+
+          <div class="form__row">
+            <label class="field">
+              <span>Phone (optional)</span>
+              <input type="tel" name="phone" autocomplete="tel" />
+            </label>
+            <label class="field">
+              <span>Date needed</span>
+              <input type="date" name="date" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Occasion</span>
+            <input type="text" name="occasion" placeholder="Birthday, wedding, just because" />
+          </label>
+
+          <label class="field">
+            <span>Your idea</span>
+            <textarea name="message" rows="4" placeholder="Flavours you love, number of people, colours, sizes, anything you have in mind"></textarea>
+          </label>
+
+          <button type="submit" class="btn btn--solid" data-cursor="link">Send enquiry</button>
+          <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared footer -->
+  <footer class="footer">
+    <div class="footer__cta">
+      <p class="footer__kicker">Ready when you are</p>
+      <h2 class="footer__big">Let's bake something <em>special.</em></h2>
+      <a href="contact.html" class="btn btn--solid" data-cursor="link">Start your enquiry</a>
+    </div>
+    <div class="footer__grid">
+      <div class="footer__brandcol">
+        <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
+        <p class="footer__tag">Made slowly, by hand.</p>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Explore</span>
+        <a href="menu.html" data-cursor="link">Menu</a>
+        <a href="story.html" data-cursor="link">Story</a>
+        <a href="contact.html" data-cursor="link">Enquire</a>
+        <a href="contact-me.html" data-cursor="link">Contact</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Get in touch</span>
+        <a href="contact-me.html" data-cursor="link">Contact me</a>
+        <span class="footer__muted" data-placeholder>Email coming soon</span>
+        <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Follow</span>
+        <div class="footer__socials">
+          <a href="https://www.instagram.com/hazelscakelounge/" target="_blank" rel="noopener" aria-label="Instagram" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61580675897079" target="_blank" rel="noopener" aria-label="Facebook" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M14.5 8.5H17V5h-2.5C12.6 5 11 6.6 11 8.5V11H8.5v3.5H11V21h3.5v-6.5H17l.5-3.5h-3V8.9c0-.3.2-.4.5-.4z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
+    </div>
+  </footer>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

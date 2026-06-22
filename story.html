@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>My Story | Hazel's Cake Lounge</title>
+  <meta name="description" content="From my mother's kitchen to professional training, this is the story behind Hazel's Cake Lounge: heart and precision in every cake I make." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner">
+      <span class="loader__name">Hazel's</span>
+      <span class="loader__sub">Cake Lounge</span>
+    </div>
+    <div class="loader__count"><span id="loaderCount">00</span></div>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link">
+      <span>Hazel's</span><em>Cake Lounge</em>
+    </a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a>
+      <a href="story.html" class="is-active" data-cursor="link">Story</a>
+      <a href="contact.html" data-cursor="link">Enquire</a>
+      <a href="contact-me.html" data-cursor="link">Contact</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false" data-cursor="link">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <main id="top">
+    <section class="page-hero">
+      <p class="page-hero__eyebrow reveal-up">My story</p>
+      <h1 class="page-hero__title">
+        <span class="kinetic" data-split="words" data-stagger="0.06" data-distance="24">From my mother's</span>
+        <span class="kinetic gold" data-split="words" data-stagger="0.06" data-distance="24" data-delay="0.14">kitchen to yours.</span>
+      </h1>
+    </section>
+
+    <article class="article">
+      <p class="article__lead kinetic" data-split="words" data-stagger="0.04" data-distance="22">Some of my earliest memories are flour dusted and sweet.</p>
+
+      <div class="article__body">
+        <p class="reveal-up">I grew up watching my mother bake. She never used a timer and she never measured anything twice. It was all feeling, instinct, and love pressed into every bowl she touched. I would drag a chair to the kitchen counter just to be close to it, close to her, close to whatever magic was happening.</p>
+
+        <blockquote class="article__quote kinetic" data-split="words" data-stagger="0.04" data-distance="20">She taught me that a cake is never just a cake. It is a <em>moment.</em></blockquote>
+
+        <p class="reveal-up">It is someone's birthday sung out loud. It is a grandmother's recipe kept alive. It is the thing people remember long after the candles go out.</p>
+
+        <p class="reveal-up">I started baking on my own as a young girl and I never really stopped. Then life took me in a different direction for a while. I joined Standard Bank, stepped into the corporate world, and threw myself into it. I was good at it too. But somewhere between the meetings and the spreadsheets, I kept thinking about my mother's kitchen. I kept thinking about cake.</p>
+
+        <p class="reveal-up">After a couple of years, I made a decision that felt terrifying and absolutely right at the same time. I left. Because I realised that what I was meant to do, what I had always been meant to do, was this.</p>
+
+        <p class="reveal-up">I did not just leap and hope for the best. I invested in my craft properly. I enrolled in professional baking courses, trained under people who had dedicated their lives to this art, and I came out the other side with both the passion I was born with and the formal expertise to back it up. What my mother gave me was heart. The training gave me precision. Together, they are everything I bring to every cake I make.</p>
+
+        <p class="reveal-up">Today, when you order from me, you are not just getting something homemade and hopeful. You are getting years of lived experience, professional training, and a genuine love for what lands on your table.</p>
+
+        <p class="reveal-up">Every order I take is personal to me. I want your cake to be the one people talk about long after the plates are cleared.</p>
+
+        <p class="article__sign reveal-up">Welcome. I am so glad you found me.</p>
+      </div>
+    </article>
+
+    <!-- How it works -->
+    <section class="process" id="process">
+      <div class="section-head section-head--center">
+        <span class="section-head__index reveal-up">How it works</span>
+        <h2 class="section-head__title reveal-up">From idea to bake</h2>
+        <p class="section-head__note reveal-up">Four simple steps, from your first message to the day it is yours.</p>
+      </div>
+      <ol class="steps">
+        <li class="step reveal-up">
+          <span class="step__num">01</span><h3>Tell us</h3>
+          <p>Send your idea through the enquiry form: the bake, the flavour, the occasion and the date.</p>
+        </li>
+        <li class="step reveal-up">
+          <span class="step__num">02</span><h3>We plan it</h3>
+          <p>I reply within two days with a suggestion and a price, refined together until it feels right.</p>
+        </li>
+        <li class="step reveal-up">
+          <span class="step__num">03</span><h3>I bake</h3>
+          <p>Made by hand in the days before, never frozen, and finished fresh for your date.</p>
+        </li>
+        <li class="step reveal-up">
+          <span class="step__num">04</span><h3>You collect</h3>
+          <p>Ready for collection or delivery, so it reaches you exactly as it should.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="cta-band">
+      <p class="cta-band__kicker reveal-up">Ready when you are</p>
+      <h2 class="reveal-up">If you can dream it, <em>we can bake it.</em></h2>
+      <div class="cta-band__actions reveal-up">
+        <a href="menu.html" class="btn" data-cursor="link">View the menu</a>
+        <a href="contact.html" class="btn btn--ghost" data-cursor="link">Start an enquiry</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__cta">
+      <p class="footer__kicker">Ready when you are</p>
+      <h2 class="footer__big">Let's bake something <em>special.</em></h2>
+      <a href="contact.html" class="btn btn--solid" data-cursor="link">Start your enquiry</a>
+    </div>
+    <div class="footer__grid">
+      <div class="footer__brandcol">
+        <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
+        <p class="footer__tag">Made slowly, by hand.</p>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Explore</span>
+        <a href="menu.html" data-cursor="link">Menu</a>
+        <a href="story.html" data-cursor="link">Story</a>
+        <a href="contact.html" data-cursor="link">Enquire</a>
+        <a href="contact-me.html" data-cursor="link">Contact</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Get in touch</span>
+        <a href="contact-me.html" data-cursor="link">Contact me</a>
+        <span class="footer__muted" data-placeholder>Email coming soon</span>
+        <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Follow</span>
+        <div class="footer__socials">
+          <a href="https://www.instagram.com/hazelscakelounge/" target="_blank" rel="noopener" aria-label="Instagram" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61580675897079" target="_blank" rel="noopener" aria-label="Facebook" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M14.5 8.5H17V5h-2.5C12.6 5 11 6.6 11 8.5V11H8.5v3.5H11V21h3.5v-6.5H17l.5-3.5h-3V8.9c0-.3.2-.4.5-.4z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
+    </div>
+  </footer>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>The Menu | Hazel's Cake Lounge</title>
+  <meta name="description" content="Cakes, cupcakes, loaf cakes, muffins, scones, biscuits and rusks. Every bake made to order in the flavour you love. Tap anything to enquire." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner">
+      <span class="loader__name">Hazel's</span>
+      <span class="loader__sub">Cake Lounge</span>
+    </div>
+    <div class="loader__count"><span id="loaderCount">00</span></div>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link">
+      <span>Hazel's</span><em>Cake Lounge</em>
+    </a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" class="is-active" data-cursor="link">Menu</a>
+      <a href="story.html" data-cursor="link">Story</a>
+      <a href="contact.html" data-cursor="link">Enquire</a>
+      <a href="contact-me.html" data-cursor="link">Contact</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false" data-cursor="link">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <main id="top">
+    <section class="page-hero">
+      <p class="page-hero__eyebrow reveal-up">The menu</p>
+      <h1 class="page-hero__title">
+        <span class="kinetic" data-split="words" data-stagger="0.05" data-distance="28">Everything</span>
+        <span class="kinetic gold" data-split="words" data-stagger="0.05" data-distance="28" data-delay="0.12">we bake.</span>
+      </h1>
+      <p class="page-hero__lede reveal-up">Every item is made to order, so you choose the flavour, the size and the finish. Tap anything below to enquire about it.</p>
+    </section>
+
+    <section class="collection" id="menu">
+      <div class="cards" id="cards">
+        <article class="card reveal-card">
+          <div class="card__media"><img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=1000&q=80" alt="Chocolate celebration cake" data-fallback /></div>
+          <div class="card__meta">
+            <span class="card__num">01</span><h3>Cakes</h3>
+            <p>Birthday, celebration and layer cakes, in any flavour and finish you love.</p>
+            <button class="card__enquire" data-product="Cakes" data-cursor="link">Enquire <span>&rarr;</span></button>
+          </div>
+        </article>
+        <article class="card reveal-card">
+          <div class="card__media"><img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=1000&q=80" alt="Cupcakes iced by hand" data-fallback /></div>
+          <div class="card__meta">
+            <span class="card__num">02</span><h3>Cupcakes</h3>
+            <p>Soft, generous and iced by hand. By the dozen, or by the dozens.</p>
+            <button class="card__enquire" data-product="Cupcakes" data-cursor="link">Enquire <span>&rarr;</span></button>
+          </div>
+        </article>
+        <article class="card reveal-card">
+          <div class="card__media"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1000&q=80" alt="Loaf cake" data-fallback /></div>
+          <div class="card__meta">
+            <span class="card__num">03</span><h3>Loaf Cakes</h3>
+            <p>Banana, lemon, marble and more. Everyday comfort, baked properly.</p>
+            <button class="card__enquire" data-product="Loaf cakes" data-cursor="link">Enquire <span>&rarr;</span></button>
+          </div>
+        </article>
+        <article class="card reveal-card">
+          <div class="card__media"><img src="https://images.unsplash.com/photo-1607958996333-41aef7caefaa?auto=format&fit=crop&w=1000&q=80" alt="Muffins" data-fallback /></div>
+          <div class="card__meta">
+            <span class="card__num">04</span><h3>Muffins</h3>
+            <p>Chocolate, berry and breakfast batches, baked fresh on the day.</p>
+            <button class="card__enquire" data-product="Muffins" data-cursor="link">Enquire <span>&rarr;</span></button>
+          </div>
+        </article>
+        <article class="card reveal-card">
+          <div class="card__media"><img src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=1000&q=80" alt="Freshly baked scones" data-fallback /></div>
+          <div class="card__meta">
+            <span class="card__num">05</span><h3>Scones</h3>
+            <p>Light and buttery, best served warm. Plain or with your favourite extras.</p>
+            <button class="card__enquire" data-product="Scones" data-cursor="link">Enquire <span>&rarr;</span></button>
+          </div>
+        </article>
+        <article class="card reveal-card">
+          <div class="card__media"><img src="https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=1000&q=80" alt="Biscuits and cookies" data-fallback /></div>
+          <div class="card__meta">
+            <span class="card__num">06</span><h3>Biscuits</h3>
+            <p>Crisp, chewy or iced, and boxed beautifully for gifting or sharing.</p>
+            <button class="card__enquire" data-product="Biscuits" data-cursor="link">Enquire <span>&rarr;</span></button>
+          </div>
+        </article>
+        <article class="card reveal-card">
+          <div class="card__media"><img src="https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&w=1000&q=80" alt="Rusks with coffee" data-fallback /></div>
+          <div class="card__meta">
+            <span class="card__num">07</span><h3>Rusks</h3>
+            <p>Buttermilk rusks for slow mornings and a good cup of coffee.</p>
+            <button class="card__enquire" data-product="Rusks" data-cursor="link">Enquire <span>&rarr;</span></button>
+          </div>
+        </article>
+        <article class="card reveal-card card--invite">
+          <div class="card__meta">
+            <span class="card__num">08</span><h3>Something custom</h3>
+            <p>Have a specific cake, flavour or idea in mind? Describe it and we will bake it for you.</p>
+            <button class="card__enquire" data-product="A custom bake" data-cursor="link">Tell us your idea <span>&rarr;</span></button>
+          </div>
+        </article>
+      </div>
+
+      <div class="anything reveal-up">
+        <p>Do not see what you are looking for?</p>
+        <h3>If you can dream it, <em>we can bake it.</em></h3>
+        <a href="contact.html" class="btn btn--solid" data-cursor="link">Enquire about anything</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__cta">
+      <p class="footer__kicker">Ready when you are</p>
+      <h2 class="footer__big">Let's bake something <em>special.</em></h2>
+      <a href="contact.html" class="btn btn--solid" data-cursor="link">Start your enquiry</a>
+    </div>
+    <div class="footer__grid">
+      <div class="footer__brandcol">
+        <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
+        <p class="footer__tag">Made slowly, by hand.</p>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Explore</span>
+        <a href="menu.html" data-cursor="link">Menu</a>
+        <a href="story.html" data-cursor="link">Story</a>
+        <a href="contact.html" data-cursor="link">Enquire</a>
+        <a href="contact-me.html" data-cursor="link">Contact</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Get in touch</span>
+        <a href="contact-me.html" data-cursor="link">Contact me</a>
+        <span class="footer__muted" data-placeholder>Email coming soon</span>
+        <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Follow</span>
+        <div class="footer__socials">
+          <a href="https://www.instagram.com/hazelscakelounge/" target="_blank" rel="noopener" aria-label="Instagram" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61580675897079" target="_blank" rel="noopener" aria-label="Facebook" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M14.5 8.5H17V5h-2.5C12.6 5 11 6.6 11 8.5V11H8.5v3.5H11V21h3.5v-6.5H17l.5-3.5h-3V8.9c0-.3.2-.4.5-.4z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
+    </div>
+  </footer>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

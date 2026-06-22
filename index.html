@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hazel's Cake Lounge — Bespoke Cakes & Patisserie</title>
-  <meta name="description" content="Hazel's Cake Lounge — quietly luxurious bespoke cakes and patisserie, made by hand in small batches." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>Hazel's Cake Lounge | Handmade Cakes & Home Bakes</title>
+  <meta name="description" content="Hazel's Cake Lounge. Handmade cakes, cupcakes, loaf cakes, muffins, scones, biscuits and rusks, all baked to order in any flavour you love." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -20,21 +21,20 @@
     <div class="loader__count"><span id="loaderCount">00</span></div>
   </div>
 
-  <!-- Custom cursor -->
   <div class="cursor" id="cursor" aria-hidden="true"></div>
 
   <!-- Navigation -->
   <header class="nav" id="nav">
-    <a href="#top" class="nav__brand" data-cursor="link">
+    <a href="index.html" class="nav__brand" data-cursor="link">
       <span>Hazel's</span><em>Cake Lounge</em>
     </a>
-    <nav class="nav__links">
-      <a href="#collection" data-cursor="link">Collection</a>
-      <a href="#story" data-cursor="link">Story</a>
-      <a href="#process" data-cursor="link">Process</a>
-      <a href="#contact" data-cursor="link">Enquire</a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a>
+      <a href="story.html" data-cursor="link">Story</a>
+      <a href="contact.html" data-cursor="link">Enquire</a>
+      <a href="contact-me.html" data-cursor="link">Contact</a>
     </nav>
-    <button class="nav__menu" id="menuToggle" aria-label="Open menu" data-cursor="link">
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false" data-cursor="link">
       <span></span><span></span>
     </button>
   </header>
@@ -44,250 +44,128 @@
     <!-- HERO -->
     <section class="hero" id="hero">
       <div class="hero__media" data-parallax="0.18">
-        <img
-          src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&w=1920&q=80"
-          alt="A minimal, elegant layered cake" data-fallback />
+        <img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&w=1920&q=80" alt="A freshly baked cake" data-fallback />
         <div class="hero__veil"></div>
       </div>
 
       <div class="hero__content">
-        <p class="hero__eyebrow reveal-up">Bespoke cakes · Patisserie · Est. small batch</p>
+        <p class="hero__eyebrow reveal-up">Baked to order &middot; Any flavour &middot; Any occasion</p>
         <h1 class="hero__title">
           <span class="line"><span>The art of</span></span>
           <span class="line"><span><em>the slow rise.</em></span></span>
         </h1>
         <p class="hero__lede reveal-up">
-          Quietly luxurious cakes, composed by hand and finished with restraint —
-          for the moments that deserve a little ceremony.
+          Handmade cakes, cupcakes and home bakes, every one made to order.
+          Tell us what you have in mind and we will create it for you.
         </p>
         <div class="hero__actions reveal-up">
-          <a href="#collection" class="btn" data-cursor="link">View the collection</a>
-          <a href="#contact" class="btn btn--ghost" data-cursor="link">Commission a cake</a>
+          <a href="menu.html" class="btn" data-cursor="link">View the menu</a>
+          <a href="contact.html" class="btn btn--ghost" data-cursor="link">Enquire now</a>
         </div>
       </div>
 
-      <div class="hero__scroll reveal-up">
-        <span>Scroll</span>
-        <i></i>
-      </div>
+      <div class="hero__scroll reveal-up"><span>Scroll</span><i></i></div>
     </section>
 
-    <!-- MARQUEE -->
-    <section class="marquee" aria-hidden="true">
-      <div class="marquee__track">
-        <span>Hand finished</span><i>·</i>
-        <span>Small batch</span><i>·</i>
-        <span>Seasonal</span><i>·</i>
-        <span>Bespoke</span><i>·</i>
-        <span>Hand finished</span><i>·</i>
-        <span>Small batch</span><i>·</i>
-        <span>Seasonal</span><i>·</i>
-        <span>Bespoke</span><i>·</i>
-      </div>
-    </section>
-
-    <!-- INTRO STATEMENT -->
+    <!-- STATEMENT -->
     <section class="statement">
       <p class="statement__text">
-        <span class="word">We</span> <span class="word">believe</span> <span class="word">a</span>
-        <span class="word">cake</span> <span class="word">should</span> <span class="word">feel</span>
-        <span class="word">composed,</span> <span class="word">not</span> <span class="word">decorated.</span>
-        <span class="word">Considered</span> <span class="word">lines,</span>
-        <span class="word">honest</span> <span class="word">flavour,</span>
-        <span class="word">nothing</span> <span class="word">in</span> <span class="word">excess.</span>
+        <span class="word">We</span> <span class="word">bake</span> <span class="word">it</span>
+        <span class="word">all</span> <span class="word">by</span> <span class="word">hand,</span>
+        <span class="word">to</span> <span class="word">order,</span>
+        <span class="word">in</span> <span class="word">the</span> <span class="word">flavour</span>
+        <span class="word">you</span> <span class="word">love.</span>
+        <span class="word">If</span> <span class="word">you</span> <span class="word">can</span>
+        <span class="word">picture</span> <span class="word">it,</span>
+        <span class="word">you</span> <span class="word">can</span> <span class="word">ask</span>
+        <span class="word">for</span> <span class="word">it.</span>
       </p>
-    </section>
-
-    <!-- SIGNATURE COLLECTION -->
-    <section class="collection" id="collection">
-      <div class="section-head">
-        <span class="section-head__index reveal-up">01</span>
-        <h2 class="section-head__title reveal-up">The Signature Collection</h2>
-        <p class="section-head__note reveal-up">Four quiet studies in flavour and form. Each made to order.</p>
-      </div>
-
-      <div class="cards">
-        <article class="card reveal-card" data-cursor="view">
-          <div class="card__media">
-            <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=1000&q=80" alt="Dark chocolate cake" data-fallback />
-          </div>
-          <div class="card__meta">
-            <span class="card__num">No. 01</span>
-            <h3>Noir</h3>
-            <p>Single-origin dark chocolate, burnt honey, a whisper of sea salt.</p>
-          </div>
-        </article>
-
-        <article class="card reveal-card card--tall" data-cursor="view">
-          <div class="card__media">
-            <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1000&q=80" alt="Vanilla layered cake" data-fallback />
-          </div>
-          <div class="card__meta">
-            <span class="card__num">No. 02</span>
-            <h3>Blanc</h3>
-            <p>Tahitian vanilla, cultured cream, slow-macerated summer berries.</p>
-          </div>
-        </article>
-
-        <article class="card reveal-card card--tall" data-cursor="view">
-          <div class="card__media">
-            <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=1000&q=80" alt="Citrus cake" data-fallback />
-          </div>
-          <div class="card__meta">
-            <span class="card__num">No. 03</span>
-            <h3>Verveine</h3>
-            <p>Sicilian lemon, olive oil sponge, lemon verbena from the garden.</p>
-          </div>
-        </article>
-
-        <article class="card reveal-card" data-cursor="view">
-          <div class="card__media">
-            <img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=1000&q=80" alt="Pistachio dessert" data-fallback />
-          </div>
-          <div class="card__meta">
-            <span class="card__num">No. 04</span>
-            <h3>Pistache</h3>
-            <p>Roasted Bronte pistachio, brown butter, rose-water crémeux.</p>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- STORY — pinned cinematic -->
-    <section class="story" id="story">
-      <div class="story__media" data-parallax="0.12">
-        <img src="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=1400&q=80" alt="Hands finishing a cake" data-fallback />
-      </div>
-      <div class="story__panel">
-        <span class="section-head__index reveal-up">02</span>
-        <h2 class="story__title reveal-up">A small kitchen,<br /><em>an unhurried hand.</em></h2>
-        <p class="reveal-up">Hazel's began at a single marble bench, with the conviction that the
-          best things are made in small numbers and given time. We bake to order, never to a
-          shelf — so what arrives at your table was made for it.</p>
-        <p class="reveal-up">Seasonal fruit from growers we know by name. Chocolate and vanilla
-          chosen for character over convenience. Finishes kept deliberately spare, so the
-          flavour speaks first.</p>
-        <a href="#process" class="link-underline reveal-up" data-cursor="link">How we work →</a>
-      </div>
-    </section>
-
-    <!-- PROCESS -->
-    <section class="process" id="process">
-      <div class="section-head section-head--center">
-        <span class="section-head__index reveal-up">03</span>
-        <h2 class="section-head__title reveal-up">From conversation to cake</h2>
-      </div>
-
-      <ol class="steps">
-        <li class="step reveal-up">
-          <span class="step__num">01</span>
-          <h3>The conversation</h3>
-          <p>We talk through the occasion, the room, the palette. No template — every commission starts blank.</p>
-        </li>
-        <li class="step reveal-up">
-          <span class="step__num">02</span>
-          <h3>The composition</h3>
-          <p>A flavour and form proposal, refined together until the smallest detail feels right.</p>
-        </li>
-        <li class="step reveal-up">
-          <span class="step__num">03</span>
-          <h3>The bake</h3>
-          <p>Made by hand in the days before, never frozen, finished the morning it's yours.</p>
-        </li>
-        <li class="step reveal-up">
-          <span class="step__num">04</span>
-          <h3>The arrival</h3>
-          <p>Hand-delivered and set, so it meets your guests exactly as intended.</p>
-        </li>
-      </ol>
     </section>
 
     <!-- GALLERY -->
     <section class="gallery" id="gallery">
       <div class="section-head">
-        <span class="section-head__index reveal-up">04</span>
-        <h2 class="section-head__title reveal-up">Recent commissions</h2>
+        <span class="section-head__index reveal-up">Lately</span>
+        <h2 class="section-head__title reveal-up">Fresh from the kitchen</h2>
       </div>
       <div class="gallery__grid">
-        <figure class="gallery__item reveal-card" data-parallax="0.06">
-          <img src="https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=900&q=80" alt="Commission cake" data-fallback />
-        </figure>
-        <figure class="gallery__item reveal-card" data-parallax="0.1">
-          <img src="https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&w=900&q=80" alt="Plated dessert" data-fallback />
-        </figure>
-        <figure class="gallery__item reveal-card" data-parallax="0.04">
-          <img src="https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?auto=format&fit=crop&w=900&q=80" alt="Celebration cake" data-fallback />
-        </figure>
-        <figure class="gallery__item reveal-card" data-parallax="0.12">
-          <img src="https://images.unsplash.com/photo-1557925923-cd4648e211a0?auto=format&fit=crop&w=900&q=80" alt="Tiered cake" data-fallback />
-        </figure>
+        <figure class="gallery__item reveal-card"><img src="https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=900&q=80" alt="A finished bake" data-fallback /></figure>
+        <figure class="gallery__item reveal-card"><img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=80" alt="A layered cake" data-fallback /></figure>
+        <figure class="gallery__item reveal-card"><img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80" alt="A celebration cake" data-fallback /></figure>
+        <figure class="gallery__item reveal-card"><img src="https://images.unsplash.com/photo-1557925923-cd4648e211a0?auto=format&fit=crop&w=900&q=80" alt="A tiered cake" data-fallback /></figure>
       </div>
     </section>
 
-    <!-- CONTACT -->
-    <section class="contact" id="contact">
-      <div class="contact__inner">
-        <span class="section-head__index reveal-up">05</span>
-        <h2 class="contact__title">
-          <span class="line"><span>Let's make</span></span>
-          <span class="line"><span><em>something quiet.</em></span></span>
-        </h2>
-        <p class="contact__lede reveal-up">Commissions open four to six weeks ahead. Tell us the occasion and we'll be in touch within two days.</p>
+    <!-- STORY TEASER -->
+    <section class="teaser">
+      <div class="teaser__media" data-parallax="0.1">
+        <img src="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=1200&q=80" alt="Hands finishing a cake" data-fallback />
+      </div>
+      <div class="teaser__panel">
+        <span class="section-head__index reveal-up">Our story</span>
+        <h2 class="reveal-up">A small kitchen,<br /><em>an unhurried hand.</em></h2>
+        <p class="reveal-up">Hazel's bakes in small numbers and takes its time, so every order is made just for you and your day. Good ingredients, honest flavour, and the same care in a tin of rusks as in a tiered cake.</p>
+        <a href="story.html" class="link-underline reveal-up" data-cursor="link">Read our story &rarr;</a>
+      </div>
+    </section>
 
-        <form class="form" id="enquiryForm" novalidate>
-          <div class="form__row">
-            <label class="field">
-              <span>Name</span>
-              <input type="text" name="name" autocomplete="name" required />
-            </label>
-            <label class="field">
-              <span>Email</span>
-              <input type="email" name="email" autocomplete="email" required />
-            </label>
-          </div>
-          <div class="form__row">
-            <label class="field">
-              <span>Occasion</span>
-              <input type="text" name="occasion" placeholder="Wedding, birthday, just because…" />
-            </label>
-            <label class="field">
-              <span>Date</span>
-              <input type="date" name="date" />
-            </label>
-          </div>
-          <label class="field">
-            <span>Tell us more</span>
-            <textarea name="message" rows="3" placeholder="Number of guests, flavours you love, the feeling you're after…"></textarea>
-          </label>
-          <button type="submit" class="btn btn--solid" data-cursor="link">Send enquiry</button>
-          <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>
-        </form>
+    <!-- CTA BAND -->
+    <section class="cta-band">
+      <p class="cta-band__kicker reveal-up">Ready when you are</p>
+      <h2 class="reveal-up">If you can dream it, <em>we can bake it.</em></h2>
+      <div class="cta-band__actions reveal-up">
+        <a href="menu.html" class="btn" data-cursor="link">View the menu</a>
+        <a href="contact.html" class="btn btn--ghost" data-cursor="link">Start an enquiry</a>
       </div>
     </section>
   </main>
 
+  <!-- Floating Enquire (landing only) -->
+  <a href="contact.html" class="btn btn--solid float-enquire" id="floatEnquire" data-cursor="link">Enquire</a>
+
+  <!-- Shared footer -->
   <footer class="footer">
-    <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
-    <div class="footer__cols">
-      <div>
-        <span class="footer__label">Visit</span>
-        <p>By appointment<br />The Bakehouse, Studio 4</p>
+    <div class="footer__cta">
+      <p class="footer__kicker">Ready when you are</p>
+      <h2 class="footer__big">Let's bake something <em>special.</em></h2>
+      <a href="contact.html" class="btn btn--solid" data-cursor="link">Start your enquiry</a>
+    </div>
+    <div class="footer__grid">
+      <div class="footer__brandcol">
+        <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
+        <p class="footer__tag">Made slowly, by hand.</p>
       </div>
-      <div>
-        <span class="footer__label">Contact</span>
-        <p><a href="mailto:hello@hazelscakelounge.com" data-cursor="link">hello@hazelscakelounge.com</a><br /><a href="tel:+27000000000" data-cursor="link">+27 00 000 0000</a></p>
+      <div class="footer__col">
+        <span class="footer__label">Explore</span>
+        <a href="menu.html" data-cursor="link">Menu</a>
+        <a href="story.html" data-cursor="link">Story</a>
+        <a href="contact.html" data-cursor="link">Enquire</a>
+        <a href="contact-me.html" data-cursor="link">Contact</a>
       </div>
-      <div>
+      <div class="footer__col">
+        <span class="footer__label">Get in touch</span>
+        <a href="contact-me.html" data-cursor="link">Contact me</a>
+        <span class="footer__muted" data-placeholder>Email coming soon</span>
+        <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+      </div>
+      <div class="footer__col">
         <span class="footer__label">Follow</span>
-        <p><a href="#" data-cursor="link">Instagram</a><br /><a href="#" data-cursor="link">Pinterest</a></p>
+        <div class="footer__socials">
+          <a href="https://www.instagram.com/hazelscakelounge/" target="_blank" rel="noopener" aria-label="Instagram" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61580675897079" target="_blank" rel="noopener" aria-label="Facebook" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M14.5 8.5H17V5h-2.5C12.6 5 11 6.6 11 8.5V11H8.5v3.5H11V21h3.5v-6.5H17l.5-3.5h-3V8.9c0-.3.2-.4.5-.4z"/></svg>
+          </a>
+        </div>
       </div>
     </div>
     <div class="footer__base">
-      <span>© <span id="year"></span> Hazel's Cake Lounge</span>
-      <span>Made slowly, by hand.</span>
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
     </div>
   </footer>
 
-  <script src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
