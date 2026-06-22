@@ -7,6 +7,7 @@ export default defineConfig({
       input: {
         main: 'index.html',
         menu: 'menu.html',
+        work: 'work.html',
         story: 'story.html',
         contact: 'contact.html',
         contactme: 'contact-me.html',

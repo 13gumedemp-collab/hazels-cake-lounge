@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>My Work | Hazel's Cake Lounge</title>
+  <meta name="description" content="A gallery of cakes, bakes and treats made by hand at Hazel's Cake Lounge. Red velvet, carrot cake, celebration cakes, biscuits, muffins and rusks." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner">
+      <span class="loader__name">Hazel's</span>
+      <span class="loader__sub">Cake Lounge</span>
+    </div>
+    <div class="loader__count"><span id="loaderCount">00</span></div>
+  </div>
+
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link">
+      <span>Hazel's</span><em>Cake Lounge</em>
+    </a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a>
+      <a href="work.html" class="is-active" data-cursor="link">My Work</a>
+      <a href="story.html" data-cursor="link">Story</a>
+      <a href="contact.html" data-cursor="link">Enquire</a>
+      <a href="contact-me.html" data-cursor="link">Contact</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false" data-cursor="link">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <main id="top">
+    <section class="page-hero">
+      <p class="page-hero__eyebrow reveal-up">My work</p>
+      <h1 class="page-hero__title">
+        <span class="kinetic" data-split="words" data-stagger="0.05" data-distance="28">Made by hand,</span>
+        <span class="kinetic gold" data-split="words" data-stagger="0.05" data-distance="28" data-delay="0.12">one order at a time.</span>
+      </h1>
+      <p class="page-hero__lede reveal-up">A little gallery of recent bakes. Every one was made to order, in the flavour and finish the customer dreamed up. See something you love? Tap anything to start your own.</p>
+    </section>
+
+    <section class="workgallery" id="work">
+      <figure class="work-item reveal-card work-item--tall">
+        <img src="/images/work-redvelvet-top.png" alt="Red velvet cake finished with cream cheese frosting, top view" data-fallback />
+        <figcaption><span>Red velvet</span><em>Cream cheese frosting</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card">
+        <img src="/images/cake-square-box.jpg" alt="A buttercream celebration cake, boxed and ready" data-fallback />
+        <figcaption><span>Celebration cake</span><em>Boxed for collection</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card">
+        <img src="/images/work-vanilla-layer.png" alt="A hand-finished vanilla layer cake" data-fallback />
+        <figcaption><span>Layer cake</span><em>Finished by hand</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card work-item--tall">
+        <img src="/images/work-redvelvet-side.png" alt="Red velvet cake, side view with cream piping" data-fallback />
+        <figcaption><span>Red velvet</span><em>Piped border, crumb finish</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card">
+        <img src="/images/cake-round-birthday.png" alt="A classic birthday layer cake" data-fallback />
+        <figcaption><span>Birthday cake</span><em>Classic and timeless</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card">
+        <img src="/images/work-carrot-slice.png" alt="Carrot cake, layered and frosted by hand" data-fallback />
+        <figcaption><span>Carrot cake</span><em>Layered with cream cheese</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card">
+        <img src="/images/cake-anniversary-1.png" alt="A cream layer cake for an anniversary" data-fallback />
+        <figcaption><span>Anniversary cake</span><em>Made for a milestone</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card work-item--tall">
+        <img src="/images/work-festive-biscuits.png" alt="Cherry shortbread biscuits in a festive tin" data-fallback />
+        <figcaption><span>Cherry biscuits</span><em>Tinned for gifting</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card">
+        <img src="/images/work-crumb-muffins.png" alt="Crumb-topped muffins, freshly baked" data-fallback />
+        <figcaption><span>Muffins</span><em>Crumb topped, baked fresh</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card">
+        <img src="/images/work-rusks-tray.png" alt="A tray of buttermilk rusks, fresh from the oven" data-fallback />
+        <figcaption><span>Rusks</span><em>Fresh from the oven</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card work-item--tall">
+        <img src="/images/work-rusks-tin.png" alt="Buttermilk rusks packed in a tin" data-fallback />
+        <figcaption><span>Rusks</span><em>Boxed for slow mornings</em></figcaption>
+      </figure>
+      <figure class="work-item reveal-card">
+        <img src="/images/cupcake.png" alt="A hand-iced cupcake" data-fallback />
+        <figcaption><span>Cupcakes</span><em>Iced by hand</em></figcaption>
+      </figure>
+    </section>
+
+    <section class="cta-band">
+      <p class="cta-band__kicker reveal-up">Your turn</p>
+      <h2 class="reveal-up">If you can dream it, <em>I can bake it.</em></h2>
+      <div class="cta-band__actions reveal-up">
+        <a href="contact.html" class="btn" data-cursor="link">Start an enquiry</a>
+        <a href="menu.html" class="btn btn--ghost" data-cursor="link">View the menu</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__grid">
+      <div class="footer__brandcol">
+        <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
+        <p class="footer__tag">Made slowly, by hand.</p>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Explore</span>
+        <a href="menu.html" data-cursor="link">Menu</a>
+        <a href="work.html" data-cursor="link">My Work</a>
+        <a href="story.html" data-cursor="link">Story</a>
+        <a href="contact.html" data-cursor="link">Enquire</a>
+        <a href="contact-me.html" data-cursor="link">Contact</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Get in touch</span>
+        <a href="contact-me.html" data-cursor="link">Contact me</a>
+        <span class="footer__muted" data-placeholder>Email coming soon</span>
+        <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Follow</span>
+        <div class="footer__socials">
+          <a href="https://www.instagram.com/hazelscakelounge/" target="_blank" rel="noopener" aria-label="Instagram" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61580675897079" target="_blank" rel="noopener" aria-label="Facebook" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M14.5 8.5H17V5h-2.5C12.6 5 11 6.6 11 8.5V11H8.5v3.5H11V21h3.5v-6.5H17l.5-3.5h-3V8.9c0-.3.2-.4.5-.4z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
+    </div>
+  </footer>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

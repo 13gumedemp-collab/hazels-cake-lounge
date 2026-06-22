@@ -372,6 +372,40 @@
     addEventListener('resize', () => { if (cardsTrack.classList.contains('is-carousel')) setActive(); }, { passive: true });
   }
 
+  /* ---- Landing gallery carousel (Motion style, all devices) ---- */
+  const galTrack = $('#galleryTrack');
+  if (galTrack) {
+    const slides = $$('.mslide', galTrack);
+    if (slides.length) {
+      const dotsWrap = document.createElement('div');
+      dotsWrap.className = 'carousel-dots';
+      const dots = slides.map((s, i) => {
+        const d = document.createElement('button');
+        d.type = 'button'; d.className = 'carousel-dot';
+        d.setAttribute('aria-label', 'Go to image ' + (i + 1));
+        d.setAttribute('data-cursor', 'link');
+        d.addEventListener('click', () => s.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }));
+        dotsWrap.appendChild(d); return d;
+      });
+      galTrack.parentElement.after(dotsWrap);
+      const setActive = () => {
+        const tr = galTrack.getBoundingClientRect();
+        const center = tr.left + tr.width / 2;
+        let best = 0, bestD = Infinity;
+        slides.forEach((s, i) => {
+          const r = s.getBoundingClientRect();
+          const d = Math.abs(r.left + r.width / 2 - center);
+          if (d < bestD) { bestD = d; best = i; }
+        });
+        slides.forEach((s, i) => s.classList.toggle('is-active', i === best));
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === best));
+      };
+      galTrack.addEventListener('scroll', () => requestAnimationFrame(setActive), { passive: true });
+      addEventListener('resize', setActive, { passive: true });
+      setActive();
+    }
+  }
+
   /* ---- Year ---- */
   $$('#year').forEach((el) => { el.textContent = new Date().getFullYear(); });
 })();
