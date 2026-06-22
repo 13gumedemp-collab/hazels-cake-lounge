@@ -353,6 +353,21 @@ section { position: relative; }
   filter: saturate(0.98) brightness(0.96); }
 .mslide.is-active { border-color: var(--gold);
   box-shadow: 0 34px 80px -34px rgba(0,0,0,0.85), 0 0 0 1px rgba(212,175,55,0.4); }
+.mslide--cta { display: block; text-decoration: none; }
+.mslide--cta img { filter: saturate(0.55) brightness(0.4); transition: filter 0.6s var(--ease); }
+.mslide--cta:hover img { filter: saturate(0.7) brightness(0.5); }
+.mslide__cta-overlay { position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 0.85rem; text-align: center; padding: 1.6rem;
+  background: linear-gradient(180deg, rgba(11,10,8,0.5), rgba(11,10,8,0.8)); }
+.mslide__cta-kicker { font-family: 'Jost', sans-serif; font-size: 0.7rem; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--cream-soft); }
+.mslide__cta-title { font-family: 'Fraunces', serif; font-weight: 400; line-height: 1.05;
+  font-size: clamp(1.7rem, 4vw, 2.4rem); color: var(--cream); }
+.mslide__cta-btn { margin-top: 0.5rem; font-family: 'Jost', sans-serif; font-size: 0.74rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: #0b0a08; background: var(--gold);
+  padding: 0.9rem 1.6rem; border-radius: 2px;
+  transition: background 0.35s var(--ease), transform 0.35s var(--ease); }
+.mslide--cta:hover .mslide__cta-btn { background: var(--gold-bright); transform: translateY(-2px); }
 .mcarousel + .carousel-dots { padding-top: 0.2rem; }
 .gallery__more { text-align: center; padding: 1.6rem 1.4rem clamp(5rem, 12vh, 9rem); }
 .mcarousel__nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 6;
