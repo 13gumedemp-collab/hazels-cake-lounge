@@ -297,6 +297,62 @@
     select?.classList.remove('is-set');
   });
 
+  /* ---- Liquid buttons: guarantee a full fill on tap (touch lacks reliable hover/focus) ---- */
+  $$('.btn').forEach((b) => {
+    b.addEventListener('pointerdown', () => {
+      b.classList.add('btn--fill');
+      clearTimeout(b._fillT);
+      b._fillT = setTimeout(() => b.classList.remove('btn--fill'), 900);
+    });
+  });
+
+  /* ---- Menu carousel (mobile + tablet only) ---- */
+  const cardsTrack = $('#cards');
+  if (cardsTrack) {
+    const mq = window.matchMedia('(max-width: 1024px)');
+    const cards = $$('.card', cardsTrack);
+    let dotsWrap = null, dots = [], onScroll = null;
+    const setActive = () => {
+      const tr = cardsTrack.getBoundingClientRect();
+      const center = tr.left + tr.width / 2;
+      let best = 0, bestD = Infinity;
+      cards.forEach((c, i) => {
+        const r = c.getBoundingClientRect();
+        const d = Math.abs(r.left + r.width / 2 - center);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      cards.forEach((c, i) => c.classList.toggle('is-active', i === best));
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === best));
+    };
+    const build = () => {
+      if (cardsTrack.classList.contains('is-carousel')) return;
+      cardsTrack.classList.add('is-carousel');
+      dotsWrap = document.createElement('div'); dotsWrap.className = 'carousel-dots';
+      dots = cards.map((c, i) => {
+        const d = document.createElement('button');
+        d.type = 'button'; d.className = 'carousel-dot';
+        d.setAttribute('aria-label', 'Go to item ' + (i + 1)); d.setAttribute('data-cursor', 'link');
+        d.addEventListener('click', () => c.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }));
+        dotsWrap.appendChild(d); return d;
+      });
+      cardsTrack.after(dotsWrap);
+      onScroll = () => requestAnimationFrame(setActive);
+      cardsTrack.addEventListener('scroll', onScroll, { passive: true });
+      setActive();
+    };
+    const teardown = () => {
+      if (!cardsTrack.classList.contains('is-carousel')) return;
+      cardsTrack.classList.remove('is-carousel');
+      if (onScroll) cardsTrack.removeEventListener('scroll', onScroll);
+      dotsWrap?.remove(); dots = [];
+      cards.forEach((c) => c.classList.remove('is-active'));
+    };
+    const apply = () => (mq.matches ? build() : teardown());
+    apply();
+    mq.addEventListener('change', apply);
+    addEventListener('resize', () => { if (cardsTrack.classList.contains('is-carousel')) setActive(); }, { passive: true });
+  }
+
   /* ---- Year ---- */
   $$('#year').forEach((el) => { el.textContent = new Date().getFullYear(); });
 })();

@@ -24,7 +24,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
 body {
   background: var(--bg);
@@ -175,6 +175,9 @@ section { position: relative; }
   box-shadow: 0 12px 30px -12px rgba(212,175,55,0.5); }
 .btn:hover::before { height: 100%; }
 .btn:active { transform: scale(0.95); }
+/* JS-applied on tap so the fill always completes on touch (no reliable hover/focus) */
+.btn.btn--fill::before { height: 100%; }
+.btn.btn--fill { color: var(--liquid-button-color); }
 /* Secondary / ghost variant: liquid fills in cream */
 .btn--ghost { --liquid-button-background-color: var(--cream);
   color: var(--cream); border-color: rgba(244,236,221,0.55); }
@@ -482,6 +485,20 @@ section { position: relative; }
 .cselect__opt:hover { background: rgba(212,175,55,0.12); color: var(--gold-bright); }
 .cselect__opt.is-active { color: var(--gold); }
 @keyframes optIn { to { opacity: 1; transform: none; } }
+
+/* ----------  Menu carousel (mobile + tablet only, applied via JS)  ---------- */
+.cards.is-carousel { display: flex; grid-template-columns: none; align-items: flex-start; gap: 1rem;
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; padding: 0 10% 0.5rem; }
+.cards.is-carousel::-webkit-scrollbar { display: none; }
+.cards.is-carousel .card { flex: 0 0 80%; max-width: 360px; scroll-snap-align: center;
+  opacity: 0.4; transform: scale(0.9); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
+.cards.is-carousel .card.is-active { opacity: 1; transform: scale(1); }
+.cards.is-carousel .card__media { clip-path: none; animation: none; }
+.carousel-dots { display: flex; justify-content: center; gap: 0.5rem; padding-top: 1.6rem; }
+.carousel-dot { width: 8px; height: 8px; border-radius: 50%; padding: 0; border: none;
+  background: rgba(244,236,221,0.25); cursor: none; transition: width 0.4s var(--ease), background 0.4s var(--ease); }
+.carousel-dot.is-active { width: 26px; border-radius: 5px; background: var(--gold); }
 
 /* ----------  Floating Enquire (landing)  ---------- */
 .float-enquire { position: fixed; z-index: 90;
