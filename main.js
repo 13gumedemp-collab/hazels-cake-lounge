@@ -289,6 +289,33 @@
   }
   select?.addEventListener('change', () => select.classList.toggle('is-set', !!select.value));
 
+  // Enquiry form: inspiration image preview
+  const refInput = $('#refImage');
+  if (refInput) {
+    const refName = $('#refName');
+    const refPreview = $('#refPreview');
+    const refImg = refPreview ? $('img', refPreview) : null;
+    const refClear = $('#refClear');
+    const defaultName = refName ? refName.textContent : '';
+    const resetRef = () => {
+      refInput.value = '';
+      if (refName) refName.textContent = defaultName;
+      if (refImg && refImg.src) { try { URL.revokeObjectURL(refImg.src); } catch (e) {} refImg.removeAttribute('src'); }
+      if (refPreview) refPreview.hidden = true;
+    };
+    refInput.addEventListener('change', () => {
+      const file = refInput.files && refInput.files[0];
+      if (!file || !file.type.startsWith('image/')) { resetRef(); return; }
+      if (refName) refName.textContent = file.name;
+      if (refImg && refPreview) {
+        if (refImg.src) { try { URL.revokeObjectURL(refImg.src); } catch (e) {} }
+        refImg.src = URL.createObjectURL(file);
+        refPreview.hidden = false;
+      }
+    });
+    refClear?.addEventListener('click', resetRef);
+  }
+
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));

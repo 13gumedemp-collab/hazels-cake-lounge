@@ -155,6 +155,19 @@
             <textarea name="message" rows="4" placeholder="Flavours you love, number of people, colours, sizes, anything you have in mind"></textarea>
           </label>
 
+          <label class="field">
+            <span>Inspiration photo (optional)</span>
+            <div class="filefield">
+              <input type="file" name="reference" id="refImage" accept="image/*" />
+              <span class="filefield__btn" data-cursor="link">Choose an image</span>
+              <span class="filefield__name" id="refName">Show me a cake you love and I will recreate the feeling of it</span>
+            </div>
+            <div class="filepreview" id="refPreview" hidden>
+              <img alt="Preview of your inspiration cake" />
+              <button type="button" class="filepreview__clear" id="refClear" aria-label="Remove image" data-cursor="link">&times;</button>
+            </div>
+          </label>
+
           <button type="submit" class="btn btn--solid" data-cursor="link">Send enquiry</button>
           <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>
         </form>
