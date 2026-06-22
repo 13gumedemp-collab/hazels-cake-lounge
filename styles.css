@@ -338,10 +338,11 @@ section { position: relative; }
 .mcarousel { position: relative; }
 .mcarousel__track { display: flex; gap: clamp(1rem, 2.4vw, 2rem);
   overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+  scroll-padding-left: clamp(1.4rem, 5vw, 4rem);
   -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  padding: clamp(1.6rem, 4vh, 3rem) max(1.4rem, calc(50% - 230px)); }
+  padding: clamp(1.6rem, 4vh, 3rem) clamp(1.4rem, 5vw, 4rem); }
 .mcarousel__track::-webkit-scrollbar { display: none; }
-.mslide { flex: 0 0 min(80vw, 460px); aspect-ratio: 4/5; scroll-snap-align: center;
+.mslide { flex: 0 0 min(80vw, 460px); aspect-ratio: 4/5; scroll-snap-align: start;
   position: relative; overflow: hidden; border-radius: 4px; border: 1px solid var(--line-soft);
   opacity: 0.38; transform: scale(0.84);
   transition: opacity 0.6s var(--ease), transform 0.6s var(--ease), border-color 0.6s var(--ease), box-shadow 0.6s var(--ease); }
@@ -353,6 +354,17 @@ section { position: relative; }
 .mslide.is-active img { transform: scale(1); filter: saturate(1.03) brightness(1.01); }
 .mcarousel + .carousel-dots { padding-top: 0.2rem; }
 .gallery__more { text-align: center; padding: 1.6rem 1.4rem clamp(5rem, 12vh, 9rem); }
+.mcarousel__nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 6;
+  width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--gold);
+  background: rgba(11,10,8,0.55); color: var(--gold); display: grid; place-items: center;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  transition: background 0.3s var(--ease), color 0.3s var(--ease), opacity 0.3s var(--ease), border-color 0.3s var(--ease); }
+.mcarousel__nav svg { width: 18px; height: 18px; }
+.mcarousel__nav:hover { background: var(--gold); color: #0b0a08; }
+.mcarousel__nav--prev { left: clamp(0.5rem, 2.5vw, 1.6rem); }
+.mcarousel__nav--next { right: clamp(0.5rem, 2.5vw, 1.6rem); }
+.mcarousel__nav[disabled] { opacity: 0.22; pointer-events: none; }
+@media (max-width: 560px) { .mcarousel__nav { width: 40px; height: 40px; } }
 
 /* ----------  My Work gallery  ---------- */
 .workgallery { columns: 3 260px; column-gap: clamp(0.8rem, 1.6vw, 1.4rem);

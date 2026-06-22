@@ -377,6 +377,29 @@
   if (galTrack) {
     const slides = $$('.mslide', galTrack);
     if (slides.length) {
+      const mcar = galTrack.parentElement;
+      const maxIndex = slides.length - 1;
+      let current = 0;
+      const clamp = (i) => Math.max(0, Math.min(maxIndex, i));
+
+      // Prev / next arrows
+      const mkArrow = (dir) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'mcarousel__nav mcarousel__nav--' + (dir < 0 ? 'prev' : 'next');
+        b.setAttribute('aria-label', dir < 0 ? 'Previous image' : 'Next image');
+        b.setAttribute('data-cursor', 'link');
+        b.innerHTML = dir < 0
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+        b.addEventListener('click', () => goTo(current + dir));
+        mcar.appendChild(b);
+        return b;
+      };
+      const prevBtn = mkArrow(-1);
+      const nextBtn = mkArrow(1);
+
+      // Pagination dots
       const dotsWrap = document.createElement('div');
       dotsWrap.className = 'carousel-dots';
       const dots = slides.map((s, i) => {
@@ -384,25 +407,37 @@
         d.type = 'button'; d.className = 'carousel-dot';
         d.setAttribute('aria-label', 'Go to image ' + (i + 1));
         d.setAttribute('data-cursor', 'link');
-        d.addEventListener('click', () => s.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }));
+        d.addEventListener('click', () => goTo(i));
         dotsWrap.appendChild(d); return d;
       });
-      galTrack.parentElement.after(dotsWrap);
-      const setActive = () => {
-        const tr = galTrack.getBoundingClientRect();
-        const center = tr.left + tr.width / 2;
-        let best = 0, bestD = Infinity;
-        slides.forEach((s, i) => {
-          const r = s.getBoundingClientRect();
-          const d = Math.abs(r.left + r.width / 2 - center);
-          if (d < bestD) { bestD = d; best = i; }
-        });
-        slides.forEach((s, i) => s.classList.toggle('is-active', i === best));
-        dots.forEach((d, i) => d.classList.toggle('is-active', i === best));
+      mcar.after(dotsWrap);
+
+      const step = () => (slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : galTrack.clientWidth) || 1;
+      const update = () => {
+        slides.forEach((s, i) => s.classList.toggle('is-active', i === current));
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+        prevBtn.disabled = current <= 0;
+        nextBtn.disabled = current >= maxIndex;
       };
-      galTrack.addEventListener('scroll', () => requestAnimationFrame(setActive), { passive: true });
-      addEventListener('resize', setActive, { passive: true });
-      setActive();
+      function goTo(i) {
+        current = clamp(i);
+        const s = slides[current];
+        const padLeft = parseFloat(getComputedStyle(galTrack).paddingLeft) || 0;
+        const delta = s.getBoundingClientRect().left - galTrack.getBoundingClientRect().left - padLeft;
+        galTrack.scrollTo({ left: galTrack.scrollLeft + delta, behavior: 'smooth' });
+        update();
+      }
+      let raf;
+      galTrack.addEventListener('scroll', () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const atEnd = galTrack.scrollLeft + galTrack.clientWidth >= galTrack.scrollWidth - 2;
+          current = atEnd ? maxIndex : clamp(Math.round(galTrack.scrollLeft / step()));
+          update();
+        });
+      }, { passive: true });
+      addEventListener('resize', update, { passive: true });
+      update();
     }
   }
 
