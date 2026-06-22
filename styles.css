@@ -400,6 +400,8 @@ section { position: relative; }
   padding: 0 1.4rem; color: var(--cream-soft); font-size: 0.92rem; letter-spacing: 0.01em; }
 .respond-note b { color: var(--gold); font-weight: 500; }
 @media (max-width: 560px) { .ministeps { gap: 0.6rem 1.4rem; } }
+.footer__steps { margin: 0 auto clamp(2rem, 5vh, 3.2rem); padding-bottom: clamp(1.6rem, 4vh, 2.6rem);
+  border-bottom: 1px solid var(--line-soft); }
 
 /* ----------  Contact / enquiry  ---------- */
 .contact { background:
