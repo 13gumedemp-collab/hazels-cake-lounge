@@ -439,15 +439,20 @@
       });
       mcar.after(dotsWrap);
 
+      const mqMobile = window.matchMedia('(max-width: 700px)');
       const step = () => (slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : galTrack.clientWidth) || 1;
       // Continuous, scroll-linked scaling: each slide's size tracks its distance
       // from the focused position 1:1, so there is no transition lag or popping.
+      // On mobile the scale/fade is gentler so swiping feels smooth, not staggered.
       const render = () => {
+        const mobile = mqMobile.matches;
+        const sAmt = mobile ? 0.05 : 0.14;
+        const oAmt = mobile ? 0.22 : 0.5;
         const prog = galTrack.scrollLeft / step();
         for (let i = 0; i < slides.length; i++) {
           const d = Math.min(1, Math.abs(i - prog));
-          slides[i].style.transform = 'scale(' + (1 - 0.14 * d).toFixed(4) + ')';
-          slides[i].style.opacity = (1 - 0.5 * d).toFixed(4);
+          slides[i].style.transform = 'scale(' + (1 - sAmt * d).toFixed(4) + ')';
+          slides[i].style.opacity = (1 - oAmt * d).toFixed(4);
         }
       };
       const update = () => {

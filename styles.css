@@ -381,6 +381,13 @@ section { position: relative; }
 .mcarousel__nav--next { right: clamp(0.5rem, 2.5vw, 1.6rem); }
 .mcarousel__nav[disabled] { opacity: 0.22; pointer-events: none; }
 @media (max-width: 560px) { .mcarousel__nav { width: 40px; height: 40px; } }
+/* On mobile the landing carousel is swipe-only: hide the arrows and let the
+   gentler scroll-snap carry the motion so it feels smooth, not staggered. */
+@media (max-width: 700px) {
+  #galleryCarousel .mcarousel__nav { display: none; }
+  #galleryTrack { scroll-snap-type: x proximity; scroll-padding: 0 12vw; }
+  #galleryTrack .mslide { scroll-snap-align: center; }
+}
 
 /* ----------  My Work gallery  ---------- */
 .workgallery { columns: 3 260px; column-gap: clamp(0.8rem, 1.6vw, 1.4rem);
