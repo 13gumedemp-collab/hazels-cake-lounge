@@ -826,7 +826,9 @@
     });
     const href = b.tagName === 'A' ? b.getAttribute('href') : null;
     const external = b.target === '_blank' || (href && /^(https?:|mailto:|tel:|#)/.test(href));
-    if (isTouch && href && !external) {
+    // Enquire/order buttons open the overlay (handled elsewhere); they must NOT navigate.
+    const isTrigger = b.matches('[data-enquire], #floatEnquire') || b.classList.contains('card__enquire') || (href && /contact\.html/.test(href));
+    if (isTouch && href && !external && !isTrigger) {
       b.addEventListener('click', (e) => {
         e.preventDefault();
         b.classList.add('btn--fill');
