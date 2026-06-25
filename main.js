@@ -725,11 +725,15 @@
     });
 
     /* ---- triggers: every enquire / order button opens the overlay ---- */
+    const touch = window.matchMedia('(hover: none)').matches;
     document.addEventListener('click', (e) => {
       const t = e.target.closest('a.btn[href*="contact.html"], .card__enquire, #floatEnquire, [data-enquire]');
       if (!t || overlay.contains(t)) return;
       e.preventDefault();
-      openOverlay(t.dataset.product || '');
+      // Let the liquid fill flood fully before the overlay covers the button (touch has no hover).
+      if (t.classList.contains('btn')) t.classList.add('btn--fill');
+      const delay = touch && t.classList.contains('btn') ? 460 : 0;
+      setTimeout(() => openOverlay(t.dataset.product || ''), delay);
     }, true);
 
     /* ---- Occasion Book: add one or many occasions (anyone, order or not) ---- */
