@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>Messaging Terms | Hazel's Cake Lounge</title>
+  <meta name="description" content="How Hazel's Cake Lounge sends WhatsApp and email messages, and how your data is handled." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner"><span class="loader__name">Hazel's</span><span class="loader__sub">Cake Lounge</span></div>
+    <div class="loader__count"><span id="loaderCount">00</span></div>
+  </div>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link"><span>Hazel's</span><em>Cake Lounge</em></a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a>
+      <a href="work.html" data-cursor="link">My Work</a>
+      <a href="story.html" data-cursor="link">Story</a>
+      <a href="occasion-book.html" data-cursor="link">The Occasion Book</a>
+      <a href="reviews.html" data-cursor="link">Community</a>
+      <a href="contact.html" data-cursor="link">Contact</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false" data-cursor="link"><span></span><span></span></button>
+  </header>
+
+  <main id="top">
+    <section class="page-hero">
+      <p class="page-hero__eyebrow reveal-up">Messaging &amp; privacy</p>
+      <h1 class="page-hero__title"><span class="kinetic" data-split="words">Messaging Terms</span></h1>
+      <p class="legal-date reveal-up">Effective date: 23 June 2026</p>
+    </section>
+
+    <article class="article legal">
+      <h2 class="reveal-up">1. WhatsApp messaging terms</h2>
+      <ul class="reveal-up">
+        <li><b>Sender:</b> Hazel's Cake Lounge.</li>
+        <li><b>Message types:</b> Personal occasion reminders sent directly by Hazel. These are not automated bulk messages.</li>
+        <li><b>Frequency:</b> A maximum of two WhatsApp messages per occasion per year.</li>
+        <li><b>Opt out:</b> Reply STOP at any time. Your opt out is immediate and permanent until you choose to opt back in.</li>
+        <li><b>Rates:</b> Standard carrier rates may apply.</li>
+        <li><b>Consent:</b> Your consent to receive WhatsApp messages is never a condition of placing an order.</li>
+      </ul>
+
+      <h2 class="reveal-up">2. Email communication terms</h2>
+      <ul class="reveal-up">
+        <li><b>Types:</b> Enquiry confirmations, occasion reminders, Cake Memory Cards, order updates, and occasional personal notes from Hazel.</li>
+        <li><b>Unsubscribe:</b> Reply UNSUBSCRIBE to any email at any time.</li>
+      </ul>
+
+      <h2 class="reveal-up">3. Data and privacy</h2>
+      <ul class="reveal-up">
+        <li><b>What is collected:</b> Name, email, phone number, occasion details, order history, flavour preferences, and cake photos.</li>
+        <li><b>Why:</b> To provide a personalised occasion reminder service and to fulfil orders.</li>
+        <li><b>Sharing:</b> Your data is never sold or shared with any third party under any circumstances.</li>
+        <li><b>Retention:</b> Your data is held for as long as you remain an active customer. You may request deletion at any time.</li>
+        <li><b>Deletion requests:</b> <a href="mailto:hello@hazelscakelounge.co.za" data-cursor="link">hello@hazelscakelounge.co.za</a></li>
+        <li><b>Right to access:</b> You may request a copy of all data held about you at any time.</li>
+      </ul>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__grid">
+      <div class="footer__brandcol">
+        <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
+        <p class="footer__tag">Made slowly, by hand.</p>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Explore</span>
+        <a href="menu.html" data-cursor="link">Menu</a>
+        <a href="work.html" data-cursor="link">My Work</a>
+        <a href="story.html" data-cursor="link">Story</a>
+        <a href="occasion-book.html" data-cursor="link">The Occasion Book</a>
+        <a href="reviews.html" data-cursor="link">Community</a>
+        <a href="contact.html" data-cursor="link">Contact</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Get in touch</span>
+        <a href="contact.html" data-cursor="link">Contact me</a>
+        <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
+    </div>
+  </footer>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

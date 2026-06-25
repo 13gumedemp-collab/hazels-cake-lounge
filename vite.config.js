@@ -11,6 +11,8 @@ export default defineConfig({
         story: 'story.html',
         reviews: 'reviews.html',
         contact: 'contact.html',
+        occasionbook: 'occasion-book.html',
+        messagingterms: 'messaging-terms.html',
       },
     },
   },

@@ -415,6 +415,356 @@
     });
   }
 
+  /* ============================================================
+     Cinematic multi-step enquiry overlay
+     Built in JS so it lives on every page (and any new ones),
+     preserving the loader and custom cursor automatically.
+     ============================================================ */
+  (function enquiryOverlay() {
+    const SB_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
+    const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnenBveXlpamFmYmx6Zml5aG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODk3MzIsImV4cCI6MjA5Nzk2NTczMn0.g-INXAO6kNGwN750J5rreKlroMFFro7Bl9uJXcr-vug';
+    const STORE = 'hcl_enquiry_progress';
+    const ONE_OFF = ['Wedding', 'Graduation', 'Baby Shower'];
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const REL_OPTS = ['My child', 'My partner or spouse', 'My parent', 'My sibling', 'My friend', 'My colleague', 'Myself', 'Other'];
+    const OCC_OPTS = ['Birthday', 'Wedding', 'Anniversary', 'Baby Shower', 'Graduation', 'Just Because', 'Other'];
+    const opt = (list) => '<option value="" disabled selected>Choose one</option>' + list.map((o) => `<option>${o}</option>`).join('');
+
+    const markup = `
+      <div class="enq__scrim" data-enq-close></div>
+      <div class="enq__panel" role="dialog" aria-modal="true" aria-label="Enquiry form">
+        <div class="enq__progress"><span class="enq__progress-fill" id="enqFill"></span></div>
+        <div class="enq__bar">
+          <span class="enq__logo">Hazel's <em>Cake Lounge</em></span>
+          <button class="enq__close" id="enqClose" aria-label="Close" data-cursor="link">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 5l14 14M19 5L5 19"/></svg>
+          </button>
+        </div>
+        <div class="enq__resume" id="enqResume" hidden>
+          <span>Welcome back. Would you like to continue where you left off?</span>
+          <div class="enq__resume-btns">
+            <button type="button" class="enq__mini" id="enqContinue" data-cursor="link">Continue</button>
+            <button type="button" class="enq__mini enq__mini--ghost" id="enqRestart" data-cursor="link">Start again</button>
+          </div>
+        </div>
+        <div class="enq__stage" id="enqStage">
+          <section class="enq__step" data-step="0">
+            <span class="enq__label">Step 1 of 4 &mdash; The Celebration</span>
+            <h2 class="enq__title">Tell me about the occasion.</h2>
+            <p class="enq__sub">I want to make sure every detail is exactly right.</p>
+            <label class="field"><span>Who are we celebrating?</span><input type="text" name="occasion_for" placeholder="Emma, my mum, my husband" /></label>
+            <label class="field"><span>What is your relationship to them?</span><select name="relationship">${opt(REL_OPTS)}</select></label>
+            <label class="field"><span>What is the occasion?</span><select name="occasion_type">${opt(OCC_OPTS)}</select></label>
+            <p class="enq__hint" data-hint="occasion" hidden></p>
+            <label class="field"><span data-datelabel>When is the date?</span><input type="date" name="occasion_date" /></label>
+            <div class="enq__nav"><span></span><button type="button" class="btn btn--solid enq__next" data-cursor="link">Next</button></div>
+          </section>
+          <section class="enq__step" data-step="1">
+            <span class="enq__label">Step 2 of 4 &mdash; The Cake</span>
+            <h2 class="enq__title">Now tell me about the cake.</h2>
+            <p class="enq__sub">The more you share, the more personal I can make it.</p>
+            <label class="field"><span>Flavours you love</span><textarea name="flavours" rows="2" placeholder="Lemon and raspberry, vanilla bean, dark chocolate. Anything you love, tell me."></textarea></label>
+            <label class="field"><span>How many people</span><input type="text" name="number_of_people" placeholder="Around 20, just the two of us, a table of 50" /></label>
+            <label class="field"><span>Colours, themes, or ideas</span><textarea name="colours_and_themes" rows="2" placeholder="Soft florals, something minimal, dusty pink and gold"></textarea></label>
+            <div class="field"><span class="field__lbl">Show me a cake you love (optional)</span>
+              <div class="enq__drop" id="enqDrop" data-cursor="link">
+                <input type="file" id="enqFile" accept="image/jpeg,image/png,image/webp" hidden />
+                <div class="enq__drop-empty"><p>Drop an image here or click to browse</p><small>Show me a cake you love and I will recreate the feeling of it.</small></div>
+                <div class="enq__drop-preview" hidden><img alt="Your inspiration" /><button type="button" class="enq__drop-x" aria-label="Remove" data-cursor="link">&times;</button></div>
+                <div class="enq__drop-status" hidden></div>
+              </div>
+            </div>
+            <div class="enq__nav"><button type="button" class="enq__back" data-cursor="link">Back</button><button type="button" class="btn btn--solid enq__next" data-cursor="link">Next</button></div>
+          </section>
+          <section class="enq__step" data-step="2">
+            <span class="enq__label">Step 3 of 4 &mdash; About You</span>
+            <h2 class="enq__title">Last thing. How do I reach you?</h2>
+            <p class="enq__sub">I reply to every enquiry personally, within two days.</p>
+            <label class="field"><span>Your name</span><input type="text" name="full_name" placeholder="Your full name" autocomplete="name" /></label>
+            <label class="field"><span>Your email</span><input type="email" name="email" placeholder="Where I can reach you" autocomplete="email" /></label>
+            <label class="field"><span>Your phone or WhatsApp (optional)</span><input type="tel" name="whatsapp_number" placeholder="073 373 4234" autocomplete="tel" /><small class="enq__note">Only used to discuss your order. Never shared.</small></label>
+            <div class="enq__nav"><button type="button" class="enq__back" data-cursor="link">Back</button><button type="button" class="btn btn--solid enq__next" data-cursor="link">Next</button></div>
+          </section>
+          <section class="enq__step" data-step="3">
+            <span class="enq__label">Step 4 of 4 &mdash; The Occasion Book</span>
+            <h2 class="enq__title">One more thing worth knowing.</h2>
+            <p class="enq__sub enq__body">Every occasion you share with me goes into my Occasion Book. A personal record I keep of every celebration. Next year, before the date arrives, I will reach out personally so you never have to remember to order. It is already taken care of.</p>
+            <div class="consent">
+              <label class="consent__row"><input type="checkbox" name="occasion_book" checked /><span data-book-label>Remember this occasion for me every year.</span></label>
+              <label class="consent__row"><input type="checkbox" name="whatsapp_consent" /><span>Send me WhatsApp reminders too. <a href="messaging-terms.html" target="_blank" rel="noopener" data-cursor="link">View messaging terms</a>. Personal messages from Hazel, not automated texts.</span></label>
+            </div>
+            <div class="enq__nav"><button type="button" class="enq__back" data-cursor="link">Back</button>
+              <button type="button" class="btn btn--solid enq__submit" id="enqSubmit" data-cursor="link"><span class="enq__submit-txt">Send my enquiry to Hazel</span><span class="enq__spinner" hidden></span></button>
+            </div>
+          </section>
+        </div>
+      </div>`;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'enq';
+    overlay.id = 'enqOverlay';
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML = markup;
+    document.body.appendChild(overlay);
+
+    const stage = $('#enqStage', overlay);
+    const steps = $$('.enq__step', overlay);
+    const fill = $('#enqFill', overlay);
+    let current = 0;
+    let open = false;
+    let inspirationUrl = '';
+    const data = {};
+
+    // Enhance the two dropdowns with the site's cinematic select.
+    $$('select', overlay).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
+
+    const setProgress = () => { fill.style.width = ((current + 1) * 25) + '%'; };
+
+    const showStep = (n, dir) => {
+      steps.forEach((s, i) => {
+        if (i === n) {
+          if (!reduce) { s.style.transition = 'none'; s.style.transform = 'translateX(' + (dir >= 0 ? 40 : -40) + 'px)'; s.style.opacity = '0'; }
+          s.classList.add('is-active');
+          requestAnimationFrame(() => requestAnimationFrame(() => { s.style.transition = ''; s.style.transform = ''; s.style.opacity = ''; }));
+        } else if (s.classList.contains('is-active')) {
+          if (!reduce) { s.style.transform = 'translateX(' + (dir >= 0 ? -40 : 40) + 'px)'; s.style.opacity = '0'; }
+          setTimeout(() => { s.classList.remove('is-active'); s.style.transform = ''; s.style.opacity = ''; }, reduce ? 0 : 480);
+        }
+      });
+      current = n;
+      setProgress();
+      stage.scrollTop = 0;
+    };
+
+    const val = (name) => { const el = $('[name="' + name + '"]', overlay); return el ? el.value.trim() : ''; };
+    const fieldBox = (name) => { const el = $('[name="' + name + '"]', overlay); return el ? (el.closest('.field') || el.parentElement) : null; };
+    const clearErr = (step) => $$('.field__error', steps[step]).forEach((e) => e.remove());
+    const showErr = (name, msg) => {
+      const box = fieldBox(name); if (!box) return;
+      let e = box.querySelector('.field__error'); if (!e) { e = document.createElement('p'); e.className = 'field__error'; box.appendChild(e); }
+      e.textContent = msg; box.classList.add('has-error');
+    };
+
+    const validate = (step) => {
+      clearErr(step);
+      let ok = true;
+      if (step === 0) {
+        if (!val('occasion_for')) { showErr('occasion_for', 'Let me know who we are celebrating.'); ok = false; }
+        if (!val('occasion_type')) { showErr('occasion_type', 'Please choose the occasion.'); ok = false; }
+        if (!val('occasion_date')) { showErr('occasion_date', 'Please pick the date.'); ok = false; }
+      }
+      if (step === 2) {
+        if (!val('full_name')) { showErr('full_name', 'Please tell me your name.'); ok = false; }
+        const em = val('email');
+        if (!em || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { showErr('email', 'I will need a valid email to reply.'); ok = false; }
+      }
+      return ok;
+    };
+
+    // Conditional hints on occasion type / Just Because.
+    const applyConditionals = () => {
+      const occ = val('occasion_type');
+      const hint = $('[data-hint="occasion"]', overlay);
+      const dateLabel = $('[data-datelabel]', overlay);
+      const bookLabel = $('[data-book-label]', overlay);
+      if (ONE_OFF.includes(occ)) {
+        hint.textContent = 'This is a once off celebration. I will still follow up after the day and keep you in my memory for the future.';
+        hint.hidden = false;
+        if (bookLabel) bookLabel.textContent = 'Keep me in your Occasion Book for future celebrations.';
+      } else if (occ === 'Just Because') {
+        hint.textContent = 'No occasion needed. Sometimes cake is reason enough.';
+        hint.hidden = false;
+        if (dateLabel) dateLabel.textContent = 'When would you like it ready?';
+        if (bookLabel) bookLabel.textContent = 'Remember this occasion for me every year.';
+      } else {
+        hint.hidden = true;
+        if (dateLabel) dateLabel.textContent = 'When is the date?';
+        if (bookLabel) bookLabel.textContent = 'Remember this occasion for me every year.';
+      }
+    };
+    overlay.addEventListener('change', (e) => { if (e.target.name === 'occasion_type') applyConditionals(); });
+
+    /* ---- progress persistence ---- */
+    const snapshot = () => {
+      const o = { step: current };
+      ['occasion_for', 'relationship', 'occasion_type', 'occasion_date', 'flavours', 'number_of_people', 'colours_and_themes', 'full_name', 'email', 'whatsapp_number'].forEach((n) => { o[n] = val(n); });
+      o.occasion_book = $('[name="occasion_book"]', overlay).checked;
+      o.whatsapp_consent = $('[name="whatsapp_consent"]', overlay).checked;
+      o.inspirationUrl = inspirationUrl;
+      return o;
+    };
+    const hasProgress = () => { try { return !!localStorage.getItem(STORE); } catch (e) { return false; } };
+    const save = () => { try { localStorage.setItem(STORE, JSON.stringify(snapshot())); } catch (e) {} };
+    const wipe = () => { try { localStorage.removeItem(STORE); } catch (e) {} };
+    const restore = () => {
+      let o; try { o = JSON.parse(localStorage.getItem(STORE)); } catch (e) { return; }
+      if (!o) return;
+      Object.keys(o).forEach((k) => {
+        const el = $('[name="' + k + '"]', overlay);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = !!o[k];
+        else { el.value = o[k] || ''; el.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      inspirationUrl = o.inspirationUrl || '';
+      applyConditionals();
+      showStep(Math.min(o.step || 0, 3), 1);
+    };
+
+    /* ---- open / close ---- */
+    function openOverlay(product) {
+      if (open) return;
+      open = true;
+      document.documentElement.classList.add('enq-open');
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden', 'false');
+      const resume = $('#enqResume', overlay);
+      if (hasProgress()) { resume.hidden = false; } else { resume.hidden = true; showStep(0, 1); }
+      if (!hasProgress() && product) { /* product context could prefill notes later */ }
+    }
+    function closeOverlay() {
+      if (!open) return;
+      if (current >= 1 || val('occasion_for')) save();
+      open = false;
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      setTimeout(() => document.documentElement.classList.remove('enq-open'), reduce ? 0 : 700);
+    }
+
+    $('#enqClose', overlay).addEventListener('click', closeOverlay);
+    $$('[data-enq-close]', overlay).forEach((b) => b.addEventListener('click', closeOverlay));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) closeOverlay(); });
+    $('#enqContinue', overlay).addEventListener('click', () => { $('#enqResume', overlay).hidden = true; restore(); });
+    $('#enqRestart', overlay).addEventListener('click', () => { wipe(); $('#enqResume', overlay).hidden = true; Object.keys(data).forEach((k) => delete data[k]); inspirationUrl = ''; overlay.querySelectorAll('input,textarea,select').forEach((el) => { if (el.type === 'checkbox') el.checked = el.name === 'occasion_book'; else el.value = ''; el.dispatchEvent(new Event('change', { bubbles: true })); }); resetDrop(); applyConditionals(); showStep(0, 1); });
+
+    /* ---- step navigation ---- */
+    $$('.enq__next', overlay).forEach((b) => b.addEventListener('click', () => {
+      if (!validate(current)) return;
+      if (current === 2 && val('relationship') === 'Myself' && !val('occasion_for')) {
+        const f = $('[name="occasion_for"]', overlay); if (f) f.value = val('full_name');
+      }
+      save();
+      showStep(Math.min(current + 1, 3), 1);
+    }));
+    $$('.enq__back', overlay).forEach((b) => b.addEventListener('click', () => showStep(Math.max(current - 1, 0), -1)));
+
+    /* ---- inspiration upload ---- */
+    const drop = $('#enqDrop', overlay);
+    const fileInput = $('#enqFile', overlay);
+    const dropEmpty = $('.enq__drop-empty', overlay);
+    const dropPrev = $('.enq__drop-preview', overlay);
+    const dropImg = $('.enq__drop-preview img', overlay);
+    const dropStatus = $('.enq__drop-status', overlay);
+    function resetDrop() { inspirationUrl = ''; if (fileInput) fileInput.value = ''; if (dropPrev) dropPrev.hidden = true; if (dropEmpty) dropEmpty.hidden = false; if (dropStatus) { dropStatus.hidden = true; dropStatus.textContent = ''; } }
+    async function uploadFile(file) {
+      if (!file || !/^image\/(jpeg|png|webp)$/.test(file.type)) return;
+      if (file.size > 10 * 1024 * 1024) { dropStatus.hidden = false; dropStatus.textContent = 'That image is over 10MB, try a smaller one.'; return; }
+      dropEmpty.hidden = true; dropPrev.hidden = false; dropImg.src = URL.createObjectURL(file);
+      dropStatus.hidden = false; dropStatus.textContent = 'Uploading...';
+      const path = 'enq-' + Math.random().toString(36).slice(2) + '-' + file.name.replace(/[^\w.]+/g, '_');
+      try {
+        const res = await fetch(SB_URL + '/storage/v1/object/inspiration-photos/' + encodeURIComponent(path), {
+          method: 'POST', headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file,
+        });
+        if (!res.ok) throw new Error(await res.text());
+        inspirationUrl = path; dropStatus.textContent = 'Added.';
+        setTimeout(() => { dropStatus.hidden = true; }, 1500);
+      } catch (e) { dropStatus.textContent = 'Could not upload that one, but you can still send your enquiry.'; }
+    }
+    if (drop) {
+      drop.addEventListener('click', (e) => { if (!e.target.closest('.enq__drop-x')) fileInput.click(); });
+      fileInput.addEventListener('change', () => uploadFile(fileInput.files[0]));
+      ['dragover', 'dragenter'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('is-drag'); }));
+      ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('is-drag'); }));
+      drop.addEventListener('drop', (e) => { const f = e.dataTransfer.files[0]; if (f) uploadFile(f); });
+      $('.enq__drop-x', overlay).addEventListener('click', (e) => { e.stopPropagation(); resetDrop(); });
+    }
+
+    /* ---- submit ---- */
+    $('#enqSubmit', overlay).addEventListener('click', async () => {
+      if (!validate(0)) { showStep(0, -1); return; }
+      const btn = $('#enqSubmit', overlay);
+      const txt = $('.enq__submit-txt', overlay);
+      const spin = $('.enq__spinner', overlay);
+      btn.disabled = true; txt.style.opacity = '0'; spin.hidden = false;
+      const notes = [val('flavours'), val('colours_and_themes')].filter(Boolean).join('\n');
+      const payload = {
+        full_name: val('full_name'), email: val('email').toLowerCase(), whatsapp_number: val('whatsapp_number'),
+        occasion_for: val('occasion_for'), relationship_to_customer: val('relationship'),
+        occasion_type: val('occasion_type'), occasion_date: val('occasion_date'),
+        cake_description: notes, number_of_people: val('number_of_people'),
+        colours_and_themes: val('colours_and_themes'), inspiration_photo_url: inspirationUrl,
+        email_consent: true, whatsapp_consent: $('[name="whatsapp_consent"]', overlay).checked,
+        occasion_book_opted_in: $('[name="occasion_book"]', overlay).checked,
+      };
+      try {
+        const res = await fetch(SB_URL + '/functions/v1/process-enquiry', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON }, body: JSON.stringify(payload),
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || out.status !== 'success') throw new Error(out.error || 'failed');
+        spin.hidden = true;
+        btn.innerHTML = '<svg class="enq__check" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>';
+        wipe();
+        const bookLine = out.occasion_book_opted_in ? '<p>I have added ' + esc(out.person_name) + "'s " + esc(out.occasion_type) + ' to my Occasion Book. Next year I will reach out before the date. You are already taken care of.</p>' : '';
+        setTimeout(() => {
+          stage.innerHTML = '<div class="enq__success"><h2 class="enq__title">You are all set, ' + esc(out.first_name) + '.</h2><p class="enq__sub">I have received your enquiry for ' + esc(out.person_name) + "'s " + esc(out.occasion_type) + ' on ' + esc(out.occasion_date) + ' and I will be in touch personally within two days.</p>' + bookLine + '<span class="enq__success-line"></span><small class="enq__close-note">You can close this window now.</small></div>';
+          fill.style.width = '100%';
+        }, reduce ? 0 : 520);
+        setTimeout(closeOverlay, 8000);
+      } catch (e) {
+        spin.hidden = true; txt.style.opacity = '1'; btn.disabled = false;
+        let s = $('.enq__err', overlay);
+        if (!s) { s = document.createElement('p'); s.className = 'field__error enq__err'; btn.parentElement.appendChild(s); }
+        s.textContent = 'Something went wrong on my side. Please try again, or email hello@hazelscakelounge.co.za.';
+      }
+    });
+
+    /* ---- triggers: every enquire / order button opens the overlay ---- */
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest('a.btn[href*="contact.html"], .card__enquire, #floatEnquire, [data-enquire]');
+      if (!t || overlay.contains(t)) return;
+      e.preventDefault();
+      openOverlay(t.dataset.product || '');
+    }, true);
+
+    /* ---- Occasion Book: "add another occasion" form (existing customers) ---- */
+    const addForm = $('#addOccasionForm');
+    if (addForm) {
+      const addStatus = $('#addOccasionStatus');
+      addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const f = Object.fromEntries(new FormData(addForm));
+        if (!f.email || !f.person_name || !f.occasion_type || !f.occasion_date) {
+          addStatus.textContent = 'Please fill in your email, who to add, the occasion and the date.';
+          return;
+        }
+        const btn = addForm.querySelector('button[type="submit"]');
+        const label = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = 'Adding...'; }
+        try {
+          const res = await fetch(SB_URL + '/functions/v1/add-circle-member', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
+            body: JSON.stringify({
+              email: String(f.email).trim().toLowerCase(), person_name: String(f.person_name).trim(),
+              relationship_to_customer: f.relationship || '', occasion_type: f.occasion_type,
+              occasion_date: f.occasion_date, notes: String(f.notes || '').trim(),
+            }),
+          });
+          const out = await res.json().catch(() => ({}));
+          if (out.status === 'not_found') {
+            addStatus.textContent = 'I do not have your email on record yet. Place your first enquiry and I will add you to the Occasion Book automatically.';
+          } else if (out.status === 'success') {
+            addForm.innerHTML = '<div class="form-success"><h3>Added.</h3><p>I have added ' + esc(f.person_name) + ' to your Occasion Book. I will reach out before the date so you never have to remember.</p></div>';
+          } else { throw new Error(out.error || 'failed'); }
+        } catch (err) {
+          if (btn) { btn.disabled = false; btn.textContent = label; }
+          addStatus.textContent = 'Something went wrong. Please try again, or email hello@hazelscakelounge.co.za.';
+        }
+      });
+    }
+  })();
+
   /* ---- Liquid buttons: guarantee the fill completes on tap ----
      Touch has no reliable hover/focus, and link buttons navigate before the
      animation finishes. On touch we hold the tap, let the fill flood fully,

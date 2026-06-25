@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>The Occasion Book | Hazel's Cake Lounge</title>
+  <meta name="description" content="Every time you order with Hazel, your occasion goes into her Occasion Book. She reaches out before each one so you never have to remember." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner"><span class="loader__name">Hazel's</span><span class="loader__sub">Cake Lounge</span></div>
+    <div class="loader__count"><span id="loaderCount">00</span></div>
+  </div>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link"><span>Hazel's</span><em>Cake Lounge</em></a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a>
+      <a href="work.html" data-cursor="link">My Work</a>
+      <a href="story.html" data-cursor="link">Story</a>
+      <a href="occasion-book.html" class="is-active" data-cursor="link">The Occasion Book</a>
+      <a href="reviews.html" data-cursor="link">Community</a>
+      <a href="contact.html" data-cursor="link">Contact</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false" data-cursor="link"><span></span><span></span></button>
+  </header>
+
+  <main id="top">
+    <section class="page-hero">
+      <p class="page-hero__eyebrow reveal-up">The Occasion Book</p>
+      <h1 class="page-hero__title">
+        <span class="kinetic" data-split="words" data-stagger="0.06" data-distance="30">Every occasion.</span>
+        <span class="kinetic gold" data-split="words" data-stagger="0.06" data-distance="30" data-delay="0.12">Remembered.</span>
+      </h1>
+      <p class="page-hero__lede reveal-up">Every time you order with me, I add your occasion to my personal record. Before each one arrives I will reach out so you never have to think about it. No reminders on your phone. No calendar alerts. I remember for you.</p>
+      <span class="hero-rule reveal-up"></span>
+    </section>
+
+    <!-- What to expect -->
+    <section class="expect">
+      <div class="expect__col reveal-up">
+        <svg class="expect__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="8" y="12" width="32" height="28" rx="2"/><path d="M8 20h32M16 8v8M32 8v8"/></svg>
+        <h3>One month before</h3>
+        <p>I reach out personally with plenty of time to plan something special.</p>
+      </div>
+      <div class="expect__col reveal-up">
+        <svg class="expect__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="24" cy="24" r="16"/><path d="M24 14v10l7 4"/></svg>
+        <h3>One week before</h3>
+        <p>A warm reminder so nothing sneaks up on you at the last moment.</p>
+      </div>
+      <div class="expect__col reveal-up">
+        <svg class="expect__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="24" cy="24" r="15"/></svg>
+        <h3>Every year, automatically</h3>
+        <p>Once you are in the book I remember for you. Every single year, without you having to do a thing.</p>
+      </div>
+    </section>
+
+    <!-- Add another occasion -->
+    <section class="contactwrap">
+      <aside class="info reveal-up">
+        <h2 class="info__title">Already ordered with me before?</h2>
+        <div class="info__row">
+          <span class="info__label">Add someone special</span>
+          <p>If you have ordered with me before, add another person to your Occasion Book here. I will find your record by email and start remembering them too.</p>
+        </div>
+        <div class="info__row">
+          <span class="info__label">Not ordered yet?</span>
+          <p>Place your first enquiry and I will add you to the Occasion Book automatically.</p>
+          <a href="contact.html" class="btn btn--ghost" data-enquire data-cursor="link">Start an enquiry</a>
+        </div>
+      </aside>
+
+      <div class="formwrap">
+        <form class="form" id="addOccasionForm" novalidate>
+          <label class="field">
+            <span>Your email address</span>
+            <input type="email" name="email" autocomplete="email" placeholder="The email you ordered with" required />
+          </label>
+          <label class="field">
+            <span>Who would you like to add?</span>
+            <input type="text" name="person_name" placeholder="Emma, my mum, my husband" required />
+          </label>
+          <label class="field">
+            <span>Relationship to you</span>
+            <select name="relationship">
+              <option value="" disabled selected>Choose one</option>
+              <option>My child</option><option>My partner or spouse</option><option>My parent</option>
+              <option>My sibling</option><option>My friend</option><option>My colleague</option>
+              <option>Myself</option><option>Other</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Occasion type</span>
+            <select name="occasion_type" required>
+              <option value="" disabled selected>Choose one</option>
+              <option>Birthday</option><option>Wedding</option><option>Anniversary</option>
+              <option>Baby Shower</option><option>Graduation</option><option>Just Because</option><option>Other</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Date</span>
+            <input type="date" name="occasion_date" required />
+          </label>
+          <label class="field">
+            <span>Notes or flavour preferences</span>
+            <textarea name="notes" rows="3" placeholder="Anything I should remember about them"></textarea>
+          </label>
+          <button type="submit" class="btn btn--solid" data-cursor="link">Add to my Occasion Book</button>
+          <p class="form__status" id="addOccasionStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__grid">
+      <div class="footer__brandcol">
+        <div class="footer__brand">Hazel's<em>Cake Lounge</em></div>
+        <p class="footer__tag">Made slowly, by hand.</p>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Explore</span>
+        <a href="menu.html" data-cursor="link">Menu</a>
+        <a href="work.html" data-cursor="link">My Work</a>
+        <a href="story.html" data-cursor="link">Story</a>
+        <a href="occasion-book.html" data-cursor="link">The Occasion Book</a>
+        <a href="reviews.html" data-cursor="link">Community</a>
+        <a href="contact.html" data-cursor="link">Contact</a>
+      </div>
+      <div class="footer__col">
+        <span class="footer__label">Get in touch</span>
+        <a href="contact.html" data-cursor="link">Contact me</a>
+        <a href="tel:+27733734234" data-cursor="link">073 373 4234</a>
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
+    </div>
+  </footer>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

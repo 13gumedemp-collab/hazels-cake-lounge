@@ -31,6 +31,7 @@
       <a href="menu.html" data-cursor="link">Menu</a>
       <a href="work.html" data-cursor="link">My Work</a>
       <a href="story.html" data-cursor="link">Story</a>
+      <a href="occasion-book.html" data-cursor="link">The Occasion Book</a>
       <a href="reviews.html" data-cursor="link">Community</a>
       <a href="contact.html" class="is-active" data-cursor="link">Contact</a>
     </nav>
@@ -103,99 +104,16 @@
         </div>
       </aside>
 
-      <!-- Enquiry form -->
+      <!-- Golden order card (opens the cinematic enquiry overlay) -->
       <div class="formwrap">
-        <form class="form" id="enquiryForm" novalidate>
-          <label class="field">
-            <span>What can I bake for you?</span>
-            <select name="product" id="productSelect" required>
-              <option value="" disabled selected>Choose a bake</option>
-              <option>Cakes</option>
-              <option>Cupcakes</option>
-              <option>Loaf cakes</option>
-              <option>Muffins</option>
-              <option>Scones</option>
-              <option>Biscuits</option>
-              <option>Rusks</option>
-              <option>A custom bake</option>
-              <option>A mix of treats</option>
-              <option>Not sure yet</option>
-            </select>
-          </label>
-
-          <div class="form__row">
-            <label class="field">
-              <span>Name</span>
-              <input type="text" name="name" autocomplete="name" required />
-            </label>
-            <label class="field">
-              <span>Email</span>
-              <input type="email" name="email" autocomplete="email" required />
-            </label>
-          </div>
-
-          <div class="form__row">
-            <label class="field">
-              <span>Phone (optional)</span>
-              <input type="tel" name="phone" autocomplete="tel" />
-            </label>
-            <label class="field">
-              <span>Date needed</span>
-              <input type="date" name="date" required />
-            </label>
-          </div>
-
-          <label class="field">
-            <span>Who are we celebrating?</span>
-            <input type="text" name="person_name" placeholder="Emma, my husband, just me" required />
-          </label>
-
-          <label class="field">
-            <span>Occasion</span>
-            <select name="occasion_type" required>
-              <option value="" disabled selected>Choose an occasion</option>
-              <option>Birthday</option>
-              <option>Wedding</option>
-              <option>Anniversary</option>
-              <option>Baby Shower</option>
-              <option>Graduation</option>
-              <option>Just Because</option>
-              <option>Other</option>
-            </select>
-          </label>
-
-          <label class="field">
-            <span>Your idea</span>
-            <textarea name="message" rows="4" placeholder="Flavours you love, number of people, colours, sizes, anything you have in mind"></textarea>
-          </label>
-
-          <label class="field">
-            <span>Inspiration photo (optional)</span>
-            <div class="filefield">
-              <input type="file" name="reference" id="refImage" accept="image/*" />
-              <span class="filefield__btn" data-cursor="link">Choose an image</span>
-              <span class="filefield__name" id="refName">Show me a cake you love and I will recreate the feeling of it</span>
-            </div>
-            <div class="filepreview" id="refPreview" hidden>
-              <img alt="Preview of your inspiration cake" />
-              <button type="button" class="filepreview__clear" id="refClear" aria-label="Remove image" data-cursor="link">&times;</button>
-            </div>
-          </label>
-
-          <div class="consent">
-            <label class="consent__row">
-              <input type="checkbox" name="occasion_book" checked />
-              <span>Remember this occasion for me every year. Hazel will reach out before the date so I never have to think about it.</span>
-            </label>
-            <label class="consent__row">
-              <input type="checkbox" name="whatsapp_consent" />
-              <span>Send me WhatsApp reminders too. View our <a href="messaging-terms.html" target="_blank" rel="noopener" data-cursor="link">messaging terms</a>.</span>
-            </label>
-          </div>
-
-          <button type="submit" class="btn btn--solid" data-cursor="link">Send enquiry</button>
-          <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>
-        </form>
+        <div class="ordercard reveal-up" id="orderCard">
+          <span class="ordercard__label">Place an order</span>
+          <h2 class="ordercard__title">Every great cake starts here.</h2>
+          <p class="ordercard__body">Whether it is a birthday, a wedding, or a Tuesday that deserves something special, I would love to hear about it.</p>
+          <p class="ordercard__body">Tell me about your occasion and I will be in touch personally within two days.</p>
+          <button type="button" class="btn btn--solid ordercard__cta" data-enquire data-cursor="link">Start my enquiry</button>
+          <p class="ordercard__note">I read and reply to every message myself.</p>
+        </div>
       </div>
     </section>
   </main>
@@ -212,6 +130,7 @@
         <a href="menu.html" data-cursor="link">Menu</a>
         <a href="work.html" data-cursor="link">My Work</a>
         <a href="story.html" data-cursor="link">Story</a>
+        <a href="occasion-book.html" data-cursor="link">The Occasion Book</a>
         <a href="reviews.html" data-cursor="link">Community</a>
         <a href="contact.html" data-cursor="link">Contact</a>
       </div>
