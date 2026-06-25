@@ -12,18 +12,21 @@ Deno.serve(async (req) => {
   if (!b.phone) return json({ error: "phone is required" }, 400);
 
   const supabase = adminClient();
+  const method = b.contact_method === "whatsapp" ? "WhatsApp" : "Call";
   const detail = [b.name, b.occasion_for && `for ${b.occasion_for}`, b.occasion_type, b.occasion_date]
     .filter(Boolean).join(" · ");
   await notify(
     supabase, "callback_requested",
-    `Callback requested: ${b.phone}${detail ? " (" + detail + ")" : ""}`,
+    `${method} requested: ${b.phone}${detail ? " (" + detail + ")" : ""}`,
     "high", "/customers",
   );
 
   const businessEmail = Deno.env.get("BUSINESS_EMAIL") ?? "hello@hazelscakelounge.co.za";
   await sendToAddress(businessEmail, "callback_request", {
     ...businessVars(),
-    phone: b.phone, name: b.name || "Not given", occasion_for: b.occasion_for || "Not given",
+    phone: b.phone, name: b.name || "Not given", contact_method: method,
+    contact_consent: b.contact_consent ? "Yes" : "Not given",
+    occasion_for: b.occasion_for || "Not given",
     occasion_type: b.occasion_type || "Not given", occasion_date: b.occasion_date || "Not given",
   }, supabase);
 
