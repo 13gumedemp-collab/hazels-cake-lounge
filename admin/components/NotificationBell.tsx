@@ -10,7 +10,7 @@ export default function NotificationBell() {
 
   const load = useCallback(async () => {
     try {
-      const r = await fetch("/api/notifications", { cache: "no-store" });
+      const r = await fetch(`/api/notifications?ts=${Date.now()}`, { cache: "no-store" });
       if (r.ok) setNotes((await r.json()).notifications || []);
     } catch {}
   }, []);
