@@ -188,10 +188,6 @@ section { position: relative; }
   color: var(--cream); border-color: rgba(244,236,221,0.55); }
 .btn--ghost::before { background: var(--cream); }
 .btn--ghost:hover { border-color: var(--cream); }
-/* Solid: a genuinely filled gold button with dark text in every state */
-.btn--solid { background: var(--gold-grad); color: #0b0a08; border-color: transparent; }
-.btn--solid::before { display: none; }
-.btn--solid:hover, .btn--solid.btn--fill { color: #0b0a08; }
 /* Touch devices have no real hover: fill fully on tap and keep it filled */
 @media (hover: none) {
   .btn::before { transition: height 0.32s var(--ease); }
