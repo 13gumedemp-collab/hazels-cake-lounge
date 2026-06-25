@@ -7,20 +7,17 @@ export default function ServiceWorker() {
   useEffect(() => {
     (async () => {
       try {
+        if ("serviceWorker" in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+        }
         if ("caches" in window) {
           const keys = await caches.keys();
           await Promise.all(keys.map((k) => caches.delete(k)));
         }
-        if ("serviceWorker" in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map((r) => r.unregister()));
-          // If an old worker was still controlling this tab, one reload frees it.
-          if (navigator.serviceWorker.controller && !sessionStorage.getItem("hcl_sw_off")) {
-            sessionStorage.setItem("hcl_sw_off", "1");
-            window.location.reload();
-          }
-        }
       } catch {}
+      // No reload here: data is read live from the server, so there is nothing
+      // to refresh, and a reload would fight a still-active worker (popups/loops).
     })();
   }, []);
   return null;
