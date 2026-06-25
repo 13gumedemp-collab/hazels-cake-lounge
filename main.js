@@ -316,19 +316,106 @@
     refClear?.addEventListener('click', resetRef);
   }
 
-  form?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form));
-    if (!data.name || !data.email) {
-      status.textContent = 'Please add your name and email so we can reply.';
-      return;
-    }
-    const first = data.name.trim().split(' ')[0];
-    const what = data.product ? ` about your ${data.product.toLowerCase()}` : '';
-    status.textContent = `Thank you ${first}, your enquiry${what} is with us. We will reply within two days.`;
-    form.reset();
-    select?.classList.remove('is-set');
-  });
+  // Supabase project (anon key is public by design; data is protected by RLS).
+  const SUPABASE_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnenBveXlpamFmYmx6Zml5aG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODk3MzIsImV4cCI6MjA5Nzk2NTczMn0.g-INXAO6kNGwN750J5rreKlroMFFro7Bl9uJXcr-vug';
+
+  if (form) {
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+    const fieldOf = (name) => form.querySelector(`[name="${name}"]`);
+    const clearErrors = () => {
+      $$('.field__error', form).forEach((e) => e.remove());
+      $$('.has-error', form).forEach((e) => e.classList.remove('has-error'));
+      if (status) status.textContent = '';
+    };
+    const showError = (name, msg) => {
+      const el = fieldOf(name);
+      const box = el ? (el.closest('.field') || el.closest('.consent__row')) : null;
+      if (!box) return;
+      let err = box.querySelector('.field__error');
+      if (!err) { err = document.createElement('p'); err.className = 'field__error'; box.appendChild(err); }
+      err.textContent = msg;
+      box.classList.add('has-error');
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+      const data = Object.fromEntries(new FormData(form));
+      const required = [
+        ['name', 'Please tell me your name.'],
+        ['email', 'I will need your email so I can reply.'],
+        ['person_name', 'Let me know who we are celebrating.'],
+        ['occasion_type', 'Please choose the occasion.'],
+        ['date', 'Please pick the date you need it for.'],
+      ];
+      let firstBad = null;
+      required.forEach(([f, msg]) => {
+        if (!String(data[f] || '').trim()) { showError(f, msg); firstBad = firstBad || f; }
+      });
+      if (data.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) {
+        showError('email', 'That email looks a little off, could you check it?');
+        firstBad = firstBad || 'email';
+      }
+      if (firstBad) { fieldOf(firstBad)?.focus({ preventScroll: false }); return; }
+
+      const ideaParts = [];
+      if (data.product) ideaParts.push('Bake: ' + data.product);
+      if (data.message) ideaParts.push(String(data.message).trim());
+      const notes = ideaParts.join('\n');
+
+      const payload = {
+        source: 'enquiry',
+        customer: {
+          full_name: data.name.trim(),
+          email: data.email.trim().toLowerCase(),
+          whatsapp_number: String(data.phone || '').trim(),
+        },
+        consent: { email_consent: true, whatsapp_consent: !!data.whatsapp_consent },
+        occasions: [{
+          person_name: data.person_name.trim(),
+          occasion_type: data.occasion_type,
+          occasion_date: data.date,
+          recurring_yearly: !!data.occasion_book,
+          notes,
+        }],
+        order: { cake_description: notes, occasion_date: data.date },
+      };
+
+      const btn = form.querySelector('button[type="submit"]');
+      const label = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/occasion-registration', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify(payload),
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || out.status !== 'success') throw new Error(out.error || 'Request failed');
+
+        form.innerHTML =
+          '<div class="form-success">' +
+          '<h3>You are all set, ' + esc(out.first_name || data.name.trim().split(' ')[0]) + '.</h3>' +
+          '<p>I have received your enquiry and will be in touch personally within two days. ' +
+          'I have also added ' + esc(out.person_name || data.person_name.trim()) +
+          "'s " + esc(out.occasion_type || data.occasion_type) + ' to my Occasion Book.</p>' +
+          '</div>';
+        form.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+      } catch (err) {
+        if (btn) { btn.disabled = false; btn.textContent = label; }
+        if (status) status.textContent =
+          'Something went wrong on my side. Please try again, or email me directly at hello@hazelscakelounge.co.za.';
+      }
+    });
+  }
 
   /* ---- Liquid buttons: guarantee the fill completes on tap ----
      Touch has no reliable hover/focus, and link buttons navigate before the

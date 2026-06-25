@@ -1,0 +1,8 @@
+project_id = "qgzpoyyijafblzfiyhoc"
+
+# Public function — called from the website with the anon key, so no JWT gate.
+[functions.occasion-registration]
+verify_jwt = false
+
+# Internal functions are invoked server-side (cron / admin) with the service
+# role key, which is a valid JWT, so the default verify_jwt = true is fine.

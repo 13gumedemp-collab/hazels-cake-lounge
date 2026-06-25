@@ -141,13 +141,27 @@
             </label>
             <label class="field">
               <span>Date needed</span>
-              <input type="date" name="date" />
+              <input type="date" name="date" required />
             </label>
           </div>
 
           <label class="field">
+            <span>Who are we celebrating?</span>
+            <input type="text" name="person_name" placeholder="Emma, my husband, just me" required />
+          </label>
+
+          <label class="field">
             <span>Occasion</span>
-            <input type="text" name="occasion" placeholder="Birthday, wedding, just because" />
+            <select name="occasion_type" required>
+              <option value="" disabled selected>Choose an occasion</option>
+              <option>Birthday</option>
+              <option>Wedding</option>
+              <option>Anniversary</option>
+              <option>Baby Shower</option>
+              <option>Graduation</option>
+              <option>Just Because</option>
+              <option>Other</option>
+            </select>
           </label>
 
           <label class="field">
@@ -167,6 +181,17 @@
               <button type="button" class="filepreview__clear" id="refClear" aria-label="Remove image" data-cursor="link">&times;</button>
             </div>
           </label>
+
+          <div class="consent">
+            <label class="consent__row">
+              <input type="checkbox" name="occasion_book" checked />
+              <span>Remember this occasion for me every year. Hazel will reach out before the date so I never have to think about it.</span>
+            </label>
+            <label class="consent__row">
+              <input type="checkbox" name="whatsapp_consent" />
+              <span>Send me WhatsApp reminders too. View our <a href="messaging-terms.html" target="_blank" rel="noopener" data-cursor="link">messaging terms</a>.</span>
+            </label>
+          </div>
 
           <button type="submit" class="btn btn--solid" data-cursor="link">Send enquiry</button>
           <p class="form__status" id="formStatus" role="status" aria-live="polite"></p>

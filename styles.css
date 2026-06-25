@@ -461,6 +461,38 @@ section { position: relative; }
 @media (max-width: 600px) { .form__row { grid-template-columns: 1fr; } }
 .field input[type="date"] { color-scheme: dark; }
 
+/* Consent checkboxes */
+.consent { display: flex; flex-direction: column; gap: 0.75rem; margin: 0.5rem 0 0.2rem; }
+.consent__row { display: flex; gap: 0.65rem; align-items: flex-start; cursor: pointer; }
+.consent__row input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; flex: 0 0 auto; margin-top: 0.1rem;
+  width: 1.05rem; height: 1.05rem; border: 1px solid rgba(201,168,76,0.55);
+  border-radius: 3px; background: transparent; cursor: pointer; position: relative;
+  transition: background 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.consent__row input[type="checkbox"]:checked { background: var(--gold); border-color: var(--gold); }
+.consent__row input[type="checkbox"]:checked::after {
+  content: ''; position: absolute; left: 0.32rem; top: 0.12rem;
+  width: 0.28rem; height: 0.55rem; border: solid #0b0a08; border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.consent__row input[type="checkbox"]:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+.consent__row span { font-family: 'Jost', sans-serif; font-size: 0.74rem; line-height: 1.5;
+  letter-spacing: 0.04em; color: var(--gold); }
+.consent__row a { color: var(--gold-bright); text-decoration: underline; text-underline-offset: 2px; }
+
+/* Inline field errors + success state */
+.field__error { font-family: 'Jost', sans-serif; font-size: 0.72rem; letter-spacing: 0.02em;
+  color: #e7a17a; margin: 0.4rem 0 0; }
+.field.has-error input, .field.has-error textarea, .field.has-error select,
+.field.has-error .cselect__trigger { border-color: #e7a17a; }
+.consent__row.has-error span { color: #e7a17a; }
+.form-success { padding: clamp(1.5rem, 5vh, 3rem) 0; }
+.form-success h3 { font-family: 'Fraunces', serif; font-weight: 500;
+  font-size: clamp(1.6rem, 4vw, 2.4rem); color: var(--cream); margin: 0 0 0.8rem; }
+.form-success p { font-family: 'Jost', sans-serif; color: var(--cream-soft);
+  line-height: 1.7; max-width: 46ch; }
+
 /* Story portrait */
 .story-portrait { width: min(420px, 80vw); margin: clamp(0.5rem, 3vh, 2rem) auto clamp(1rem, 4vh, 2.5rem);
   position: relative; overflow: hidden; border-radius: 4px; border: 1px solid var(--line-soft); }

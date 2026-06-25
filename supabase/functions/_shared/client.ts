@@ -34,17 +34,39 @@ export async function notify(
   await supabase.from("notifications").insert({ type, message });
 }
 
-// Replace {{key}} tokens in a string from a flat variables object.
-// Any token with no matching value is removed.
+// Render a template string against a flat variables object.
+// Supports {{#if key}}...{{/if}} conditional blocks (kept when the value is
+// truthy) and {{key}} substitution. Unknown tokens render as empty strings.
 export function fillTemplate(
   text: string | null,
   vars: Record<string, unknown>,
 ): string {
   if (!text) return "";
-  return text.replace(/\{\{\s*([\w]+)\s*\}\}/g, (_m, key) => {
+  // Conditional blocks first (handles nesting-free {{#if}} ... {{/if}}).
+  let out = text.replace(
+    /\{\{#if\s+([\w]+)\s*\}\}([\s\S]*?)\{\{\/if\}\}/g,
+    (_m, key, inner) => (vars[key] ? inner : ""),
+  );
+  // Simple substitution.
+  out = out.replace(/\{\{\s*([\w]+)\s*\}\}/g, (_m, key) => {
     const v = vars[key];
     return v === undefined || v === null ? "" : String(v);
   });
+  // Tidy excess blank lines left by removed blocks.
+  return out.replace(/\n{3,}/g, "\n\n");
+}
+
+// Business constants available to every template (overridable by caller vars).
+export function businessVars(): Record<string, string> {
+  const site = Deno.env.get("SITE_URL") ?? "https://hazelscakelounge.co.za";
+  return {
+    business_name: Deno.env.get("RESEND_FROM_NAME") ?? "Hazel's Cake Lounge",
+    business_email: Deno.env.get("BUSINESS_EMAIL") ?? "hello@hazelscakelounge.co.za",
+    business_phone: Deno.env.get("BUSINESS_PHONE") ?? "073 373 4234",
+    admin_dashboard_url: Deno.env.get("ADMIN_DASHBOARD_URL") ??
+      "https://admin.hazelscakelounge.co.za",
+    enquiry_url: Deno.env.get("ENQUIRY_URL") ?? `${site}/contact.html`,
+  };
 }
 
 // first_name helper derived from a full name.
