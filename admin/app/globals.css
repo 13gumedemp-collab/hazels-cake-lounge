@@ -24,3 +24,34 @@ h1, h2, h3, .font-serif { font-family: var(--font-fraunces), Georgia, serif; }
 /* Shared cinematic entrance */
 @keyframes riseIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 .rise { animation: riseIn 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* Cinematic stacking notification list */
+.nlist { position: relative; }
+.nlist__card {
+  display: flex; gap: 0.5rem; align-items: flex-start;
+  border: 1px solid rgba(201,168,76,0.22); background: #14110d;
+  border-radius: 14px; padding: 0.8rem 0.9rem;
+  transition: transform 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease, margin 0.55s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease;
+  will-change: transform, opacity;
+}
+/* Stacked: cards overlap with depth, newest on top, the deck invites a click. */
+.nlist--stack { cursor: pointer; min-height: 96px; }
+.nlist--stack .nlist__card {
+  position: absolute; left: 0; right: 0; top: 0;
+  transform: translateY(calc(var(--i) * 12px)) scale(calc(1 - var(--i) * 0.05));
+  opacity: calc(1 - var(--i) * 0.22);
+}
+.nlist--stack:hover .nlist__card {
+  transform: translateY(calc(var(--i) * 16px)) scale(calc(1 - var(--i) * 0.04));
+  box-shadow: 0 10px 30px -18px rgba(0,0,0,0.8);
+}
+/* Open: cards fall into a clean, staggered column. */
+.nlist--open .nlist__card {
+  position: relative; opacity: 1; transform: none;
+  margin-bottom: 0.6rem; animation: nlistIn 0.55s cubic-bezier(0.16,1,0.3,1) both;
+}
+.nlist--open .nlist__card:last-child { margin-bottom: 0; }
+@keyframes nlistIn { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .nlist__card { transition: none; animation: none !important; }
+}

@@ -13,6 +13,8 @@ export default defineConfig({
         contact: 'contact.html',
         occasionbook: 'occasion-book.html',
         messagingterms: 'messaging-terms.html',
+        terms: 'terms.html',
+        privacy: 'privacy.html',
       },
     },
   },
