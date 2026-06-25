@@ -1,30 +1,23 @@
 "use client";
 import { useEffect } from "react";
 
-// The Command Centre is a live data app: a service worker cache only causes
-// stale orders/notifications. Unregister any previously installed worker and
-// clear its caches so the dashboard always shows fresh data.
+// Register the network-first worker (sw.js) which never caches APIs or page
+// data. It uses skipWaiting + clients.claim, so it takes over any tab still
+// held by an older, over-caching worker. One reload on takeover gives fresh data.
 export default function ServiceWorker() {
   useEffect(() => {
-    const hadController = "serviceWorker" in navigator && !!navigator.serviceWorker.controller;
-    const cleanup = async () => {
-      try {
-        if ("serviceWorker" in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map((r) => r.unregister()));
-        }
-        if ("caches" in window) {
-          const keys = await caches.keys();
-          await Promise.all(keys.map((k) => caches.delete(k)));
-        }
-      } catch {}
-      // If an old worker was serving this page, one reload gets truly fresh data.
-      if (hadController && !sessionStorage.getItem("hcl_sw_cleared")) {
-        sessionStorage.setItem("hcl_sw_cleared", "1");
+    if (!("serviceWorker" in navigator)) return;
+    // Clear any stale caches left by older worker versions.
+    if ("caches" in window) {
+      caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+    }
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!sessionStorage.getItem("hcl_sw_reloaded")) {
+        sessionStorage.setItem("hcl_sw_reloaded", "1");
         window.location.reload();
       }
-    };
-    cleanup();
+    });
   }, []);
   return null;
 }
