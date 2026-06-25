@@ -635,8 +635,8 @@ section { position: relative; }
 .info__title { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 1.4rem; }
 .info__row { padding: 1rem 0; border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 0.3rem; }
 .info__label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
-.info__row a { color: var(--cream); transition: color 0.3s var(--ease); }
-.info__row a:hover { color: var(--gold-bright); }
+.info__row a:not(.btn) { color: var(--cream); transition: color 0.3s var(--ease); }
+.info__row a:not(.btn):hover { color: var(--gold-bright); }
 .info__row p { color: var(--cream-soft); font-size: 0.95rem; }
 .info__hint { font-size: 0.74rem; color: var(--muted); }
 .socials { display: flex; gap: 0.8rem; margin-top: 0.5rem; }
