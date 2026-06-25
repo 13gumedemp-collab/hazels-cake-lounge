@@ -23,7 +23,7 @@
     <nav class="nav__links" id="navLinks">
       <a href="menu.html" data-cursor="link">Menu</a>
       <a href="work.html" data-cursor="link">My Work</a>
-      <a href="story.html" data-cursor="link">Story</a>
+      <a href="story.html" data-cursor="link">My Story</a>
       <a href="occasion-book.html" class="is-active" data-cursor="link">The Occasion Book</a>
       <a href="reviews.html" data-cursor="link">Community</a>
       <a href="contact.html" data-cursor="link">Contact</a>
@@ -42,40 +42,46 @@
       <span class="hero-rule reveal-up"></span>
     </section>
 
-    <!-- What to expect -->
-    <section class="expect">
-      <div class="expect__col reveal-up">
-        <svg class="expect__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="8" y="12" width="32" height="28" rx="2"/><path d="M8 20h32M16 8v8M32 8v8"/></svg>
-        <h3>One month before</h3>
-        <p>I reach out personally with plenty of time to plan something special.</p>
+    <!-- How I remember: a quiet, looping sequence -->
+    <section class="seq reveal-up" aria-label="How I reach out before each occasion">
+      <p class="seq__eyebrow">How I reach out</p>
+      <div class="seq__track">
+        <span class="seq__line"></span>
+        <span class="seq__line seq__line--lit"></span>
+        <div class="seq__step" style="--i:0">
+          <span class="seq__dot"></span>
+          <span class="seq__when">One month before</span>
+          <span class="seq__note">A first, gentle word so there is time to plan.</span>
+        </div>
+        <div class="seq__step" style="--i:1">
+          <span class="seq__dot"></span>
+          <span class="seq__when">Two weeks before</span>
+          <span class="seq__note">A quiet check in so the details can settle.</span>
+        </div>
+        <div class="seq__step" style="--i:2">
+          <span class="seq__dot"></span>
+          <span class="seq__when">One week before</span>
+          <span class="seq__note">A final reminder, and the cake is taken care of.</span>
+        </div>
       </div>
-      <div class="expect__col reveal-up">
-        <svg class="expect__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="24" cy="24" r="16"/><path d="M24 14v10l7 4"/></svg>
-        <h3>One week before</h3>
-        <p>A warm reminder so nothing sneaks up on you at the last moment.</p>
-      </div>
-      <div class="expect__col reveal-up">
-        <svg class="expect__icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="24" cy="24" r="15"/></svg>
-        <h3>Every year, automatically</h3>
-        <p>Once you are in the book I remember for you. Every single year, without you having to do a thing.</p>
-      </div>
+      <p class="seq__foot">Then every year, automatically. You never have to remember.</p>
     </section>
 
     <!-- Add another occasion -->
     <section class="contactwrap">
       <aside class="info reveal-up">
-        <h2 class="info__title">Add the people who matter.</h2>
+        <h2 class="info__title">Who is the cake for?</h2>
+        <div class="info__row">
+          <span class="info__label">What this does</span>
+          <p>Fill in the people and dates you never want to miss. I save each one in my Occasion Book and reach out before the day arrives, so the cake is sorted long before you would have remembered to ask. You are not ordering anything right now. You are simply making sure I remember for you.</p>
+        </div>
         <div class="info__row">
           <span class="info__label">Everyone is welcome</span>
-          <p>You do not need to have ordered before, and you do not need to be ordering today. Add the occasions you care about and I will keep them in my book, reaching out before each one so nothing is ever forgotten.</p>
+          <p>You do not need to have ordered before, and you do not need to be ordering today. Add the occasions you care about and I will keep them safe.</p>
         </div>
         <div class="info__row">
-          <span class="info__label">Add as many as you like</span>
-          <p>A birthday, an anniversary, a wedding, a just because. Add one person or your whole circle in one go.</p>
-        </div>
-        <div class="info__row">
-          <span class="info__label">Ready to order now?</span>
-          <a href="contact.html" class="btn" data-enquire data-cursor="link">Start an enquiry</a>
+          <span class="info__label">Yearly or one off</span>
+          <p>Birthdays and anniversaries I remember every single year. One off occasions like a wedding or a graduation I will not repeat, but you can still use this page to plan one for a date down the line. Add one person or your whole circle in one go.</p>
         </div>
       </aside>
 
@@ -105,10 +111,6 @@
       <div class="occ-block">
         <span class="occ-block__line"></span>
         <label class="field">
-          <span>Who would you like to add?</span>
-          <input type="text" class="occ-person" placeholder="Natalia, my husband, my daughter" />
-        </label>
-        <label class="field">
           <span>Relationship to you</span>
           <select class="occ-rel">
             <option value="" disabled selected>Choose one</option>
@@ -116,6 +118,10 @@
             <option>My sibling</option><option>My friend</option><option>My colleague</option>
             <option>Myself</option><option>Other</option>
           </select>
+        </label>
+        <label class="field occ-name">
+          <span>What is the name of the person? <em class="field__opt">(optional)</em></span>
+          <input type="text" class="occ-person" placeholder="Natalia" />
         </label>
         <label class="field">
           <span>Occasion type</span>
@@ -125,6 +131,11 @@
             <option>Baby Shower</option><option>Graduation</option><option>Just Because</option><option>Other</option>
           </select>
         </label>
+        <label class="field occ-other" hidden>
+          <span>Tell me the occasion</span>
+          <input type="text" class="occ-other-input" placeholder="A retirement, a christening, a special dinner" />
+        </label>
+        <p class="occ-hint" hidden></p>
         <label class="field">
           <span>Date</span>
           <input type="date" class="occ-date" />
@@ -148,7 +159,7 @@
         <span class="footer__label">Explore</span>
         <a href="menu.html" data-cursor="link">Menu</a>
         <a href="work.html" data-cursor="link">My Work</a>
-        <a href="story.html" data-cursor="link">Story</a>
+        <a href="story.html" data-cursor="link">My Story</a>
         <a href="occasion-book.html" data-cursor="link">The Occasion Book</a>
         <a href="reviews.html" data-cursor="link">Community</a>
         <a href="contact.html" data-cursor="link">Contact</a>
@@ -161,7 +172,10 @@
     </div>
     <div class="footer__base">
       <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
-      <span>Cakes &middot; Cupcakes &middot; Bakes &middot; Treats</span>
+      <nav class="footer__legal">
+        <a href="messaging-terms.html" data-cursor="link">Terms &amp; conditions</a>
+        <a href="messaging-terms.html#privacy" data-cursor="link">Privacy policy</a>
+      </nav>
     </div>
   </footer>
   <script type="module" src="main.js"></script>

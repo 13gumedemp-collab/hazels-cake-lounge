@@ -21,18 +21,57 @@ function occasionRules(type: string): { recurring_yearly: boolean; is_one_time: 
   }
 }
 
+// Turns "My child" etc. into "your child" for natural possessive phrasing.
+function relationshipPossessive(rel: string): string {
+  return ({
+    "My child": "your child",
+    "My partner or spouse": "your partner",
+    "My parent": "your parent",
+    "My sibling": "your sibling",
+    "My friend": "your friend",
+    "My colleague": "your colleague",
+  } as Record<string, string>)[rel] || "";
+}
+
+// Builds the natural-language celebration phrase, the stored person name, and a
+// Hazel-facing variant. Examples:
+//   Myself  -> "your Birthday"        (stored: their own name)
+//   name    -> "Natalia's Birthday"
+//   rel only-> "your daughter's Birthday"
+function buildLabels(opts: { name: string; rel: string; occLabel: string; customerName: string }) {
+  const { name, rel, occLabel, customerName } = opts;
+  let celebration_label: string;
+  let person_name: string;
+  if (rel === "Myself") {
+    celebration_label = `your ${occLabel}`;
+    person_name = name || customerName;
+  } else if (name) {
+    celebration_label = `${name}'s ${occLabel}`;
+    person_name = name;
+  } else {
+    const poss = relationshipPossessive(rel);
+    celebration_label = poss ? `${poss}'s ${occLabel}` : `the ${occLabel}`;
+    person_name = rel ? rel.replace(/^My /, "") : "Someone special";
+  }
+  // Hazel-facing copy reads "their" instead of "your".
+  const celebration_label_their = celebration_label.replace(/^your\b/, "their").replace(/\byour /g, "their ");
+  return { celebration_label, celebration_label_their, person_name };
+}
+
 interface Payload {
   full_name: string;
   email: string;
   whatsapp_number?: string;
-  occasion_for: string;
+  occasion_for?: string;
   relationship_to_customer?: string;
   occasion_type: string;
+  occasion_other?: string;
   occasion_date: string;
   cake_description?: string;
   number_of_people?: string;
   colours_and_themes?: string;
   inspiration_photo_url?: string;
+  inspiration_photo_urls?: string[];
   email_consent?: boolean;
   whatsapp_consent?: boolean;
   occasion_book_opted_in?: boolean;
@@ -43,12 +82,16 @@ Deno.serve(async (req) => {
   let p: Payload;
   try { p = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
 
-  if (!p.full_name || !p.email || !p.occasion_for || !p.occasion_type || !p.occasion_date) {
+  if (!p.full_name || !p.email || !p.occasion_type || !p.occasion_date) {
     return json({ error: "Missing required fields" }, 400);
   }
   const supabase = adminClient();
   const emailConsent = p.email_consent ?? true;
   const whatsappConsent = p.whatsapp_consent ?? false;
+  // "Other" occasions carry a free-text label; everything else uses the type.
+  const occLabel = (p.occasion_type === "Other" && (p.occasion_other || "").trim())
+    ? (p.occasion_other || "").trim()
+    : p.occasion_type;
 
   // (a) upsert customer
   const { data: customer, error: cErr } = await supabase
@@ -65,15 +108,21 @@ Deno.serve(async (req) => {
     .single();
   if (cErr || !customer) return json({ error: `Customer save failed: ${cErr?.message}` }, 500);
 
-  // (b+c) circle_member with rules
+  // (b+c) circle_member with rules + natural-language labels
   const rules = occasionRules(p.occasion_type);
+  const labels = buildLabels({
+    name: (p.occasion_for || "").trim(),
+    rel: p.relationship_to_customer || "",
+    occLabel,
+    customerName: customer.full_name,
+  });
   const { data: member, error: mErr } = await supabase
     .from("circle_members")
     .insert({
       customer_id: customer.id,
-      person_name: p.occasion_for,
+      person_name: labels.person_name,
       relationship_to_customer: p.relationship_to_customer || null,
-      occasion_type: p.occasion_type,
+      occasion_type: occLabel,
       occasion_date: p.occasion_date,
       recurring_yearly: p.occasion_book_opted_in === false ? false : rules.recurring_yearly,
       is_one_time: rules.is_one_time,
@@ -90,7 +139,9 @@ Deno.serve(async (req) => {
       customer_id: customer.id,
       circle_member_id: member.id,
       cake_description: p.cake_description || null,
-      inspiration_photo_url: p.inspiration_photo_url || null,
+      inspiration_photo_url: (Array.isArray(p.inspiration_photo_urls) && p.inspiration_photo_urls.length)
+        ? p.inspiration_photo_urls.join(",")
+        : (p.inspiration_photo_url || null),
       number_of_people: p.number_of_people || null,
       colours_and_themes: p.colours_and_themes || null,
       order_date: new Date().toISOString().slice(0, 10),
@@ -103,7 +154,7 @@ Deno.serve(async (req) => {
   // (e) notification (high / gold)
   await notify(
     supabase, "new_enquiry",
-    `New enquiry from ${customer.full_name} for ${member.person_name}'s ${member.occasion_type} on ${member.occasion_date}.`,
+    `New enquiry from ${customer.full_name} for ${labels.celebration_label_their} on ${member.occasion_date}.`,
     "high", "/orders",
   );
 
@@ -114,6 +165,8 @@ Deno.serve(async (req) => {
     customer_email: customer.email,
     customer_phone: customer.whatsapp_number ?? "",
     person_name: member.person_name,
+    celebration_label: labels.celebration_label,
+    celebration_label_their: labels.celebration_label_their,
     relationship: p.relationship_to_customer ?? "",
     occasion_type: member.occasion_type,
     occasion_date: member.occasion_date,
@@ -140,6 +193,8 @@ Deno.serve(async (req) => {
     order_id: order?.id ?? null,
     first_name: firstName(customer.full_name),
     person_name: member.person_name,
+    celebration_label: labels.celebration_label,
+    occasion_label: occLabel,
     occasion_type: member.occasion_type,
     occasion_date: member.occasion_date,
     occasion_book_opted_in: member.recurring_yearly,

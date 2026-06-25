@@ -448,9 +448,10 @@
             <span class="enq__label">Step 1 of 4 &mdash; The Celebration</span>
             <h2 class="enq__title">Tell me about the occasion.</h2>
             <p class="enq__sub">I want to make sure every detail is exactly right.</p>
-            <label class="field"><span>Who are we celebrating?</span><input type="text" name="occasion_for" placeholder="Myself, my husband, my daughter" /></label>
             <label class="field"><span>What is your relationship to them?</span><select name="relationship">${opt(REL_OPTS)}</select></label>
+            <label class="field" data-name-field><span>What is the name of the person? <em class="field__opt">(optional)</em></span><input type="text" name="occasion_for" placeholder="Natalia" /></label>
             <label class="field"><span>What is the occasion?</span><select name="occasion_type">${opt(OCC_OPTS)}</select></label>
+            <label class="field" data-occ-other hidden><span>Tell me the occasion</span><input type="text" name="occasion_other" placeholder="A retirement, a christening, a special dinner" /></label>
             <p class="enq__hint" data-hint="occasion" hidden></p>
             <label class="field"><span data-datelabel>When is the date?</span><input type="date" name="occasion_date" /></label>
             <div class="enq__nav"><span></span><button type="button" class="btn btn--solid enq__next" data-cursor="link">Next</button></div>
@@ -462,13 +463,13 @@
             <label class="field"><span>Flavours you love</span><textarea name="flavours" rows="2" placeholder="Lemon and raspberry, vanilla bean, dark chocolate. Anything you love, tell me."></textarea></label>
             <label class="field"><span>How many people</span><input type="text" name="number_of_people" placeholder="Around 20, just the two of us, a table of 50" /></label>
             <label class="field"><span>Colours, themes, or ideas</span><textarea name="colours_and_themes" rows="2" placeholder="Soft florals, something minimal, dusty pink and gold"></textarea></label>
-            <div class="field"><span class="field__lbl">Show me a cake you love (optional)</span>
+            <div class="field"><span class="field__lbl">Show me cakes you love (optional)</span>
               <div class="enq__drop" id="enqDrop" data-cursor="link">
-                <input type="file" id="enqFile" accept="image/jpeg,image/png,image/webp" hidden />
-                <div class="enq__drop-empty"><p>Drop an image here or click to browse</p><small>Show me a cake you love and I will recreate the feeling of it.</small></div>
-                <div class="enq__drop-preview" hidden><img alt="Your inspiration" /><button type="button" class="enq__drop-x" aria-label="Remove" data-cursor="link">&times;</button></div>
-                <div class="enq__drop-status" hidden></div>
+                <input type="file" id="enqFile" accept="image/*" multiple hidden />
+                <div class="enq__drop-empty"><p>Drag images here, or click to browse</p><small>Add as many as you like. I will recreate the feeling of them.</small></div>
               </div>
+              <div class="enq__thumbs" id="enqThumbs"></div>
+              <div class="enq__drop-status" hidden></div>
             </div>
             <div class="enq__nav"><button type="button" class="enq__back" data-cursor="link">Back</button><button type="button" class="btn btn--solid enq__next" data-cursor="link">Next</button></div>
           </section>
@@ -497,11 +498,19 @@
         <div class="enq__exit" id="enqExit" hidden>
           <div class="enq__exit-inner">
             <h2 class="enq__title">Before you go.</h2>
-            <p class="enq__sub">Leave your number and I will give you a personal call to help finish your order. No pressure at all.</p>
-            <label class="field"><span>Your phone or WhatsApp</span><input type="tel" id="enqCallNum" placeholder="073 373 4234" /></label>
+            <p class="enq__sub">Leave your number and I will reach out personally to help finish your order. No pressure at all.</p>
+            <div class="field">
+              <span class="field__lbl">How would you like me to reach you?</span>
+              <div class="enq__choice" role="radiogroup" aria-label="How would you like to be contacted?">
+                <label class="enq__choice-opt"><input type="radio" name="contact_method" value="call" checked /><span>A phone call</span></label>
+                <label class="enq__choice-opt"><input type="radio" name="contact_method" value="whatsapp" /><span>A WhatsApp message</span></label>
+              </div>
+            </div>
+            <label class="field"><span>Your phone or WhatsApp number</span><input type="tel" id="enqCallNum" placeholder="073 373 4234" /></label>
+            <label class="consent__row enq__exit-consent"><input type="checkbox" id="enqCallConsent" /><span>I am happy to be contacted by phone or WhatsApp about my order. <a href="messaging-terms.html" target="_blank" rel="noopener" data-cursor="link">View terms</a>.</span></label>
             <div class="enq__nav">
               <button type="button" class="enq__back" id="enqExitClose" data-cursor="link">No thanks, close</button>
-              <button type="button" class="btn btn--solid" id="enqCallMe" data-cursor="link">Ask Hazel to call me</button>
+              <button type="button" class="btn btn--solid" id="enqCallMe" data-cursor="link">Send to Hazel</button>
             </div>
             <p class="enq__exit-status" id="enqExitStatus" role="status" aria-live="polite"></p>
           </div>
@@ -558,8 +567,9 @@
       clearErr(step);
       let ok = true;
       if (step === 0) {
-        if (!val('occasion_for')) { showErr('occasion_for', 'Let me know who we are celebrating.'); ok = false; }
+        if (!val('relationship')) { showErr('relationship', 'Please choose your relationship.'); ok = false; }
         if (!val('occasion_type')) { showErr('occasion_type', 'Please choose the occasion.'); ok = false; }
+        if (val('occasion_type') === 'Other' && !val('occasion_other')) { showErr('occasion_other', 'Tell me the occasion so I get it right.'); ok = false; }
         const dv = val('occasion_date');
         if (!dv) { showErr('occasion_date', 'Please pick the date.'); ok = false; }
         else if (dv < minDate()) { showErr('occasion_date', 'I need at least 3 days notice to bake. Please choose a later date.'); ok = false; }
@@ -575,11 +585,18 @@
     // Conditional hints on occasion type / Just Because.
     const applyConditionals = () => {
       const occ = val('occasion_type');
+      const rel = val('relationship');
       const hint = $('[data-hint="occasion"]', overlay);
       const dateLabel = $('[data-datelabel]', overlay);
       const bookLabel = $('[data-book-label]', overlay);
+      const otherField = $('[data-occ-other]', overlay);
+      const nameField = $('[data-name-field]', overlay);
+      // Free-text occasion when "Other" is chosen.
+      if (otherField) otherField.hidden = occ !== 'Other';
+      // No name needed when the cake is for the customer themselves.
+      if (nameField) nameField.hidden = rel === 'Myself';
       if (ONE_OFF.includes(occ)) {
-        hint.textContent = 'This is a once off celebration. I will still follow up after the day and keep you in my memory for the future.';
+        hint.textContent = 'This is a once off occasion, so I will not remember it every year. I will still follow up after the day, and you are always welcome to plan future dates here too.';
         hint.hidden = false;
         if (bookLabel) bookLabel.textContent = 'Keep me in your Occasion Book for future celebrations.';
       } else if (occ === 'Just Because') {
@@ -593,7 +610,7 @@
         if (bookLabel) bookLabel.textContent = 'Remember this occasion for me every year.';
       }
     };
-    overlay.addEventListener('change', (e) => { if (e.target.name === 'occasion_type') applyConditionals(); });
+    overlay.addEventListener('change', (e) => { if (e.target.name === 'occasion_type' || e.target.name === 'relationship') applyConditionals(); });
 
     const started = () => !submitted && !!(val('occasion_for') || val('occasion_type') || val('occasion_date') || val('full_name') || val('email'));
 
@@ -628,16 +645,21 @@
     $('#enqCallMe', overlay).addEventListener('click', async () => {
       const numEl = $('#enqCallNum', overlay);
       const statusEl = $('#enqExitStatus', overlay);
+      const consentEl = $('#enqCallConsent', overlay);
+      const methodEl = $('input[name="contact_method"]:checked', overlay);
+      const method = methodEl ? methodEl.value : 'call';
       const phone = numEl.value.trim();
-      if (!phone) { statusEl.textContent = 'Pop your number in and I will call you.'; numEl.focus(); return; }
+      if (!phone) { statusEl.textContent = 'Pop your number in and I will be in touch.'; numEl.focus(); return; }
+      if (consentEl && !consentEl.checked) { statusEl.textContent = 'Please tick the box so I know I may contact you.'; return; }
       const btn = $('#enqCallMe', overlay); btn.disabled = true; btn.textContent = 'Sending...';
       try {
         await fetch(SB_URL + '/functions/v1/request-callback', {
           method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
-          body: JSON.stringify({ phone: phone, name: val('full_name'), occasion_for: val('occasion_for'), occasion_type: val('occasion_type'), occasion_date: val('occasion_date') }),
+          body: JSON.stringify({ phone: phone, name: val('full_name'), contact_method: method, contact_consent: true, occasion_for: val('occasion_for'), occasion_type: val('occasion_type'), occasion_date: val('occasion_date') }),
         });
       } catch (e) { /* best effort */ }
-      $('.enq__exit-inner', overlay).innerHTML = '<h2 class="enq__title">Thank you.</h2><p class="enq__sub">I have your number and I will give you a call personally to help finish your order.</p>';
+      const how = method === 'whatsapp' ? 'send you a WhatsApp message' : 'give you a call';
+      $('.enq__exit-inner', overlay).innerHTML = '<h2 class="enq__title">Thank you.</h2><p class="enq__sub">I have your number and I will ' + how + ' personally to help finish your order.</p>';
       submitted = true;
       setTimeout(hardClose, 3500);
     });
@@ -645,43 +667,73 @@
     /* ---- step navigation ---- */
     $$('.enq__next', overlay).forEach((b) => b.addEventListener('click', () => {
       if (!validate(current)) return;
-      if (current === 2 && val('relationship') === 'Myself' && !val('occasion_for')) {
-        const f = $('[name="occasion_for"]', overlay); if (f) f.value = val('full_name');
-      }
       showStep(Math.min(current + 1, 3), 1);
     }));
     $$('.enq__back', overlay).forEach((b) => b.addEventListener('click', () => showStep(Math.max(current - 1, 0), -1)));
 
-    /* ---- inspiration upload ---- */
+    /* ---- inspiration upload (multiple images, drag and drop) ---- */
     const drop = $('#enqDrop', overlay);
     const fileInput = $('#enqFile', overlay);
-    const dropEmpty = $('.enq__drop-empty', overlay);
-    const dropPrev = $('.enq__drop-preview', overlay);
-    const dropImg = $('.enq__drop-preview img', overlay);
     const dropStatus = $('.enq__drop-status', overlay);
-    function resetDrop() { inspirationUrl = ''; if (fileInput) fileInput.value = ''; if (dropPrev) dropPrev.hidden = true; if (dropEmpty) dropEmpty.hidden = false; if (dropStatus) { dropStatus.hidden = true; dropStatus.textContent = ''; } }
-    async function uploadFile(file) {
-      if (!file || !/^image\/(jpeg|png|webp)$/.test(file.type)) return;
-      if (file.size > 10 * 1024 * 1024) { dropStatus.hidden = false; dropStatus.textContent = 'That image is over 10MB, try a smaller one.'; return; }
-      dropEmpty.hidden = true; dropPrev.hidden = false; dropImg.src = URL.createObjectURL(file);
-      dropStatus.hidden = false; dropStatus.textContent = 'Uploading...';
-      const path = 'enq-' + Math.random().toString(36).slice(2) + '-' + file.name.replace(/[^\w.]+/g, '_');
+    const thumbs = $('#enqThumbs', overlay);
+    const inspirationUrls = [];
+    const setStatus = (msg) => { if (!dropStatus) return; if (msg) { dropStatus.hidden = false; dropStatus.textContent = msg; } else { dropStatus.hidden = true; dropStatus.textContent = ''; } };
+    function looksImage(file) {
+      return (file.type && file.type.indexOf('image/') === 0) || /\.(jpe?g|png|webp|heic|heif|gif|avif)$/i.test(file.name || '');
+    }
+    async function uploadOne(file) {
+      if (!file) return;
+      // Accept any image the device offers, including iPhone HEIC (empty MIME).
+      if (!looksImage(file)) { setStatus('One of those was not an image, so I skipped it.'); return; }
+      if (file.size > 15 * 1024 * 1024) { setStatus(file.name + ' is over 15MB, try a smaller one.'); return; }
+      // Build a thumbnail with an uploading state straight away.
+      const thumb = document.createElement('div');
+      thumb.className = 'enq__thumb is-loading';
+      const img = document.createElement('img'); img.alt = 'Your inspiration';
+      try { img.src = URL.createObjectURL(file); } catch (e) {}
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'enq__thumb-x'; x.setAttribute('aria-label', 'Remove'); x.textContent = '×';
+      const spin = document.createElement('span'); spin.className = 'enq__thumb-spin';
+      thumb.appendChild(img); thumb.appendChild(spin); thumb.appendChild(x);
+      thumbs.appendChild(thumb);
+      setStatus('');
+      const safeName = (file.name || 'photo.jpg').replace(/[^\w.]+/g, '_');
+      const path = 'enq-' + Math.random().toString(36).slice(2) + '-' + safeName;
       try {
+        // No x-upsert header: it triggers a CORS preflight that storage rejects.
+        // Paths are random, so upsert is never needed anyway.
         const res = await fetch(SB_URL + '/storage/v1/object/inspiration-photos/' + encodeURIComponent(path), {
-          method: 'POST', headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': file.type, 'x-upsert': 'true' }, body: file,
+          method: 'POST',
+          headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': file.type || 'application/octet-stream' },
+          body: file,
         });
         if (!res.ok) throw new Error(await res.text());
-        inspirationUrl = path; dropStatus.textContent = 'Added.';
-        setTimeout(() => { dropStatus.hidden = true; }, 1500);
-      } catch (e) { dropStatus.textContent = 'Could not upload that one, but you can still send your enquiry.'; }
+        inspirationUrls.push(path);
+        thumb.dataset.url = path;
+        thumb.classList.remove('is-loading');
+      } catch (e) {
+        thumb.remove();
+        setStatus('Could not upload one of those, but you can still send your enquiry.');
+      }
+    }
+    function handleFiles(list) {
+      const files = Array.from(list || []);
+      files.forEach((f) => uploadOne(f));
+    }
+    if (thumbs) {
+      thumbs.addEventListener('click', (e) => {
+        const x = e.target.closest('.enq__thumb-x'); if (!x) return;
+        const thumb = x.closest('.enq__thumb');
+        const u = thumb.dataset.url; const i = inspirationUrls.indexOf(u);
+        if (i > -1) inspirationUrls.splice(i, 1);
+        thumb.remove();
+      });
     }
     if (drop) {
-      drop.addEventListener('click', (e) => { if (!e.target.closest('.enq__drop-x')) fileInput.click(); });
-      fileInput.addEventListener('change', () => uploadFile(fileInput.files[0]));
+      drop.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
       ['dragover', 'dragenter'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('is-drag'); }));
       ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('is-drag'); }));
-      drop.addEventListener('drop', (e) => { const f = e.dataTransfer.files[0]; if (f) uploadFile(f); });
-      $('.enq__drop-x', overlay).addEventListener('click', (e) => { e.stopPropagation(); resetDrop(); });
+      drop.addEventListener('drop', (e) => { if (e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files); });
     }
 
     /* ---- submit ---- */
@@ -695,9 +747,10 @@
       const payload = {
         full_name: val('full_name'), email: val('email').toLowerCase(), whatsapp_number: val('whatsapp_number'),
         occasion_for: val('occasion_for'), relationship_to_customer: val('relationship'),
-        occasion_type: val('occasion_type'), occasion_date: val('occasion_date'),
+        occasion_type: val('occasion_type'), occasion_other: val('occasion_other'), occasion_date: val('occasion_date'),
         cake_description: notes, number_of_people: val('number_of_people'),
-        colours_and_themes: val('colours_and_themes'), inspiration_photo_url: inspirationUrl,
+        colours_and_themes: val('colours_and_themes'),
+        inspiration_photo_url: inspirationUrls[0] || '', inspiration_photo_urls: inspirationUrls.slice(),
         email_consent: true, whatsapp_consent: $('[name="whatsapp_consent"]', overlay).checked,
         occasion_book_opted_in: $('[name="occasion_book"]', overlay).checked,
       };
@@ -710,9 +763,10 @@
         spin.hidden = true;
         btn.innerHTML = '<svg class="enq__check" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>';
         submitted = true;
-        const bookLine = out.occasion_book_opted_in ? '<p>I have added ' + esc(out.person_name) + "'s " + esc(out.occasion_type) + ' to my Occasion Book. Next year I will reach out before the date. You are already taken care of.</p>' : '';
+        const label = out.celebration_label || (esc(out.person_name) + "'s " + esc(out.occasion_type));
+        const bookLine = out.occasion_book_opted_in ? '<p>I have added ' + esc(label) + ' to my Occasion Book. Next year I will reach out before the date. You are already taken care of.</p>' : '';
         setTimeout(() => {
-          stage.innerHTML = '<div class="enq__success"><h2 class="enq__title">You are all set, ' + esc(out.first_name) + '.</h2><p class="enq__sub">I have received your enquiry for ' + esc(out.person_name) + "'s " + esc(out.occasion_type) + ' on ' + esc(out.occasion_date) + ' and I will be in touch personally within two days.</p>' + bookLine + '<span class="enq__success-line"></span><small class="enq__close-note">You can close this window now.</small></div>';
+          stage.innerHTML = '<div class="enq__success"><h2 class="enq__title">You are all set, ' + esc(out.first_name) + '.</h2><p class="enq__sub">I have received your enquiry for ' + esc(label) + ' on ' + esc(out.occasion_date) + ' and I will be in touch personally within two days.</p>' + bookLine + '<span class="enq__success-line"></span><small class="enq__close-note">You can close this window now.</small></div>';
           fill.style.width = '100%';
         }, reduce ? 0 : 520);
         setTimeout(closeOverlay, 8000);
@@ -727,7 +781,15 @@
     /* ---- triggers: every enquire / order button opens the overlay ---- */
     const touch = window.matchMedia('(hover: none)').matches;
     document.addEventListener('click', (e) => {
-      const t = e.target.closest('a.btn[href*="contact.html"], .card__enquire, #floatEnquire, [data-enquire]');
+      let t = e.target.closest('a.btn[href*="contact.html"], .card__enquire, #floatEnquire, [data-enquire]');
+      if (!t) {
+        // Fallback: any link or button clearly labelled as an enquiry opens the form.
+        const c = e.target.closest('a, button');
+        if (c && !overlay.contains(c) && /\benqu(?:ire|iry)\b/i.test(c.textContent || '')) {
+          const href = c.getAttribute('href') || '';
+          if (!/^(https?:|mailto:|tel:)/.test(href)) t = c;
+        }
+      }
       if (!t || overlay.contains(t)) return;
       e.preventDefault();
       // Let the liquid fill flood fully before the overlay covers the button (touch has no hover).
@@ -735,6 +797,24 @@
       const delay = touch && t.classList.contains('btn') ? 460 : 0;
       setTimeout(() => openOverlay(t.dataset.product || ''), delay);
     }, true);
+
+    /* ---- My Work: filter the gallery by category ---- */
+    const workFilter = $('#workFilter');
+    if (workFilter) {
+      const groups = $$('.workgroup');
+      workFilter.addEventListener('click', (e) => {
+        const b = e.target.closest('.workfilter__btn');
+        if (!b) return;
+        $$('.workfilter__btn', workFilter).forEach((x) => x.classList.toggle('is-active', x === b));
+        const cat = b.dataset.cat;
+        groups.forEach((g) => { g.hidden = !(cat === 'all' || g.dataset.cat === cat); });
+        // Re-reveal any cards that were hidden when they animate back in.
+        requestAnimationFrame(() => {
+          $$('.workgroup:not([hidden]) .reveal-card, .workgroup:not([hidden]) .reveal-up').forEach((el) => el.classList.add('in'));
+        });
+        window.scrollTo({ top: workFilter.getBoundingClientRect().top + window.scrollY - 90, behavior: reduce ? 'auto' : 'smooth' });
+      });
+    }
 
     /* ---- Occasion Book: add one or many occasions (anyone, order or not) ---- */
     const addForm = $('#addOccasionForm');
@@ -747,12 +827,28 @@
         const all = $$('.occ-block', blocks);
         all.forEach((b) => { const r = $('.occ-remove', b); if (r) r.hidden = all.length <= 1; });
       };
+      const ONE_OFF_TYPES = ['Wedding', 'Graduation', 'Baby Shower'];
       const addBlock = () => {
         const node = tpl.content.firstElementChild.cloneNode(true);
         blocks.appendChild(node);
         $$('select', node).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
         const d = $('.occ-date', node); if (d) d.min = minDate();
         $('.occ-remove', node).addEventListener('click', () => { node.remove(); updateRemoves(); });
+        // Show the free-text field for "Other" and a note for one off occasions.
+        const typeSel = $('.occ-type', node);
+        const otherField = $('.occ-other', node);
+        const hint = $('.occ-hint', node);
+        const onType = () => {
+          const t = typeSel.value;
+          if (otherField) otherField.hidden = t !== 'Other';
+          if (hint) {
+            if (ONE_OFF_TYPES.includes(t)) {
+              hint.textContent = 'A one off occasion. I will not repeat it every year, but you can still plan it here for any date down the line.';
+              hint.hidden = false;
+            } else { hint.hidden = true; }
+          }
+        };
+        typeSel.addEventListener('change', onType);
         updateRemoves();
         return node;
       };
@@ -774,11 +870,12 @@
           person_name: $('.occ-person', b).value.trim(),
           relationship: $('.occ-rel', b).value,
           occasion_type: $('.occ-type', b).value,
+          occasion_other: ($('.occ-other-input', b) ? $('.occ-other-input', b).value.trim() : ''),
           occasion_date: $('.occ-date', b).value,
           notes: $('.occ-notes', b).value.trim(),
-        })).filter((it) => it.person_name && it.occasion_type && it.occasion_date);
+        })).filter((it) => it.occasion_type && it.occasion_date);
         if (!items.length) {
-          addStatus.textContent = 'Please add at least one occasion: who it is for, the type and the date.';
+          addStatus.textContent = 'Please add at least one occasion: the type and the date.';
           return;
         }
         if (items.some((it) => it.occasion_date < minDate())) {
@@ -796,7 +893,7 @@
               body: JSON.stringify({
                 email: String(f.email).trim().toLowerCase(), full_name: String(f.full_name).trim(),
                 person_name: it.person_name, relationship_to_customer: it.relationship,
-                occasion_type: it.occasion_type, occasion_date: it.occasion_date, notes: it.notes,
+                occasion_type: it.occasion_type, occasion_other: it.occasion_other, occasion_date: it.occasion_date, notes: it.notes,
               }),
             });
             const out = await res.json().catch(() => ({}));
@@ -827,7 +924,7 @@
     const href = b.tagName === 'A' ? b.getAttribute('href') : null;
     const external = b.target === '_blank' || (href && /^(https?:|mailto:|tel:|#)/.test(href));
     // Enquire/order buttons open the overlay (handled elsewhere); they must NOT navigate.
-    const isTrigger = b.matches('[data-enquire], #floatEnquire') || b.classList.contains('card__enquire') || (href && /contact\.html/.test(href));
+    const isTrigger = b.matches('[data-enquire], #floatEnquire') || b.classList.contains('card__enquire') || (href && /contact\.html/.test(href)) || /\benqu(?:ire|iry)\b/i.test(b.textContent || '');
     if (isTouch && href && !external && !isTrigger) {
       b.addEventListener('click', (e) => {
         e.preventDefault();
