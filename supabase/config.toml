@@ -1,7 +1,7 @@
 project_id = "qgzpoyyijafblzfiyhoc"
 
 # Public function — called from the website with the anon key, so no JWT gate.
-[functions.occasion-registration]
+[functions.process-enquiry]
 verify_jwt = false
 
 # Internal functions are invoked server-side (cron / admin) with the service

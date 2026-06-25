@@ -1,7 +1,6 @@
-// enquiry-followup-check  (run hourly by pg_cron)
-// Finds enquiry orders that are more than 24 hours old and still sitting at
-// status 'enquiry'. For each, emails Hazel the hazel_followup_nudge and raises
-// a high-priority (red) notification. Deduped per occasion via reminder_log.
+// enquiry-followup-check  (hourly via pg_cron)
+// Enquiry orders older than 24h still at status 'enquiry' -> email Hazel the
+// nudge and raise a red notification. Deduped per circle_member.
 import { adminClient, businessVars, corsHeaders, json, notify } from "../_shared/client.ts";
 import { sendToAddress } from "../_shared/email.ts";
 
@@ -14,44 +13,34 @@ Deno.serve(async (req) => {
 
   const { data: orders } = await supabase
     .from("orders")
-    .select(`id, occasion_id, created_at,
+    .select(`id, circle_member_id, created_at,
              customer:customers ( full_name, email ),
-             occasion:occasions ( person_name, occasion_type, occasion_date )`)
-    .eq("status", "enquiry")
-    .lte("created_at", cutoff);
+             circle_member:circle_members ( person_name, occasion_type, occasion_date )`)
+    .eq("status", "enquiry").lte("created_at", cutoff);
 
-  // Which occasions already got a nudge.
   const { data: nudged } = await supabase
-    .from("reminder_log")
-    .select("occasion_id")
-    .eq("reminder_type", "followup_nudge");
-  const done = new Set((nudged ?? []).map((n) => n.occasion_id));
+    .from("reminder_log").select("circle_member_id").eq("reminder_type", "followup_nudge");
+  const done = new Set((nudged ?? []).map((n) => n.circle_member_id));
 
   let sent = 0;
   for (const o of orders ?? []) {
-    if (o.occasion_id && done.has(o.occasion_id)) continue;
+    if (o.circle_member_id && done.has(o.circle_member_id)) continue;
     const c = o.customer as { full_name: string; email: string } | null;
-    const occ = o.occasion as { person_name: string; occasion_type: string; occasion_date: string } | null;
+    const cm = o.circle_member as { person_name: string; occasion_type: string; occasion_date: string } | null;
     if (!c) continue;
-
-    const vars = {
-      ...biz,
-      customer_name: c.full_name,
-      person_name: occ?.person_name ?? "",
-      occasion_type: occ?.occasion_type ?? "",
-      occasion_date: occ?.occasion_date ?? "",
-    };
-    const r = await sendToAddress(businessEmail, "hazel_followup_nudge", vars, supabase);
+    const r = await sendToAddress(businessEmail, "hazel_followup_nudge", {
+      ...biz, customer_name: c.full_name, person_name: cm?.person_name ?? "",
+      occasion_type: cm?.occasion_type ?? "", occasion_date: cm?.occasion_date ?? "",
+    }, supabase);
     await supabase.from("reminder_log").insert({
-      occasion_id: o.occasion_id, reminder_type: "followup_nudge",
-      channel: "email", status: r.status === "sent" ? "sent" : "failed",
-      error_message: r.error ?? null,
+      circle_member_id: o.circle_member_id, reminder_type: "followup_nudge", channel: "email",
+      status: r.status === "sent" ? "sent" : "failed", error_message: r.error ?? null,
+      year_sent: new Date(Date.now() + 2 * 3600 * 1000).getUTCFullYear(),
     });
     await notify(supabase, "enquiry_overdue_reply",
-      `RED: ${c.full_name} sent an enquiry over 24 hours ago and has not had a reply.`);
+      `${c.full_name} sent an enquiry over 24 hours ago and has not had a reply.`, "high", "/orders");
     sent++;
-    if (o.occasion_id) done.add(o.occasion_id);
+    if (o.circle_member_id) done.add(o.circle_member_id);
   }
-
   return json({ status: "ok", nudges_sent: sent });
 });

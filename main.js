@@ -367,21 +367,19 @@
       const notes = ideaParts.join('\n');
 
       const payload = {
-        source: 'enquiry',
-        customer: {
-          full_name: data.name.trim(),
-          email: data.email.trim().toLowerCase(),
-          whatsapp_number: String(data.phone || '').trim(),
-        },
-        consent: { email_consent: true, whatsapp_consent: !!data.whatsapp_consent },
-        occasions: [{
-          person_name: data.person_name.trim(),
-          occasion_type: data.occasion_type,
-          occasion_date: data.date,
-          recurring_yearly: !!data.occasion_book,
-          notes,
-        }],
-        order: { cake_description: notes, occasion_date: data.date },
+        full_name: data.name.trim(),
+        email: data.email.trim().toLowerCase(),
+        whatsapp_number: String(data.phone || '').trim(),
+        occasion_for: data.person_name.trim(),
+        relationship_to_customer: String(data.relationship || '').trim(),
+        occasion_type: data.occasion_type,
+        occasion_date: data.date,
+        cake_description: notes,
+        number_of_people: String(data.number_of_people || '').trim(),
+        colours_and_themes: String(data.colours_and_themes || '').trim(),
+        email_consent: true,
+        whatsapp_consent: !!data.whatsapp_consent,
+        occasion_book_opted_in: !!data.occasion_book,
       };
 
       const btn = form.querySelector('button[type="submit"]');
@@ -389,7 +387,7 @@
       if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
 
       try {
-        const res = await fetch(SUPABASE_URL + '/functions/v1/occasion-registration', {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/process-enquiry', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

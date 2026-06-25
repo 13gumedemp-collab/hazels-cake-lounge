@@ -36,13 +36,13 @@ export async function generateMemoryCard(
     .from("orders")
     .select(`id, cake_flavour, cake_description, cake_photo_url, occasion_date,
              customer:customers ( id, full_name, email ),
-             occasion:occasions ( person_name, occasion_type )`)
+             circle_member:circle_members ( person_name, occasion_type )`)
     .eq("id", order_id)
     .single();
   if (error || !order) return { status: "failed", error: "Order not found" };
 
   const customer = order.customer as { id: string; full_name: string; email: string } | null;
-  const occasion = order.occasion as { person_name: string; occasion_type: string } | null;
+  const occasion = order.circle_member as { person_name: string; occasion_type: string } | null;
   if (!customer) return { status: "failed", error: "Order has no customer" };
 
   // Build PDF

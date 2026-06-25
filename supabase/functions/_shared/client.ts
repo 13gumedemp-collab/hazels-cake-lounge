@@ -26,12 +26,15 @@ export function json(body: unknown, status = 200): Response {
 }
 
 // Create a notification row for the live admin feed.
+// priority: 'standard' | 'high'   action_url: optional deep link
 export async function notify(
   supabase: SupabaseClient,
   type: string,
   message: string,
+  priority: "standard" | "high" = "standard",
+  action_url: string | null = null,
 ): Promise<void> {
-  await supabase.from("notifications").insert({ type, message });
+  await supabase.from("notifications").insert({ type, message, priority, action_url });
 }
 
 // Render a template string against a flat variables object.
