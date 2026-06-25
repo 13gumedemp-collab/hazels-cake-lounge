@@ -11,7 +11,6 @@ export default defineConfig({
         story: 'story.html',
         reviews: 'reviews.html',
         contact: 'contact.html',
-        contactme: 'contact-me.html',
       },
     },
   },
