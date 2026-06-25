@@ -1,24 +1,23 @@
 "use client";
 import { useEffect } from "react";
 
-// The Command Centre is a live data app. Any service worker cache only causes
-// stale orders/notifications, so tear it down completely and clear its caches.
+// The Command Centre reads live data and needs no service worker. If an old
+// worker is still controlling the tab, register the kill-switch worker (sw.js)
+// which claims control and then unregisters itself. Otherwise just make sure
+// nothing is registered. No reloads, so there are never popups or loops.
 export default function ServiceWorker() {
   useEffect(() => {
-    (async () => {
-      try {
-        if ("serviceWorker" in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(regs.map((r) => r.unregister()));
-        }
-        if ("caches" in window) {
-          const keys = await caches.keys();
-          await Promise.all(keys.map((k) => caches.delete(k)));
-        }
-      } catch {}
-      // No reload here: data is read live from the server, so there is nothing
-      // to refresh, and a reload would fight a still-active worker (popups/loops).
-    })();
+    if (!("serviceWorker" in navigator)) return;
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    } else {
+      navigator.serviceWorker.getRegistrations()
+        .then((regs) => regs.forEach((r) => r.unregister()))
+        .catch(() => {});
+      if ("caches" in window) {
+        caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+      }
+    }
   }, []);
   return null;
 }
