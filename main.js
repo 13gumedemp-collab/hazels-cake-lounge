@@ -206,7 +206,17 @@
   /* ---- Floating Enquire button (landing only) ---- */
   const floatBtn = $('#floatEnquire');
   if (floatBtn) {
-    const onScroll = () => floatBtn.classList.toggle('show', scrollY > innerHeight * 0.65);
+    // Hide the button once the footer is in view so it never covers the
+    // footer links (terms, privacy, messaging).
+    let footerVisible = false;
+    const onScroll = () => floatBtn.classList.toggle('show', scrollY > innerHeight * 0.65 && !footerVisible);
+    const footerEl = document.querySelector('.footer');
+    if (footerEl && 'IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        footerVisible = entries[0].isIntersecting;
+        onScroll();
+      }, { threshold: 0 }).observe(footerEl);
+    }
     addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   }
