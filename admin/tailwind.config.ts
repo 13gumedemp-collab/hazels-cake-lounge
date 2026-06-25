@@ -8,16 +8,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Matched to the main website: black surfaces, #d4af37 gold.
         ink: "#0b0a08",
-        ink2: "#14110d",
-        ink3: "#1c1813",
-        gold: "#C9A84C",
+        ink2: "#100f0d",
+        ink3: "#181613",
+        gold: "#d4af37",
         goldBright: "#f4dd8b",
-        goldDeep: "#8B6914",
-        cream: "#F5F0E8",
+        goldDeep: "#a8801f",
+        cream: "#f4ecdd",
         creamSoft: "#c5bba6",
         muted: "#8b8270",
-        line: "rgba(201,168,76,0.22)",
+        line: "rgba(212,175,55,0.22)",
         rose: "#C9A484",
         steel: "#84A4C9",
         sage: "#84C9A4",

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySession } from "@/lib/auth";
+import { cookies } from "next/headers";
+import { verifySession, COOKIE } from "@/lib/auth";
 
 // Moves an order through the pipeline by calling the update-order-status edge
 // function (which also fires invoices, memory cards and notifications).
 export async function POST(req: NextRequest) {
-  const session = await verifySession();
+  const token = cookies().get(COOKIE)?.value;
+  const session = await verifySession(token);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { order_id, new_status } = await req.json().catch(() => ({}));
