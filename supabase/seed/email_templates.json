@@ -3,78 +3,78 @@
     "template_name": "enquiry_acknowledgement",
     "channel": "email",
     "subject": "Got it, {{first_name}}. I will be in touch within two days.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Thank you for reaching out. I have received your enquiry for {{person_name}}'s {{occasion_type}} on {{occasion_date}} and I will be in touch personally within two days.</p><p>In the meantime, if you have any inspiration photos or extra details you would like to share, feel free to reply directly to this email.</p>{{#if occasion_book_opted_in}}<p>One more thing. I have added {{person_name}}'s {{occasion_type}} to my Occasion Book. This means next year I will reach out before the date so you never have to worry about remembering to order. You are already taken care of.</p>{{/if}}{{#if whatsapp_opted_in}}<p>You have also signed up for WhatsApp reminders. I will send you a message before the occasion each year so it is never a surprise.</p>{{/if}}<p>Speak soon,<br>Hazel</p><p style=\"color:#9a7b2e\">Hazel's Cake Lounge<br>{{business_phone}}<br>{{business_email}}</p><p style=\"font-size:12px;color:#999\">To unsubscribe from emails, reply with UNSUBSCRIBE.</p></div>"
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Thank you for reaching out. I have received your enquiry for {{person_name}}'s {{occasion_type}} on {{occasion_date}} and I will be back to you personally within two days.</p><p>If anything else comes to mind before then, just reply to this email. I read every one.</p>{{#if occasion_book_opted_in}}<p>I have also added {{person_name}}'s {{occasion_type}} to my Occasion Book. This means next year I will reach out before the date so you never have to worry about remembering to order. You are already taken care of.</p>{{/if}}{{#if whatsapp_opted_in}}<p>You have signed up for WhatsApp reminders too. I will send you a personal message before the occasion each year.</p>{{/if}}<p>Speak soon,<br>Hazel</p><p style=\"color:#9a7b2e\">Hazel's Cake Lounge<br>{{business_phone}}<br>{{business_email}}</p><p style=\"font-size:12px;color:#999\">To unsubscribe from emails reply UNSUBSCRIBE.</p></div>"
   },
   {
     "template_name": "new_enquiry_alert",
     "channel": "email",
     "subject": "New enquiry: {{person_name}}'s {{occasion_type}} on {{occasion_date}}",
-    "body": "<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:560px\"><p>Hi Hazel,</p><p>A new enquiry has just come in. Here are the details:</p><table cellpadding=\"4\" style=\"font-size:15px\"><tr><td><b>Customer</b></td><td>{{customer_name}}</td></tr><tr><td><b>Email</b></td><td>{{customer_email}}</td></tr><tr><td><b>Phone</b></td><td>{{customer_phone}}</td></tr><tr><td><b>Occasion for</b></td><td>{{person_name}}</td></tr><tr><td><b>Occasion type</b></td><td>{{occasion_type}}</td></tr><tr><td><b>Date needed</b></td><td>{{occasion_date}}</td></tr><tr><td><b>Their idea</b></td><td>{{customer_notes}}</td></tr><tr><td><b>Occasion Book</b></td><td>{{occasion_book_status}}</td></tr><tr><td><b>WhatsApp reminders</b></td><td>{{whatsapp_status}}</td></tr></table><p>Log in to your Command Centre to view the full enquiry and update the order status.</p><p><a href=\"{{admin_dashboard_url}}\">{{admin_dashboard_url}}</a></p><p>You have 24 hours before a follow up reminder is sent to you.</p></div>"
+    "body": "<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:560px\"><p>Hi Hazel,</p><p>A new enquiry has just come in.</p><table cellpadding=\"4\" style=\"font-size:15px\"><tr><td><b>Customer</b></td><td>{{customer_name}}</td></tr><tr><td><b>Email</b></td><td>{{customer_email}}</td></tr><tr><td><b>Phone</b></td><td>{{customer_phone}}</td></tr><tr><td><b>Cake for</b></td><td>{{person_name}}</td></tr><tr><td><b>Relationship</b></td><td>{{relationship}}</td></tr><tr><td><b>Occasion</b></td><td>{{occasion_type}}</td></tr><tr><td><b>Date</b></td><td>{{occasion_date}}</td></tr><tr><td><b>Their idea</b></td><td>{{customer_notes}}</td></tr><tr><td><b>Number of people</b></td><td>{{number_of_people}}</td></tr><tr><td><b>Occasion Book</b></td><td>{{occasion_book_status}}</td></tr><tr><td><b>WhatsApp reminders</b></td><td>{{whatsapp_status}}</td></tr></table><p>View this enquiry in your Command Centre:<br><a href=\"{{admin_dashboard_url}}\">{{admin_dashboard_url}}</a></p><p>You have 24 hours before a follow up reminder is sent to you.</p></div>"
   },
   {
     "template_name": "hazel_followup_nudge",
     "channel": "email",
-    "subject": "Reminder: {{customer_name}} is still waiting for a reply.",
-    "body": "<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:560px\"><p>Hi Hazel,</p><p>Just a gentle nudge. {{customer_name}} sent an enquiry 24 hours ago and has not received a personal reply yet.</p><p>Their occasion is {{person_name}}'s {{occasion_type}} on {{occasion_date}}.</p><p>Log in to your Command Centre to respond:<br><a href=\"{{admin_dashboard_url}}\">{{admin_dashboard_url}}</a></p></div>"
-  },
-  {
-    "template_name": "welcome_occasion_book",
-    "channel": "email",
-    "subject": "You are in the Occasion Book, {{first_name}}.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>You are officially in my Occasion Book. I have added {{person_name}}'s {{occasion_type}} to my personal record, the same little book I keep for every person I bake for.</p><p>Here is what that means for you. You will hear from me before every occasion, with plenty of time to plan, so you never have to worry about missing a moment. Your first reminder will arrive about one month before the date.</p><p>You do not have to remember. I will remember for you.</p><p>Warmly,<br>Hazel</p><p style=\"color:#9a7b2e\">Hazel's Cake Lounge<br>{{business_phone}}<br>{{business_email}}</p></div>"
+    "subject": "Reminder: {{customer_name}} has not heard back yet.",
+    "body": "<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:560px\"><p>Hi Hazel,</p><p>Just a gentle nudge. {{customer_name}} sent an enquiry 24 hours ago for {{person_name}}'s {{occasion_type}} on {{occasion_date}} and is still waiting for a reply.</p><p>View and respond in your Command Centre:<br><a href=\"{{admin_dashboard_url}}\">{{admin_dashboard_url}}</a></p></div>"
   },
   {
     "template_name": "reminder_one_month",
     "channel": "email",
-    "subject": "{{person_name}}'s {{occasion_type}} is a month away.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>It is Hazel. I wanted to reach out personally because {{person_name}}'s {{occasion_type}} is just about a month away.</p><p>I would love to bake something special for the day. My diary fills up quickly, so it is worth getting your order in early while there is plenty of choice.</p><p>Whenever you are ready, you can tell me what you have in mind here:<br><a href=\"{{enquiry_url}}\">{{enquiry_url}}</a></p><p>Warmly,<br>Hazel</p></div>"
+    "subject": "{{person_name}}'s {{occasion_type}} is a month away, {{first_name}}.",
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Just a heads up that {{person_name}}'s {{occasion_type}} is coming up in about a month, on {{occasion_date}}.</p>{{#if previous_order}}<p>Last time I baked the {{previous_flavour}} for them. I would love to create something special again this year.</p>{{/if}}<p>My diary fills up quickly so it is worth getting in touch sooner rather than later.</p><p>Reply to this email or enquire here:<br><a href=\"{{enquiry_url}}\">{{enquiry_url}}</a></p><p>Speak soon,<br>Hazel</p></div>"
   },
   {
     "template_name": "reminder_two_weeks",
     "channel": "email",
     "subject": "Two weeks until {{person_name}}'s {{occasion_type}}.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>A gentle reminder from Hazel that {{person_name}}'s {{occasion_type}} is two weeks away.</p><p>Would you like to bring back a favourite, or try something new this year? Either way, I would love to make it for you.</p><p>Tell me your idea here:<br><a href=\"{{enquiry_url}}\">{{enquiry_url}}</a></p><p>Warmly,<br>Hazel</p></div>"
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>{{person_name}}'s {{occasion_type}} is two weeks away on {{occasion_date}}.</p>{{#if previous_order}}<p>You went with the {{previous_flavour}} last time. Would you like something new this year or shall we bring back a favourite?</p>{{/if}}<p>Let me know what you have in mind and I will take care of the rest.</p><p><a href=\"{{enquiry_url}}\">{{enquiry_url}}</a></p><p>Hazel</p></div>"
   },
   {
     "template_name": "reminder_one_week",
     "channel": "email",
-    "subject": "One week to go, {{first_name}}. Let's make it special.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>One week until {{person_name}}'s {{occasion_type}}. My diary is filling up for that week, so if you would like me to bake for you, now is the moment.</p><p>It will only take a minute to tell me what you would love:<br><a href=\"{{enquiry_url}}\">{{enquiry_url}}</a></p><p>Warmly,<br>Hazel</p></div>"
+    "subject": "One week to go, {{first_name}}.",
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Just one week until {{person_name}}'s {{occasion_type}} on {{occasion_date}}.</p><p>My diary is filling up for that week so let us get your order sorted. I want to make sure {{person_name}} has something truly special.</p><p>Enquire here:<br><a href=\"{{enquiry_url}}\">{{enquiry_url}}</a></p><p>Hazel</p></div>"
   },
   {
     "template_name": "post_celebration",
     "channel": "email",
     "subject": "How did {{person_name}}'s {{occasion_type}} go?",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>It is Hazel. I have been thinking about you and hoping {{person_name}}'s {{occasion_type}} was everything you wanted it to be.</p><p>I would love to hear how it went, and if you took a photo I would treasure seeing it.</p><p>Next year I will be in touch again before the occasion, so you never have to think about it.</p><p>Warmly,<br>Hazel</p></div>"
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>I hope {{person_name}}'s {{occasion_type}} was everything it should have been.</p><p>If you have a photo from the celebration I would love to see it. Just reply to this email with anything you want to share.</p>{{#if occasion_book_opted_in}}<p>I have already noted {{person_name}}'s {{occasion_type}} for next year. I will be in touch before the date so you never have to think about it.</p>{{/if}}<p>Thank you for trusting me with your special occasion.</p><p>Hazel</p></div>"
   },
   {
     "template_name": "birthday_surprise",
     "channel": "email",
     "subject": "Happy Birthday, {{first_name}}.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>It is Hazel. No reminders and no cake talk today. I just wanted to wish you a very happy birthday.</p><p>I hope your day is warm, slow, and full of the people you love.</p><p>With love,<br>Hazel</p></div>"
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Happy Birthday.</p><p>I hope today is as wonderful as you are.</p><p>With love,<br>Hazel</p></div>"
   },
   {
     "template_name": "memory_card_delivery",
     "channel": "email",
     "subject": "Your Cake Memory Card is inside, {{first_name}}.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Your Cake Memory Card is attached to this email. It is a little keepsake of {{person_name}}'s {{occasion_type}}, something to hold onto long after the last slice.</p><p>Save it somewhere safe. I loved being part of your celebration.</p><p>Warmly,<br>Hazel</p><p style=\"color:#9a7b2e\">Hazel's Cake Lounge<br>{{business_phone}}<br>{{business_email}}</p></div>"
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Your Cake Memory Card for {{person_name}}'s {{occasion_type}} is attached to this email.</p><p>It is yours to keep. A small record of a moment worth remembering.</p><p>Thank you for letting me be part of it.</p><p>Hazel</p></div>"
+  },
+  {
+    "template_name": "circle_followup",
+    "channel": "email",
+    "subject": "Is there anyone else I should know about, {{first_name}}?",
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>I loved baking for {{person_name}}'s {{occasion_type}}. It was a pleasure.</p><p>I keep an Occasion Book for every person I bake for. A personal record of every celebration, so I can reach out before each one and make sure no one goes uncelebrated.</p><p>If there are other people in your life worth remembering, a mother, a partner, a best friend, I would love to add them too.</p><p>Just reply to this email with their name, their birthday or occasion, and your relationship to them. I will take care of the rest.</p><p>No forms. No fuss. Just a reply.</p><p>Hazel</p></div>"
   },
   {
     "template_name": "yearly_summary",
     "channel": "email",
     "subject": "Here is what we are celebrating together this year, {{first_name}}.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Happy New Year. As the year begins, here is everything I have in my Occasion Book for you:</p><div style=\"margin:16px 0;padding-left:8px;border-left:3px solid #C9A84C\">{{occasion_list}}</div><p>I will be in touch before each one, with plenty of time to plan, so you never have to remember. That is my job now.</p><p>Here is to a year of moments worth celebrating.</p><p>Warmly,<br>Hazel</p></div>"
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Happy New Year.</p><p>Here are the occasions I am already looking forward to celebrating with you this year:</p><div style=\"margin:16px 0;padding-left:8px;border-left:3px solid #C9A84C\">{{occasion_list}}</div><p>I will be in touch before each one so nothing sneaks up on you.</p><p>Looking forward to baking for you again.</p><p>Hazel</p></div>"
   },
   {
-    "template_name": "invoice_delivery",
+    "template_name": "invoice",
     "channel": "email",
     "subject": "Your invoice from Hazel's Cake Lounge, {{first_name}}.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Thank you, I have received your deposit for {{person_name}}'s {{occasion_type}}. Your invoice is attached for your records.</p><p>I am so looking forward to baking this for you. If anything changes or you would like to add a detail, just reply to this email.</p><p>Warmly,<br>Hazel</p><p style=\"color:#9a7b2e\">Hazel's Cake Lounge<br>{{business_phone}}<br>{{business_email}}</p></div>"
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Your invoice for {{person_name}}'s {{occasion_type}} is attached to this email.</p><p>Once your deposit is received I will confirm your order and get started.</p><p>Any questions, just reply here.</p><p>Hazel</p></div>"
   },
   {
-    "template_name": "order_ready",
+    "template_name": "circle_member_added",
     "channel": "email",
-    "subject": "{{person_name}}'s cake is ready, {{first_name}}.",
-    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Wonderful news. {{person_name}}'s {{occasion_type}} cake is finished and ready for {{fulfilment}}.</p><p>I will be in touch about the timing, but do reach out whenever suits you. I cannot wait for you to see it.</p><p>Warmly,<br>Hazel</p><p style=\"color:#9a7b2e\">Hazel's Cake Lounge<br>{{business_phone}}<br>{{business_email}}</p></div>"
+    "subject": "Added to your Occasion Book, {{first_name}}.",
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Done. I have added {{person_name}}'s {{occasion_type}} on {{occasion_date}} to your Occasion Book.</p><p>I will reach out before the date so you never have to remember. That is my job now.</p><p>Warmly,<br>Hazel</p></div>"
   }
 ]
