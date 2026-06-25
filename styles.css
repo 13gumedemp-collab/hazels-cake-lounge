@@ -884,6 +884,30 @@ html.enq-open, body.enq-open { overflow: hidden; }
 
 @media (max-width: 600px) { .enq__nav .btn { width: 100%; } .enq__nav { flex-direction: column-reverse; align-items: stretch; } }
 
+/* the hidden attribute must win over component display rules */
+.enq [hidden] { display: none !important; }
+
+/* exit-intent capture */
+.enq__exit { position: absolute; inset: 0; z-index: 3; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(1.5rem,6vw,3rem); }
+.enq__exit-inner { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 1.1rem; }
+.enq__exit-status { font-family: 'Jost', sans-serif; font-size: 0.8rem; color: var(--gold); min-height: 1em; }
+
+/* Occasion Book: repeatable occasion blocks */
+#occBlocks { display: flex; flex-direction: column; }
+.occ-block { display: flex; flex-direction: column; gap: 1rem; }
+.occ-block__line { display: block; height: 1px; background: var(--line-soft); margin: 1.4rem 0 0.4rem; }
+.occ-block:first-child .occ-block__line { display: none; margin: 0; }
+.enq__add { align-self: flex-start; background: none; border: 1px dashed rgba(212,175,55,0.5);
+  color: var(--gold); font-family: 'Jost', sans-serif; font-size: 0.76rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 0.7rem 1.1rem; border-radius: 4px; cursor: pointer;
+  margin: 0.4rem 0; transition: border-color 0.3s ease, background 0.3s ease; }
+.enq__add:hover { border-color: var(--gold); background: rgba(212,175,55,0.06); }
+.occ-remove { align-self: flex-start; background: none; border: none; color: var(--muted);
+  font-family: 'Jost', sans-serif; font-size: 0.74rem; cursor: pointer; text-decoration: underline; }
+.occ-remove:hover { color: var(--gold); }
+
 /* ============================================================
    Contact golden order card
    ============================================================ */

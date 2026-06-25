@@ -64,58 +64,78 @@
     <!-- Add another occasion -->
     <section class="contactwrap">
       <aside class="info reveal-up">
-        <h2 class="info__title">Already ordered with me before?</h2>
+        <h2 class="info__title">Add the people who matter.</h2>
         <div class="info__row">
-          <span class="info__label">Add someone special</span>
-          <p>If you have ordered with me before, add another person to your Occasion Book here. I will find your record by email and start remembering them too.</p>
+          <span class="info__label">Everyone is welcome</span>
+          <p>You do not need to have ordered before, and you do not need to be ordering today. Add the occasions you care about and I will keep them in my book, reaching out before each one so nothing is ever forgotten.</p>
         </div>
         <div class="info__row">
-          <span class="info__label">Not ordered yet?</span>
-          <p>Place your first enquiry and I will add you to the Occasion Book automatically.</p>
-          <a href="contact.html" class="btn btn--ghost" data-enquire data-cursor="link">Start an enquiry</a>
+          <span class="info__label">Add as many as you like</span>
+          <p>A birthday, an anniversary, a wedding, a just because. Add one person or your whole circle in one go.</p>
+        </div>
+        <div class="info__row">
+          <span class="info__label">Ready to order now?</span>
+          <a href="contact.html" class="btn btn--solid" data-enquire data-cursor="link">Start an enquiry</a>
         </div>
       </aside>
 
       <div class="formwrap">
         <form class="form" id="addOccasionForm" novalidate>
-          <label class="field">
-            <span>Your email address</span>
-            <input type="email" name="email" autocomplete="email" placeholder="The email you ordered with" required />
-          </label>
-          <label class="field">
-            <span>Who would you like to add?</span>
-            <input type="text" name="person_name" placeholder="Emma, my mum, my husband" required />
-          </label>
-          <label class="field">
-            <span>Relationship to you</span>
-            <select name="relationship">
-              <option value="" disabled selected>Choose one</option>
-              <option>My child</option><option>My partner or spouse</option><option>My parent</option>
-              <option>My sibling</option><option>My friend</option><option>My colleague</option>
-              <option>Myself</option><option>Other</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Occasion type</span>
-            <select name="occasion_type" required>
-              <option value="" disabled selected>Choose one</option>
-              <option>Birthday</option><option>Wedding</option><option>Anniversary</option>
-              <option>Baby Shower</option><option>Graduation</option><option>Just Because</option><option>Other</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Date</span>
-            <input type="date" name="occasion_date" required />
-          </label>
-          <label class="field">
-            <span>Notes or flavour preferences</span>
-            <textarea name="notes" rows="3" placeholder="Anything I should remember about them"></textarea>
-          </label>
+          <div class="form__row">
+            <label class="field">
+              <span>Your name</span>
+              <input type="text" name="full_name" autocomplete="name" placeholder="Your full name" required />
+            </label>
+            <label class="field">
+              <span>Your email address</span>
+              <input type="email" name="email" autocomplete="email" placeholder="Where I can reach you" required />
+            </label>
+          </div>
+
+          <div id="occBlocks"></div>
+
+          <button type="button" class="enq__add" id="addAnother" data-cursor="link">+ Add another occasion</button>
           <button type="submit" class="btn btn--solid" data-cursor="link">Add to my Occasion Book</button>
           <p class="form__status" id="addOccasionStatus" role="status" aria-live="polite"></p>
         </form>
       </div>
     </section>
+
+    <template id="occBlockTpl">
+      <div class="occ-block">
+        <span class="occ-block__line"></span>
+        <label class="field">
+          <span>Who would you like to add?</span>
+          <input type="text" class="occ-person" placeholder="Natalia, my husband, my daughter" />
+        </label>
+        <label class="field">
+          <span>Relationship to you</span>
+          <select class="occ-rel">
+            <option value="" disabled selected>Choose one</option>
+            <option>My child</option><option>My partner or spouse</option><option>My parent</option>
+            <option>My sibling</option><option>My friend</option><option>My colleague</option>
+            <option>Myself</option><option>Other</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Occasion type</span>
+          <select class="occ-type">
+            <option value="" disabled selected>Choose one</option>
+            <option>Birthday</option><option>Wedding</option><option>Anniversary</option>
+            <option>Baby Shower</option><option>Graduation</option><option>Just Because</option><option>Other</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Date</span>
+          <input type="date" class="occ-date" />
+        </label>
+        <label class="field">
+          <span>Notes or flavour preferences</span>
+          <textarea class="occ-notes" rows="2" placeholder="Anything I should remember about them"></textarea>
+        </label>
+        <button type="button" class="occ-remove" data-cursor="link" hidden>Remove this occasion</button>
+      </div>
+    </template>
   </main>
 
   <footer class="footer">

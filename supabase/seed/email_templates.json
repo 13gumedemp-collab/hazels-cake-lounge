@@ -72,6 +72,12 @@
     "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Your invoice for {{person_name}}'s {{occasion_type}} is attached to this email.</p><p>Once your deposit is received I will confirm your order and get started.</p><p>Any questions, just reply here.</p><p>Hazel</p></div>"
   },
   {
+    "template_name": "callback_request",
+    "channel": "email",
+    "subject": "Callback requested: {{phone}}",
+    "body": "<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:560px\"><p>Hi Hazel,</p><p>Someone started an enquiry, did not finish, and asked you to call them. Here is what they left:</p><table cellpadding=\"4\" style=\"font-size:15px\"><tr><td><b>Phone</b></td><td>{{phone}}</td></tr><tr><td><b>Name</b></td><td>{{name}}</td></tr><tr><td><b>Cake for</b></td><td>{{occasion_for}}</td></tr><tr><td><b>Occasion</b></td><td>{{occasion_type}}</td></tr><tr><td><b>Date</b></td><td>{{occasion_date}}</td></tr></table><p>Give them a call when you can to help finish the order.</p></div>"
+  },
+  {
     "template_name": "circle_member_added",
     "channel": "email",
     "subject": "Added to your Occasion Book, {{first_name}}.",

@@ -441,19 +441,12 @@
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 5l14 14M19 5L5 19"/></svg>
           </button>
         </div>
-        <div class="enq__resume" id="enqResume" hidden>
-          <span>Welcome back. Would you like to continue where you left off?</span>
-          <div class="enq__resume-btns">
-            <button type="button" class="enq__mini" id="enqContinue" data-cursor="link">Continue</button>
-            <button type="button" class="enq__mini enq__mini--ghost" id="enqRestart" data-cursor="link">Start again</button>
-          </div>
-        </div>
         <div class="enq__stage" id="enqStage">
           <section class="enq__step" data-step="0">
             <span class="enq__label">Step 1 of 4 &mdash; The Celebration</span>
             <h2 class="enq__title">Tell me about the occasion.</h2>
             <p class="enq__sub">I want to make sure every detail is exactly right.</p>
-            <label class="field"><span>Who are we celebrating?</span><input type="text" name="occasion_for" placeholder="Emma, my mum, my husband" /></label>
+            <label class="field"><span>Who are we celebrating?</span><input type="text" name="occasion_for" placeholder="Myself, my husband, my daughter" /></label>
             <label class="field"><span>What is your relationship to them?</span><select name="relationship">${opt(REL_OPTS)}</select></label>
             <label class="field"><span>What is the occasion?</span><select name="occasion_type">${opt(OCC_OPTS)}</select></label>
             <p class="enq__hint" data-hint="occasion" hidden></p>
@@ -499,6 +492,18 @@
             </div>
           </section>
         </div>
+        <div class="enq__exit" id="enqExit" hidden>
+          <div class="enq__exit-inner">
+            <h2 class="enq__title">Before you go.</h2>
+            <p class="enq__sub">Leave your number and I will give you a personal call to help finish your order. No pressure at all.</p>
+            <label class="field"><span>Your phone or WhatsApp</span><input type="tel" id="enqCallNum" placeholder="073 373 4234" /></label>
+            <div class="enq__nav">
+              <button type="button" class="enq__back" id="enqExitClose" data-cursor="link">No thanks, close</button>
+              <button type="button" class="btn btn--solid" id="enqCallMe" data-cursor="link">Ask Hazel to call me</button>
+            </div>
+            <p class="enq__exit-status" id="enqExitStatus" role="status" aria-live="polite"></p>
+          </div>
+        </div>
       </div>`;
 
     const overlay = document.createElement('div');
@@ -513,8 +518,8 @@
     const fill = $('#enqFill', overlay);
     let current = 0;
     let open = false;
+    let submitted = false;
     let inspirationUrl = '';
-    const data = {};
 
     // Enhance the two dropdowns with the site's cinematic select.
     $$('select', overlay).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
@@ -585,57 +590,52 @@
     };
     overlay.addEventListener('change', (e) => { if (e.target.name === 'occasion_type') applyConditionals(); });
 
-    /* ---- progress persistence ---- */
-    const snapshot = () => {
-      const o = { step: current };
-      ['occasion_for', 'relationship', 'occasion_type', 'occasion_date', 'flavours', 'number_of_people', 'colours_and_themes', 'full_name', 'email', 'whatsapp_number'].forEach((n) => { o[n] = val(n); });
-      o.occasion_book = $('[name="occasion_book"]', overlay).checked;
-      o.whatsapp_consent = $('[name="whatsapp_consent"]', overlay).checked;
-      o.inspirationUrl = inspirationUrl;
-      return o;
-    };
-    const hasProgress = () => { try { return !!localStorage.getItem(STORE); } catch (e) { return false; } };
-    const save = () => { try { localStorage.setItem(STORE, JSON.stringify(snapshot())); } catch (e) {} };
-    const wipe = () => { try { localStorage.removeItem(STORE); } catch (e) {} };
-    const restore = () => {
-      let o; try { o = JSON.parse(localStorage.getItem(STORE)); } catch (e) { return; }
-      if (!o) return;
-      Object.keys(o).forEach((k) => {
-        const el = $('[name="' + k + '"]', overlay);
-        if (!el) return;
-        if (el.type === 'checkbox') el.checked = !!o[k];
-        else { el.value = o[k] || ''; el.dispatchEvent(new Event('change', { bubbles: true })); }
-      });
-      inspirationUrl = o.inspirationUrl || '';
-      applyConditionals();
-      showStep(Math.min(o.step || 0, 3), 1);
-    };
+    const started = () => !submitted && !!(val('occasion_for') || val('occasion_type') || val('occasion_date') || val('full_name') || val('email'));
 
     /* ---- open / close ---- */
-    function openOverlay(product) {
+    const exitPanel = $('#enqExit', overlay);
+    function openOverlay() {
       if (open) return;
       open = true;
       document.documentElement.classList.add('enq-open');
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
-      const resume = $('#enqResume', overlay);
-      if (hasProgress()) { resume.hidden = false; } else { resume.hidden = true; showStep(0, 1); }
-      if (!hasProgress() && product) { /* product context could prefill notes later */ }
+      exitPanel.hidden = true;
+      if (!submitted) showStep(0, 1);
     }
-    function closeOverlay() {
-      if (!open) return;
-      if (current >= 1 || val('occasion_for')) save();
+    function hardClose() {
       open = false;
       overlay.classList.remove('is-open');
       overlay.setAttribute('aria-hidden', 'true');
-      setTimeout(() => document.documentElement.classList.remove('enq-open'), reduce ? 0 : 700);
+      setTimeout(() => { document.documentElement.classList.remove('enq-open'); exitPanel.hidden = true; }, reduce ? 0 : 700);
+    }
+    // Closing mid-form offers a personal call back instead of just leaving.
+    function attemptClose() {
+      if (!open) return;
+      if (started()) { exitPanel.hidden = false; const n = $('#enqCallNum', overlay); if (n) setTimeout(() => n.focus(), 60); }
+      else hardClose();
     }
 
-    $('#enqClose', overlay).addEventListener('click', closeOverlay);
-    $$('[data-enq-close]', overlay).forEach((b) => b.addEventListener('click', closeOverlay));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) closeOverlay(); });
-    $('#enqContinue', overlay).addEventListener('click', () => { $('#enqResume', overlay).hidden = true; restore(); });
-    $('#enqRestart', overlay).addEventListener('click', () => { wipe(); $('#enqResume', overlay).hidden = true; Object.keys(data).forEach((k) => delete data[k]); inspirationUrl = ''; overlay.querySelectorAll('input,textarea,select').forEach((el) => { if (el.type === 'checkbox') el.checked = el.name === 'occasion_book'; else el.value = ''; el.dispatchEvent(new Event('change', { bubbles: true })); }); resetDrop(); applyConditionals(); showStep(0, 1); });
+    $('#enqClose', overlay).addEventListener('click', attemptClose);
+    $$('[data-enq-close]', overlay).forEach((b) => b.addEventListener('click', attemptClose));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) attemptClose(); });
+    $('#enqExitClose', overlay).addEventListener('click', hardClose);
+    $('#enqCallMe', overlay).addEventListener('click', async () => {
+      const numEl = $('#enqCallNum', overlay);
+      const statusEl = $('#enqExitStatus', overlay);
+      const phone = numEl.value.trim();
+      if (!phone) { statusEl.textContent = 'Pop your number in and I will call you.'; numEl.focus(); return; }
+      const btn = $('#enqCallMe', overlay); btn.disabled = true; btn.textContent = 'Sending...';
+      try {
+        await fetch(SB_URL + '/functions/v1/request-callback', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
+          body: JSON.stringify({ phone: phone, name: val('full_name'), occasion_for: val('occasion_for'), occasion_type: val('occasion_type'), occasion_date: val('occasion_date') }),
+        });
+      } catch (e) { /* best effort */ }
+      $('.enq__exit-inner', overlay).innerHTML = '<h2 class="enq__title">Thank you.</h2><p class="enq__sub">I have your number and I will give you a call personally to help finish your order.</p>';
+      submitted = true;
+      setTimeout(hardClose, 3500);
+    });
 
     /* ---- step navigation ---- */
     $$('.enq__next', overlay).forEach((b) => b.addEventListener('click', () => {
@@ -705,7 +705,7 @@
         if (!res.ok || out.status !== 'success') throw new Error(out.error || 'failed');
         spin.hidden = true;
         btn.innerHTML = '<svg class="enq__check" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>';
-        wipe();
+        submitted = true;
         const bookLine = out.occasion_book_opted_in ? '<p>I have added ' + esc(out.person_name) + "'s " + esc(out.occasion_type) + ' to my Occasion Book. Next year I will reach out before the date. You are already taken care of.</p>' : '';
         setTimeout(() => {
           stage.innerHTML = '<div class="enq__success"><h2 class="enq__title">You are all set, ' + esc(out.first_name) + '.</h2><p class="enq__sub">I have received your enquiry for ' + esc(out.person_name) + "'s " + esc(out.occasion_type) + ' on ' + esc(out.occasion_date) + ' and I will be in touch personally within two days.</p>' + bookLine + '<span class="enq__success-line"></span><small class="enq__close-note">You can close this window now.</small></div>';
@@ -728,36 +728,71 @@
       openOverlay(t.dataset.product || '');
     }, true);
 
-    /* ---- Occasion Book: "add another occasion" form (existing customers) ---- */
+    /* ---- Occasion Book: add one or many occasions (anyone, order or not) ---- */
     const addForm = $('#addOccasionForm');
     if (addForm) {
       const addStatus = $('#addOccasionStatus');
+      const blocks = $('#occBlocks');
+      const tpl = document.getElementById('occBlockTpl');
+      const addBtn = $('#addAnother');
+      const updateRemoves = () => {
+        const all = $$('.occ-block', blocks);
+        all.forEach((b) => { const r = $('.occ-remove', b); if (r) r.hidden = all.length <= 1; });
+      };
+      const addBlock = () => {
+        const node = tpl.content.firstElementChild.cloneNode(true);
+        blocks.appendChild(node);
+        $$('select', node).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
+        $('.occ-remove', node).addEventListener('click', () => { node.remove(); updateRemoves(); });
+        updateRemoves();
+        return node;
+      };
+      addBlock();
+      addBtn.addEventListener('click', () => {
+        const n = addBlock();
+        n.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+      });
+
       addForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        addStatus.textContent = '';
         const f = Object.fromEntries(new FormData(addForm));
-        if (!f.email || !f.person_name || !f.occasion_type || !f.occasion_date) {
-          addStatus.textContent = 'Please fill in your email, who to add, the occasion and the date.';
+        if (!String(f.full_name || '').trim() || !String(f.email || '').trim()) {
+          addStatus.textContent = 'Please add your name and email so I can find or start your record.';
+          return;
+        }
+        const items = $$('.occ-block', blocks).map((b) => ({
+          person_name: $('.occ-person', b).value.trim(),
+          relationship: $('.occ-rel', b).value,
+          occasion_type: $('.occ-type', b).value,
+          occasion_date: $('.occ-date', b).value,
+          notes: $('.occ-notes', b).value.trim(),
+        })).filter((it) => it.person_name && it.occasion_type && it.occasion_date);
+        if (!items.length) {
+          addStatus.textContent = 'Please add at least one occasion: who it is for, the type and the date.';
           return;
         }
         const btn = addForm.querySelector('button[type="submit"]');
         const label = btn ? btn.textContent : '';
         if (btn) { btn.disabled = true; btn.textContent = 'Adding...'; }
-        try {
-          const res = await fetch(SB_URL + '/functions/v1/add-circle-member', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
-            body: JSON.stringify({
-              email: String(f.email).trim().toLowerCase(), person_name: String(f.person_name).trim(),
-              relationship_to_customer: f.relationship || '', occasion_type: f.occasion_type,
-              occasion_date: f.occasion_date, notes: String(f.notes || '').trim(),
-            }),
-          });
-          const out = await res.json().catch(() => ({}));
-          if (out.status === 'not_found') {
-            addStatus.textContent = 'I do not have your email on record yet. Place your first enquiry and I will add you to the Occasion Book automatically.';
-          } else if (out.status === 'success') {
-            addForm.innerHTML = '<div class="form-success"><h3>Added.</h3><p>I have added ' + esc(f.person_name) + ' to your Occasion Book. I will reach out before the date so you never have to remember.</p></div>';
-          } else { throw new Error(out.error || 'failed'); }
-        } catch (err) {
+        let added = 0, failed = false;
+        for (const it of items) {
+          try {
+            const res = await fetch(SB_URL + '/functions/v1/add-circle-member', {
+              method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
+              body: JSON.stringify({
+                email: String(f.email).trim().toLowerCase(), full_name: String(f.full_name).trim(),
+                person_name: it.person_name, relationship_to_customer: it.relationship,
+                occasion_type: it.occasion_type, occasion_date: it.occasion_date, notes: it.notes,
+              }),
+            });
+            const out = await res.json().catch(() => ({}));
+            if (out.status === 'success') added++; else failed = true;
+          } catch (err) { failed = true; }
+        }
+        if (added) {
+          addForm.innerHTML = '<div class="form-success"><h3>You are in the book.</h3><p>I have added ' + added + ' occasion' + (added > 1 ? 's' : '') + ' for you. I will reach out before each one so you never have to remember, whether or not you order ahead of time.</p></div>';
+        } else {
           if (btn) { btn.disabled = false; btn.textContent = label; }
           addStatus.textContent = 'Something went wrong. Please try again, or email hello@hazelscakelounge.co.za.';
         }

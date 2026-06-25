@@ -32,6 +32,16 @@ Deno.serve(async (req) => {
     ({ data: customer } = await supabase.from("customers")
       .select("id, full_name").eq("email", b.email.toLowerCase().trim()).single());
   }
+  // Anyone can join the Occasion Book, even without a prior order: if we have
+  // no record yet but they gave a name + email, start one for them.
+  if (!customer && b.email && b.full_name) {
+    const { data: created } = await supabase
+      .from("customers")
+      .insert({ full_name: b.full_name, email: b.email.toLowerCase().trim(), email_consent: true })
+      .select("id, full_name")
+      .single();
+    customer = created;
+  }
   if (!customer) return json({ status: "not_found" }, 200);
 
   const rules = occasionRules(b.occasion_type);
