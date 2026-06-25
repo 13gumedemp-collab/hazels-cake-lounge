@@ -17,14 +17,23 @@ export default function Shell({ counts, children }: { counts: Record<string, num
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [ready, setReady] = useState(false);
 
+  // Read the stored width once, before enabling transitions, so the sidebar
+  // never animates on first paint or on page navigation.
   useEffect(() => {
     setCollapsed(localStorage.getItem("hcl_sidebar_collapsed") === "1");
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
   }, []);
   useEffect(() => {
-    localStorage.setItem("hcl_sidebar_collapsed", collapsed ? "1" : "0");
-  }, [collapsed]);
+    if (ready) localStorage.setItem("hcl_sidebar_collapsed", collapsed ? "1" : "0");
+  }, [collapsed, ready]);
   useEffect(() => { setMobileOpen(false); }, [pathname]);
+
+  // Transitions only fire for deliberate user toggles, never on mount/nav.
+  const widthTx = ready ? "transition-[width] duration-300 ease-cinematic" : "";
+  const padTx = ready ? "transition-[padding] duration-300 ease-cinematic" : "";
 
   const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   const badge = (key: string | null) => (key && counts[key] ? counts[key] : 0);
@@ -60,11 +69,11 @@ export default function Shell({ counts, children }: { counts: Record<string, num
                     key={item.href}
                     href={item.href}
                     title={collapsed ? item.label : undefined}
-                    className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 ease-cinematic ${
+                    className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-200 ${
                       on ? "bg-gold/10 text-gold" : "text-creamSoft hover:text-cream hover:bg-white/[0.04]"
                     } ${collapsed ? "md:justify-center" : ""}`}
                   >
-                    <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r bg-gold transition-all duration-300 ease-cinematic ${on ? "h-6 opacity-100" : "h-0 opacity-0"}`} />
+                    <span className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r bg-gold transition-[height,opacity] duration-300 ease-cinematic ${on ? "h-6 opacity-100" : "h-0 opacity-0"}`} />
                     <Icon name={item.icon} className="w-5 h-5 shrink-0" />
                     <span className={`flex-1 whitespace-nowrap transition-all duration-300 ${collapsed ? "md:opacity-0 md:w-0 md:overflow-hidden" : "opacity-100"}`}>{item.label}</span>
                     {n > 0 && (
@@ -92,9 +101,9 @@ export default function Shell({ counts, children }: { counts: Record<string, num
   );
 
   return (
-    <div className={`min-h-screen transition-[padding] duration-300 ease-cinematic ${collapsed ? "md:pl-[76px]" : "md:pl-64"}`}>
+    <div className={`min-h-screen ${padTx} ${collapsed ? "md:pl-[76px]" : "md:pl-64"}`}>
       {/* Desktop sidebar */}
-      <aside className={`hidden md:flex fixed inset-y-0 left-0 z-40 flex-col border-r border-line bg-ink2/70 backdrop-blur transition-[width] duration-300 ease-cinematic ${collapsed ? "w-[76px]" : "w-64"}`}>
+      <aside className={`hidden md:flex fixed inset-y-0 left-0 z-40 flex-col border-r border-line bg-ink2 ${widthTx} ${collapsed ? "w-[76px]" : "w-64"}`}>
         {SidebarInner}
       </aside>
 
