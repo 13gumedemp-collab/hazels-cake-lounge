@@ -49,13 +49,17 @@ export default async function OrdersPage() {
       const raw = (o.inspiration_photo_url || "").trim();
       if (raw) {
         const paths = raw.split(",").map((s: string) => s.trim()).filter(Boolean);
-        const signed = await Promise.all(
-          paths.map(async (p: string) => {
-            const { data } = await sb.storage.from("inspiration-photos").createSignedUrl(p, 3600);
-            return data?.signedUrl || null;
-          }),
-        );
-        photos = signed.filter(Boolean) as string[];
+        try {
+          const signed = await Promise.all(
+            paths.map(async (p: string) => {
+              try {
+                const { data } = await sb.storage.from("inspiration-photos").createSignedUrl(p, 3600);
+                return data?.signedUrl || null;
+              } catch { return null; }
+            }),
+          );
+          photos = signed.filter(Boolean) as string[];
+        } catch { photos = []; }
       }
 
       return {

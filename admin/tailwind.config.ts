@@ -10,8 +10,8 @@ const config: Config = {
       colors: {
         // Matched to the main website: black surfaces, #d4af37 gold.
         ink: "#0b0a08",
-        ink2: "#100f0d",
-        ink3: "#181613",
+        ink2: "#0e0d0b",
+        ink3: "#141312",
         gold: "#d4af37",
         goldBright: "#f4dd8b",
         goldDeep: "#a8801f",

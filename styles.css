@@ -725,6 +725,9 @@ section { position: relative; }
   box-shadow: 0 16px 36px -12px rgba(212,175,55,0.6);
   transition: opacity 0.5s var(--ease), transform 0.5s var(--ease), filter 0.4s var(--ease), box-shadow 0.4s var(--ease); }
 .float-enquire.show { opacity: 1; transform: none; pointer-events: auto; }
+/* Keep the floating Enquire button clear of the footer legal links (landing). */
+body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); }
+@media (max-width: 600px) { body:has(#floatEnquire) .footer__base { padding-bottom: 7rem; } }
 
 /* ----------  Story teaser (landing)  ---------- */
 .teaser { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch;

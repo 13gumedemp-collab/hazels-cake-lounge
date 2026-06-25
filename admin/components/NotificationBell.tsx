@@ -1,27 +1,32 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import Icon from "./Icon";
-import NotificationList from "./NotificationList";
+import NotificationList, { Note } from "./NotificationList";
 
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const [unread, setUnread] = useState(0);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const unread = notes.filter((n) => !n.read).length;
 
-  const loadCount = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
       const r = await fetch("/api/notifications", { cache: "no-store" });
-      if (r.ok) {
-        const list = (await r.json()).notifications || [];
-        setUnread(list.filter((n: { read: boolean }) => !n.read).length);
-      }
+      if (r.ok) setNotes((await r.json()).notifications || []);
     } catch {}
   }, []);
 
   useEffect(() => {
-    loadCount();
-    const t = setInterval(loadCount, 15000);
+    load();
+    const t = setInterval(load, 15000);
     return () => clearInterval(t);
-  }, [loadCount, open]);
+  }, [load]);
+
+  const markAll = useCallback(async () => {
+    // Optimistic clear, then persist, then re-sync from the server.
+    setNotes((n) => n.map((x) => ({ ...x, read: true })));
+    await fetch("/api/notifications/read", { method: "POST" }).catch(() => {});
+    load();
+  }, [load]);
 
   return (
     <div className="relative">
@@ -35,7 +40,7 @@ export default function NotificationBell() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 mt-2 w-[22rem] max-w-[92vw] max-h-[72vh] overflow-y-auto z-50 rounded-2xl border border-line bg-ink2 shadow-2xl p-4 rise">
-            <NotificationList />
+            <NotificationList notes={notes} onMarkAll={markAll} />
           </div>
         </>
       )}

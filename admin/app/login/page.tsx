@@ -7,6 +7,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [welcoming, setWelcoming] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,12 +20,28 @@ export default function LoginPage() {
     });
     setLoading(false);
     if (res.ok) {
-      router.replace("/");
-      router.refresh();
+      // Cinematic welcome, then into the dashboard.
+      setWelcoming(true);
+      setTimeout(() => { router.replace("/"); router.refresh(); }, 2400);
     } else {
       setError("That is not quite right. Try again.");
       setPassword("");
     }
+  }
+
+  if (welcoming) {
+    return (
+      <main className="welcome fixed inset-0 z-50 grid place-items-center bg-ink overflow-hidden px-6">
+        <span className="welcome__glow" />
+        <div className="relative text-center">
+          <p className="welcome__eyebrow text-[0.7rem] tracking-[0.34em] uppercase text-creamSoft mb-4">Hazel&apos;s Command Centre</p>
+          <h1 className="welcome__title font-serif text-4xl md:text-6xl text-cream leading-tight">
+            Welcome back, <span className="text-gold italic">Hazel.</span>
+          </h1>
+          <span className="welcome__line block h-px bg-gold mx-auto mt-7" />
+        </div>
+      </main>
+    );
   }
 
   return (
