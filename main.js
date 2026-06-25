@@ -423,8 +423,10 @@
   (function enquiryOverlay() {
     const SB_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
     const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnenBveXlpamFmYmx6Zml5aG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODk3MzIsImV4cCI6MjA5Nzk2NTczMn0.g-INXAO6kNGwN750J5rreKlroMFFro7Bl9uJXcr-vug';
-    const STORE = 'hcl_enquiry_progress';
     const ONE_OFF = ['Wedding', 'Graduation', 'Baby Shower'];
+    // Hazel needs at least 3 days' notice to bake.
+    const LEAD_DAYS = 3;
+    const minDate = () => { const d = new Date(); d.setDate(d.getDate() + LEAD_DAYS); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     const REL_OPTS = ['My child', 'My partner or spouse', 'My parent', 'My sibling', 'My friend', 'My colleague', 'Myself', 'Other'];
@@ -523,6 +525,7 @@
 
     // Enhance the two dropdowns with the site's cinematic select.
     $$('select', overlay).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
+    const odEl = $('[name="occasion_date"]', overlay); if (odEl) odEl.min = minDate();
 
     const setProgress = () => { fill.style.width = ((current + 1) * 25) + '%'; };
 
@@ -557,7 +560,9 @@
       if (step === 0) {
         if (!val('occasion_for')) { showErr('occasion_for', 'Let me know who we are celebrating.'); ok = false; }
         if (!val('occasion_type')) { showErr('occasion_type', 'Please choose the occasion.'); ok = false; }
-        if (!val('occasion_date')) { showErr('occasion_date', 'Please pick the date.'); ok = false; }
+        const dv = val('occasion_date');
+        if (!dv) { showErr('occasion_date', 'Please pick the date.'); ok = false; }
+        else if (dv < minDate()) { showErr('occasion_date', 'I need at least 3 days notice to bake. Please choose a later date.'); ok = false; }
       }
       if (step === 2) {
         if (!val('full_name')) { showErr('full_name', 'Please tell me your name.'); ok = false; }
@@ -643,7 +648,6 @@
       if (current === 2 && val('relationship') === 'Myself' && !val('occasion_for')) {
         const f = $('[name="occasion_for"]', overlay); if (f) f.value = val('full_name');
       }
-      save();
       showStep(Math.min(current + 1, 3), 1);
     }));
     $$('.enq__back', overlay).forEach((b) => b.addEventListener('click', () => showStep(Math.max(current - 1, 0), -1)));
@@ -743,6 +747,7 @@
         const node = tpl.content.firstElementChild.cloneNode(true);
         blocks.appendChild(node);
         $$('select', node).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
+        const d = $('.occ-date', node); if (d) d.min = minDate();
         $('.occ-remove', node).addEventListener('click', () => { node.remove(); updateRemoves(); });
         updateRemoves();
         return node;
@@ -770,6 +775,10 @@
         })).filter((it) => it.person_name && it.occasion_type && it.occasion_date);
         if (!items.length) {
           addStatus.textContent = 'Please add at least one occasion: who it is for, the type and the date.';
+          return;
+        }
+        if (items.some((it) => it.occasion_date < minDate())) {
+          addStatus.textContent = 'Please choose dates at least 3 days from today so I have time to bake.';
           return;
         }
         const btn = addForm.querySelector('button[type="submit"]');
