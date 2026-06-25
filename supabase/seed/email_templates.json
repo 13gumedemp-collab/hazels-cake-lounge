@@ -64,5 +64,17 @@
     "channel": "email",
     "subject": "Here is what we are celebrating together this year, {{first_name}}.",
     "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Happy New Year. As the year begins, here is everything I have in my Occasion Book for you:</p><div style=\"margin:16px 0;padding-left:8px;border-left:3px solid #C9A84C\">{{occasion_list}}</div><p>I will be in touch before each one, with plenty of time to plan, so you never have to remember. That is my job now.</p><p>Here is to a year of moments worth celebrating.</p><p>Warmly,<br>Hazel</p></div>"
+  },
+  {
+    "template_name": "invoice_delivery",
+    "channel": "email",
+    "subject": "Your invoice from Hazel's Cake Lounge, {{first_name}}.",
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Thank you, I have received your deposit for {{person_name}}'s {{occasion_type}}. Your invoice is attached for your records.</p><p>I am so looking forward to baking this for you. If anything changes or you would like to add a detail, just reply to this email.</p><p>Warmly,<br>Hazel</p><p style=\"color:#9a7b2e\">Hazel's Cake Lounge<br>{{business_phone}}<br>{{business_email}}</p></div>"
+  },
+  {
+    "template_name": "order_ready",
+    "channel": "email",
+    "subject": "{{person_name}}'s cake is ready, {{first_name}}.",
+    "body": "<div style=\"font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.6;color:#2a2722;max-width:560px\"><p>Hi {{first_name}},</p><p>Wonderful news. {{person_name}}'s {{occasion_type}} cake is finished and ready for {{fulfilment}}.</p><p>I will be in touch about the timing, but do reach out whenever suits you. I cannot wait for you to see it.</p><p>Warmly,<br>Hazel</p><p style=\"color:#9a7b2e\">Hazel's Cake Lounge<br>{{business_phone}}<br>{{business_email}}</p></div>"
   }
 ]
