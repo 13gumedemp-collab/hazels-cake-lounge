@@ -763,10 +763,11 @@
         spin.hidden = true;
         btn.innerHTML = '<svg class="enq__check" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>';
         submitted = true;
-        const label = out.celebration_label || (esc(out.person_name) + "'s " + esc(out.occasion_type));
-        const bookLine = out.occasion_book_opted_in ? '<p>I have added ' + esc(label) + ' to my Occasion Book. Next year I will reach out before the date. You are already taken care of.</p>' : '';
+        const raw = out.celebration_label || ((out.person_name || 'your') + "'s " + (out.occasion_type || 'celebration'));
+        const cap = raw.charAt(0).toUpperCase() + raw.slice(1);
+        const bookLine = out.occasion_book_opted_in ? ' ' + esc(cap) + ' is now in my Occasion Book. Next year I will come to you first.' : '';
         setTimeout(() => {
-          stage.innerHTML = '<div class="enq__success"><h2 class="enq__title">You are all set, ' + esc(out.first_name) + '.</h2><p class="enq__sub">I have received your enquiry for ' + esc(label) + ' on ' + esc(out.occasion_date) + ' and I will be in touch personally within two days.</p>' + bookLine + '<span class="enq__success-line"></span><small class="enq__close-note">You can close this window now.</small></div>';
+          stage.innerHTML = '<div class="enq__success"><h2 class="enq__title">You are in good hands, ' + esc(out.first_name) + '.</h2><p class="enq__sub">I have received everything I need. Expect a personal reply from me within two days.' + bookLine + '</p><span class="enq__success-line"></span><small class="enq__close-note">I look forward to talking soon.</small></div>';
           fill.style.width = '100%';
         }, reduce ? 0 : 520);
         setTimeout(closeOverlay, 8000);
