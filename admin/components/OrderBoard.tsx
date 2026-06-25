@@ -21,13 +21,11 @@ export interface OrderCard {
 const STAGES: { key: string; label: string }[] = [
   { key: "enquiry", label: "New enquiries" },
   { key: "quoted", label: "Quoted" },
-  { key: "deposit_paid", label: "Deposit paid" },
+  { key: "deposit_paid", label: "Paid in full" },
   { key: "baking", label: "Baking" },
   { key: "ready", label: "Ready" },
   { key: "completed", label: "Completed" },
 ];
-const labelOf = (k: string) => STAGES.find((s) => s.key === k)?.label || k;
-
 function countdown(days: number | null) {
   if (days == null) return null;
   if (days < 0) return { text: `${Math.abs(days)}d overdue`, tone: "text-rose" };
@@ -147,44 +145,31 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
                             </div>
                           )}
 
-                          {/* Cinematic brand dropdown */}
-                          <div className="pt-2">
-                            <label className="text-[11px] text-muted block mb-1">Move to, or drag the card</label>
-                            <div className="relative">
-                              <button
-                                type="button"
-                                disabled={busy === o.id}
-                                onClick={() => setMenuFor(menuFor === o.id ? null : o.id)}
-                                className="w-full flex items-center justify-between gap-2 bg-ink3 border border-line rounded-lg px-3 py-2 text-sm text-cream hover:border-gold/60 transition-colors"
-                              >
-                                <span>{labelOf(statusOf(o))}</span>
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" className={`text-gold transition-transform duration-300 ${menuFor === o.id ? "rotate-180" : ""}`}><path d="M6 9l6 6 6-6" /></svg>
-                              </button>
-                              {menuFor === o.id && (
-                                <>
-                                  <div className="fixed inset-0 z-10" onClick={() => setMenuFor(null)} />
-                                  <div className="omenu absolute left-0 right-0 mt-2 z-20 rounded-xl border border-gold/40 bg-ink2 shadow-2xl overflow-hidden p-1">
-                                    {STAGES.map((s, i) => {
-                                      const on = statusOf(o) === s.key;
-                                      return (
-                                        <button
-                                          key={s.key}
-                                          onClick={() => move(o.id, s.key)}
-                                          style={{ animationDelay: `${i * 35}ms` }}
-                                          className={`omenu__item w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${on ? "bg-gold/15 text-gold" : "text-creamSoft hover:bg-gold/10 hover:text-cream"}`}
-                                        >
-                                          <span className="inline-flex items-center gap-2">
-                                            <span className={`w-1.5 h-1.5 rounded-full ${on ? "bg-gold" : "bg-creamSoft/40"}`} />
-                                            {s.label}
-                                          </span>
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                </>
-                              )}
+                          {/* Cinematic stage selector (chips) */}
+                          {isOpen && (
+                            <div className="pt-2">
+                              <label className="text-[11px] text-muted block mb-2">Move to, or drag the card</label>
+                              <div className="flex flex-wrap gap-1.5">
+                                {STAGES.map((s, i) => {
+                                  const on = statusOf(o) === s.key;
+                                  return (
+                                    <button
+                                      key={s.key}
+                                      disabled={busy === o.id}
+                                      onClick={() => move(o.id, s.key)}
+                                      style={{ animationDelay: `${i * 40}ms` }}
+                                      className={`omenu__item inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] border transition-colors duration-200 ${
+                                        on ? "bg-gold text-ink border-gold" : "border-line text-creamSoft hover:border-gold/60 hover:text-cream"
+                                      }`}
+                                    >
+                                      <span className={`w-1.5 h-1.5 rounded-full ${on ? "bg-ink" : "bg-creamSoft/40"}`} />
+                                      {s.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     </div>
