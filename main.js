@@ -446,8 +446,8 @@
     const SB_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
     const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnenBveXlpamFmYmx6Zml5aG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODk3MzIsImV4cCI6MjA5Nzk2NTczMn0.g-INXAO6kNGwN750J5rreKlroMFFro7Bl9uJXcr-vug';
     const ONE_OFF = ['Wedding', 'Graduation', 'Baby Shower'];
-    // Hazel needs at least 3 days' notice to bake.
-    const LEAD_DAYS = 3;
+    // Hazel needs at least 4 full days' notice to bake.
+    const LEAD_DAYS = 4;
     const minDate = () => { const d = new Date(); d.setDate(d.getDate() + LEAD_DAYS); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -488,7 +488,7 @@
             <div class="field"><span class="field__lbl">Show me cakes you love (optional)</span>
               <div class="enq__drop" id="enqDrop" data-cursor="link">
                 <input type="file" id="enqFile" accept="image/*" multiple hidden />
-                <div class="enq__drop-empty"><p>Drag images here, or click to browse</p><small>Add as many as you like. I will recreate the feeling of them.</small></div>
+                <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag images here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Add as many as you like. I will recreate the feeling of them.</small></div>
               </div>
               <div class="enq__thumbs" id="enqThumbs"></div>
               <div class="enq__drop-status" hidden></div>
@@ -594,7 +594,7 @@
         if (val('occasion_type') === 'Other' && !val('occasion_other')) { showErr('occasion_other', 'Tell me the occasion so I get it right.'); ok = false; }
         const dv = val('occasion_date');
         if (!dv) { showErr('occasion_date', 'Please pick the date.'); ok = false; }
-        else if (dv < minDate()) { showErr('occasion_date', 'I need at least 3 days notice to bake. Please choose a later date.'); ok = false; }
+        else if (dv < minDate()) { showErr('occasion_date', "I need at least 4 days' notice to bake. Please choose a later date."); ok = false; }
       }
       if (step === 2) {
         if (!val('full_name')) { showErr('full_name', 'Please tell me your name.'); ok = false; }
@@ -982,7 +982,7 @@
           return;
         }
         if (items.some((it) => it.occasion_date < minDate())) {
-          addStatus.textContent = 'Please choose dates at least 3 days from today so I have time to bake.';
+          addStatus.textContent = "Please choose dates at least 4 days from today so I have time to bake.";
           return;
         }
         const btn = addForm.querySelector('button[type="submit"]');
@@ -1191,8 +1191,8 @@
 
     const WORDS = {
       1: 'Noted, tell me what happened',
-      2: 'Fair, I want to do better',
-      3: 'Good, I am glad you enjoyed it',
+      2: 'What went wrong?',
+      3: 'What could I have done better?',
       4: 'Lovely to hear',
       5: 'Unforgettable, thank you',
     };
