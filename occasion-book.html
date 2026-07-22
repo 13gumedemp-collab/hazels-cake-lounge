@@ -100,7 +100,7 @@
 
           <div id="occBlocks"></div>
 
-          <button type="button" class="enq__add" id="addAnother" data-cursor="link">+ Add another occasion</button>
+          <button type="button" class="enq__add" id="addAnother" data-cursor="link" disabled>+ Add another occasion</button>
           <button type="submit" class="btn btn--solid" data-cursor="link">Save this date</button>
           <p class="form__status" id="addOccasionStatus" role="status" aria-live="polite"></p>
         </form>
@@ -144,6 +144,15 @@
           <span>Cake ideas or notes <em class="field__opt">(optional)</em></span>
           <textarea class="occ-notes" rows="2" placeholder="Add any ideas you already have"></textarea>
         </label>
+        <div>
+          <span class="field__label">Inspiration pictures <em class="field__opt">(optional)</em></span>
+          <div class="enq__drop occ-upload" role="button" tabindex="0" aria-label="Add inspiration pictures">
+            <input type="file" class="occ-file" accept="image/*" multiple hidden />
+            <div class="enq__drop-empty"><p>Drag pictures here, or tap to choose</p><small>Up to 15 MB per picture</small></div>
+          </div>
+          <div class="enq__thumbs occ-thumbs"></div>
+          <p class="enq__drop-status occ-upload-status" hidden></p>
+        </div>
         <button type="button" class="occ-remove" data-cursor="link" hidden>Remove this occasion</button>
       </div>
     </template>
