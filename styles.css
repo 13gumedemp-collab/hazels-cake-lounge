@@ -931,6 +931,9 @@ html.enq-open, body.enq-open { overflow: hidden; }
   text-transform: uppercase; padding: 0.7rem 1.1rem; border-radius: 4px; cursor: pointer;
   margin: 0.4rem 0; transition: border-color 0.3s ease, background 0.3s ease; }
 .enq__add:hover { border-color: var(--gold); background: rgba(212,175,55,0.06); }
+.enq__add:disabled { opacity: 0.35; cursor: not-allowed; border-color: var(--line-soft); background: none; }
+.field__label { display: block; font-family: 'Jost', sans-serif; font-size: 0.72rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--cream-soft); margin-bottom: 0.55rem; }
 .occ-remove { align-self: flex-start; background: none; border: none; color: var(--muted);
   font-family: 'Jost', sans-serif; font-size: 0.74rem; cursor: pointer; text-decoration: underline; }
 .occ-remove:hover { color: var(--gold); }

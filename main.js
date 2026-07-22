@@ -846,13 +846,28 @@
       const blocks = $('#occBlocks');
       const tpl = document.getElementById('occBlockTpl');
       const addBtn = $('#addAnother');
+      const blockComplete = (b) => {
+        if (!b) return false;
+        const type = $('.occ-type', b)?.value || '';
+        const date = $('.occ-date', b)?.value || '';
+        const other = $('.occ-other-input', b)?.value.trim() || '';
+        return !!(type && date && (type !== 'Other' || other));
+      };
+      const updateAdd = () => {
+        const all = $$('.occ-block', blocks);
+        addBtn.disabled = !blockComplete(all[all.length - 1]);
+        addBtn.setAttribute('aria-disabled', String(addBtn.disabled));
+      };
       const updateRemoves = () => {
         const all = $$('.occ-block', blocks);
         all.forEach((b) => { const r = $('.occ-remove', b); if (r) r.hidden = all.length <= 1; });
+        updateAdd();
       };
       const ONE_OFF_TYPES = ['Wedding', 'Graduation', 'Baby Shower'];
       const addBlock = () => {
         const node = tpl.content.firstElementChild.cloneNode(true);
+        node._inspirationUrls = [];
+        node._uploading = 0;
         blocks.appendChild(node);
         $$('select', node).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
         const d = $('.occ-date', node); if (d) d.min = minDate();
@@ -871,12 +886,72 @@
             } else { hint.hidden = true; }
           }
         };
-        typeSel.addEventListener('change', onType);
+        typeSel.addEventListener('change', () => { onType(); updateAdd(); });
+        $('.occ-date', node).addEventListener('change', updateAdd);
+        $('.occ-other-input', node).addEventListener('input', updateAdd);
+
+        const drop = $('.occ-upload', node);
+        const fileInput = $('.occ-file', node);
+        const thumbs = $('.occ-thumbs', node);
+        const uploadStatus = $('.occ-upload-status', node);
+        const setUploadStatus = (message) => {
+          uploadStatus.hidden = !message;
+          uploadStatus.textContent = message || '';
+        };
+        const looksImage = (file) => (file.type && file.type.indexOf('image/') === 0) || /\.(jpe?g|png|webp|heic|heif|gif|avif)$/i.test(file.name || '');
+        const uploadOne = async (file) => {
+          if (!looksImage(file)) { setUploadStatus('That file is not a picture.'); return; }
+          if (file.size > 15 * 1024 * 1024) { setUploadStatus(file.name + ' is over 15 MB.'); return; }
+          const thumb = document.createElement('div');
+          thumb.className = 'enq__thumb is-loading';
+          const img = document.createElement('img'); img.alt = 'Your inspiration picture';
+          try { img.src = URL.createObjectURL(file); } catch (e) {}
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'enq__thumb-x'; remove.setAttribute('aria-label', 'Remove picture'); remove.textContent = '\u00d7';
+          const spin = document.createElement('span'); spin.className = 'enq__thumb-spin';
+          thumb.appendChild(img); thumb.appendChild(spin); thumb.appendChild(remove); thumbs.appendChild(thumb);
+          node._uploading += 1; setUploadStatus('Uploading picture...');
+          const safeName = (file.name || 'photo.jpg').replace(/[^\w.]+/g, '_');
+          const path = 'book-' + Math.random().toString(36).slice(2) + '-' + safeName;
+          try {
+            const res = await fetch(SB_URL + '/storage/v1/object/inspiration-photos/' + encodeURIComponent(path), {
+              method: 'POST',
+              headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': file.type || 'application/octet-stream' },
+              body: file,
+            });
+            if (!res.ok) throw new Error(await res.text());
+            node._inspirationUrls.push(path);
+            thumb.dataset.url = path;
+            thumb.classList.remove('is-loading');
+            setUploadStatus('');
+          } catch (e) {
+            thumb.remove();
+            setUploadStatus('The picture could not upload. Please try again.');
+          } finally {
+            node._uploading -= 1;
+          }
+        };
+        const handleFiles = (list) => Array.from(list || []).forEach(uploadOne);
+        drop.addEventListener('click', () => fileInput.click());
+        drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+        fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value = ''; });
+        ['dragover', 'dragenter'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('is-drag'); }));
+        ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('is-drag'); }));
+        drop.addEventListener('drop', (e) => { if (e.dataTransfer?.files) handleFiles(e.dataTransfer.files); });
+        thumbs.addEventListener('click', (e) => {
+          const button = e.target.closest('.enq__thumb-x'); if (!button) return;
+          const thumb = button.closest('.enq__thumb');
+          if (thumb.classList.contains('is-loading')) return;
+          const url = thumb.dataset.url;
+          const index = node._inspirationUrls.indexOf(url);
+          if (index > -1) node._inspirationUrls.splice(index, 1);
+          thumb.remove();
+        });
         updateRemoves();
         return node;
       };
       addBlock();
       addBtn.addEventListener('click', () => {
+        if (addBtn.disabled) return;
         const n = addBlock();
         n.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
       });
@@ -889,6 +964,10 @@
           addStatus.textContent = 'Please add your name and email so I can save the date and send your reminders.';
           return;
         }
+        if ($$('.occ-block', blocks).some((b) => b._uploading > 0)) {
+          addStatus.textContent = 'Please wait for your pictures to finish uploading.';
+          return;
+        }
         const items = $$('.occ-block', blocks).map((b) => ({
           person_name: $('.occ-person', b).value.trim(),
           relationship: $('.occ-rel', b).value,
@@ -896,6 +975,7 @@
           occasion_other: ($('.occ-other-input', b) ? $('.occ-other-input', b).value.trim() : ''),
           occasion_date: $('.occ-date', b).value,
           notes: $('.occ-notes', b).value.trim(),
+          inspiration_photo_urls: b._inspirationUrls.slice(),
         })).filter((it) => it.occasion_type && it.occasion_date);
         if (!items.length) {
           addStatus.textContent = 'Please add at least one occasion: the type and the date.';
@@ -911,12 +991,15 @@
         let added = 0, failed = false;
         for (const it of items) {
           try {
+            const picturePaths = it.inspiration_photo_urls.map((path) => 'inspiration-photos/' + path);
+            const savedNotes = [it.notes, picturePaths.length ? 'Inspiration pictures:\n' + picturePaths.join('\n') : ''].filter(Boolean).join('\n\n');
             const res = await fetch(SB_URL + '/functions/v1/add-circle-member', {
               method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
               body: JSON.stringify({
                 email: String(f.email).trim().toLowerCase(), full_name: String(f.full_name).trim(),
                 person_name: it.person_name, relationship_to_customer: it.relationship,
-                occasion_type: it.occasion_type, occasion_other: it.occasion_other, occasion_date: it.occasion_date, notes: it.notes,
+                occasion_type: it.occasion_type, occasion_other: it.occasion_other, occasion_date: it.occasion_date,
+                notes: savedNotes, inspiration_photo_urls: it.inspiration_photo_urls,
               }),
             });
             const out = await res.json().catch(() => ({}));
