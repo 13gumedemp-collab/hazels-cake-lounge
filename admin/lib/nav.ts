@@ -13,6 +13,7 @@ export const NAV: NavItem[] = [
   { href: "/orders", label: "Orders", icon: "kanban", badge: "orders" },
   { href: "/customers", label: "Customers", icon: "people", badge: null },
   { href: "/whatsapp", label: "WhatsApp", icon: "whatsapp", badge: "whatsapp" },
+  { href: "/calls", label: "Phone calls", icon: "phone", badge: null },
   { href: "/messages", label: "Messages", icon: "mail", badge: null },
   { href: "/reminders", label: "Reminders", icon: "bell", badge: null },
   { href: "/analytics", label: "Analytics", icon: "chart", badge: null },

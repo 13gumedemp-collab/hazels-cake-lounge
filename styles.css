@@ -798,6 +798,33 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
   html { scroll-behavior: auto; }
 }
 
+/* Customer account */
+.account-page { min-height: 100vh; padding: clamp(8rem,14vh,10rem) clamp(1.2rem,5vw,4rem) 5rem; }
+.account-auth { width: min(560px,100%); margin: 0 auto; text-align: center; }
+.account-auth h1, .account-welcome h1 { font-family: 'Fraunces',serif; font-size: clamp(2.6rem,7vw,5rem); font-weight: 400; }
+.account-auth > p:not(.page-hero__eyebrow):not(.form__status) { color: var(--cream-soft); max-width: 42ch; margin: 1.3rem auto 2rem; }
+.account-google, .account-login-form .btn { width: 100%; }
+.account-divider { display: flex; align-items: center; gap: 1rem; color: var(--muted); margin: 1.5rem 0; }
+.account-divider::before,.account-divider::after { content:''; height:1px; background:var(--line); flex:1; }
+.account-login-form { display:grid; gap:1rem; text-align:left; }
+.account-dashboard { max-width: 1180px; margin: 0 auto; }
+.account-welcome,.account-section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; }
+.account-signout { background:none; border:0; color:var(--muted); text-decoration:underline; }
+.account-tabs { display:flex; gap:.5rem; overflow-x:auto; margin:2.5rem 0; border-bottom:1px solid var(--line); }
+.account-tabs button { background:none; border:0; color:var(--muted); padding:.8rem 1rem; white-space:nowrap; }
+.account-tabs button.is-active { color:var(--gold); border-bottom:2px solid var(--gold); }
+.account-panel { display:none; }.account-panel.is-active { display:block; }
+.account-section-head { margin-bottom:1.5rem; }.account-section-head span,.account-card span,.account-event div>span { color:var(--gold); font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; }
+.account-section-head h2 { font-size:clamp(2rem,5vw,3.5rem); }
+.account-list,.account-calendar { display:grid; gap:1rem; }
+.account-card,.account-event { display:flex; align-items:center; justify-content:space-between; gap:1.2rem; padding:1.3rem; border:1px solid var(--line); background:var(--bg-2); border-radius:6px; }
+.account-card h3,.account-event h3 { font-size:1.25rem; margin:.2rem 0; }.account-card p,.account-event p { color:var(--cream-soft); font-size:.88rem; }
+.account-event time { min-width:130px; color:var(--cream); }.account-event>a { color:var(--gold); font-size:.78rem; }
+.account-card__actions { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:flex-end; }.account-card__actions button { background:none; border:1px solid var(--line); color:var(--gold); padding:.5rem .7rem; border-radius:3px; }
+.account-empty { color:var(--muted); padding:2rem; border:1px dashed var(--line); text-align:center; }
+.account-profile { display:grid; gap:1rem; max-width:760px; }.account-preferences { border:1px solid var(--line); padding:1rem; display:flex; flex-wrap:wrap; gap:1rem; }.account-preferences legend { color:var(--gold); padding:0 .4rem; }.account-preferences label { color:var(--cream-soft); }
+@media(max-width:700px){.account-card,.account-event,.account-welcome,.account-section-head{align-items:flex-start;flex-direction:column}.account-event time{min-width:0}.account-card__actions{justify-content:flex-start}.account-tabs{margin-top:1.5rem}}
+
 /* ============================================================
    Cinematic enquiry overlay
    ============================================================ */

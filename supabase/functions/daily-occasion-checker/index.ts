@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
   const supabase = adminClient();
   const today = sastNow();
   const biz = businessVars();
-  let emails = 0, waTasks = 0, failures = 0, dupes = 0, anniversaries = 0, followups = 0, postCeleb = 0;
+  let emails = 0, waTasks = 0, callTasks = 0, failures = 0, dupes = 0, anniversaries = 0, followups = 0, postCeleb = 0;
 
   const { data: logs } = await supabase
     .from("reminder_log").select("circle_member_id, reminder_type, customer_id, status, year_sent")
@@ -47,11 +47,13 @@ Deno.serve(async (req) => {
 
   const { data: waRows } = await supabase.from("whatsapp_reminders_due").select("circle_member_id, reminder_type, created_at").gte("created_at", `${today.year}-01-01`);
   const waDone = new Set((waRows ?? []).map((r) => `${r.circle_member_id}|${r.reminder_type}`));
+  const { data: callRows } = await supabase.from("phone_call_reminders_due").select("circle_member_id, reminder_type, due_date").gte("due_date", `${today.year}-01-01`);
+  const callDone = new Set((callRows ?? []).map((r) => `${r.circle_member_id}|${r.reminder_type}`));
 
   const { data: members } = await supabase
     .from("circle_members")
     .select(`id, person_name, occasion_type, occasion_date, recurring_yearly, is_one_time, customer_id,
-             customer:customers ( id, full_name, email_consent, whatsapp_consent, whatsapp_number )`);
+             customer:customers ( id, full_name, email_consent, whatsapp_consent, phone_call_consent, whatsapp_number )`);
 
   const flavourFor = async (memberId: string): Promise<string | null> => {
     const { data } = await supabase.from("orders").select("cake_flavour").eq("circle_member_id", memberId).not("cake_flavour", "is", null).order("created_at", { ascending: false }).limit(1).maybeSingle();
@@ -59,7 +61,7 @@ Deno.serve(async (req) => {
   };
 
   for (const m of members ?? []) {
-    const c = m.customer as { id: string; full_name: string; email_consent: boolean; whatsapp_consent: boolean; whatsapp_number: string | null } | null;
+    const c = m.customer as { id: string; full_name: string; email_consent: boolean; whatsapp_consent: boolean; phone_call_consent: boolean; whatsapp_number: string | null } | null;
     if (!c) continue;
     const { m: mm, d: dd, y: occY } = md(m.occasion_date);
 
@@ -109,6 +111,14 @@ Deno.serve(async (req) => {
       await supabase.from("whatsapp_reminders_due").insert({ customer_id: c.id, circle_member_id: m.id, reminder_type: type, whatsapp_number: c.whatsapp_number, message_copy: waCopy(type, vars), due_date: next.toISOString().slice(0, 10), status: "pending" });
       await notify(supabase, "whatsapp_due", `WhatsApp ${type.replace("_", " ")} reminder due for ${c.full_name} (${m.person_name}'s ${m.occasion_type})`, "standard", "/whatsapp");
       waTasks++; waDone.add(`${m.id}|${type}`);
+    }
+    if (c.phone_call_consent && c.whatsapp_number && !callDone.has(`${m.id}|${type}`)) {
+      await supabase.from("phone_call_reminders_due").insert({
+        customer_id: c.id, circle_member_id: m.id, reminder_type: type,
+        phone_number: c.whatsapp_number, due_date: today.date.toISOString().slice(0, 10), status: "pending",
+      });
+      await notify(supabase, "phone_call_due", `Call ${c.full_name} about ${m.person_name}'s ${m.occasion_type}.`, "standard", "/calls");
+      callTasks++; callDone.add(`${m.id}|${type}`);
     }
   }
 
@@ -171,6 +181,6 @@ Deno.serve(async (req) => {
     }
   }
 
-  await notify(supabase, "daily_check", `Daily check: ${emails} emails, ${waTasks} WhatsApp tasks, ${postCeleb} post-celebration, ${anniversaries} anniversaries, ${followups} circle follow-ups, ${dupes} dupes, ${failures} failures${reset ? `, ${reset} reset, ${summaries} summaries` : ""}`);
-  return json({ status: "ok", emails, waTasks, postCeleb, anniversaries, followups, dupes, failures, reset, summaries });
+  await notify(supabase, "daily_check", `Daily check: ${emails} emails, ${waTasks} WhatsApp tasks, ${callTasks} call tasks, ${postCeleb} post-celebration, ${anniversaries} anniversaries, ${followups} circle follow-ups, ${dupes} dupes, ${failures} failures${reset ? `, ${reset} reset, ${summaries} summaries` : ""}`);
+  return json({ status: "ok", emails, waTasks, callTasks, postCeleb, anniversaries, followups, dupes, failures, reset, summaries });
 });

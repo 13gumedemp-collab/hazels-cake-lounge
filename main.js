@@ -184,6 +184,12 @@
 
   /* ---- Nav: hide on scroll down, solid on scroll ---- */
   const nav = $('#nav');
+  const navLinks = $('.nav__links');
+  if (navLinks && !navLinks.querySelector('a[href="account.html"]')) {
+    const accountLink = document.createElement('a');
+    accountLink.href = 'account.html'; accountLink.textContent = 'My Account'; accountLink.dataset.cursor = 'link';
+    navLinks.appendChild(accountLink);
+  }
   let lastY = 0;
   addEventListener('scroll', () => {
     const y = scrollY;

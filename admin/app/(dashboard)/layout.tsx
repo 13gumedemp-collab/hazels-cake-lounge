@@ -1,4 +1,7 @@
 import Shell from "@/components/Shell";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { COOKIE, verifySession } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabaseServer";
 import { daysUntil } from "@/lib/occasions";
 
@@ -22,6 +25,7 @@ async function getCounts() {
 }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  if (!(await verifySession(cookies().get(COOKIE)?.value))) redirect("/login");
   const counts = await getCounts();
   return <Shell counts={counts}>{children}</Shell>;
 }
