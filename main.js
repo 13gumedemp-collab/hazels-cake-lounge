@@ -196,12 +196,24 @@
 
   /* ---- Mobile menu ---- */
   const toggle = $('#menuToggle');
+  const closeMenu = () => {
+    if (!nav || !toggle) return;
+    nav.classList.remove('open');
+    document.documentElement.classList.remove('nav-open');
+    document.body.classList.remove('nav-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+  };
   toggle?.addEventListener('click', () => {
     const open = nav.classList.toggle('open');
     nav.classList.remove('hidden');
+    document.documentElement.classList.toggle('nav-open', open);
+    document.body.classList.toggle('nav-open', open);
     toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   });
-  $$('.nav__links a').forEach((a) => a.addEventListener('click', () => nav.classList.remove('open')));
+  $$('.nav__links a').forEach((a) => a.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
   /* ---- Floating Enquire button (landing only) ---- */
   const floatBtn = $('#floatEnquire');
