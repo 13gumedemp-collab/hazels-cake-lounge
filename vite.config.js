@@ -15,6 +15,7 @@ export default defineConfig({
         messagingterms: 'messaging-terms.html',
         terms: 'terms.html',
         privacy: 'privacy.html',
+        account: 'account.html',
       },
     },
   },

@@ -17,7 +17,7 @@ export default async function OrdersPage() {
   const { data: orders } = await sb
     .from("orders")
     .select(`
-      id, status, occasion_date, cake_description, number_of_people,
+      id, status, payment_status, total_amount_zar, amount_paid_zar, occasion_date, cake_description, number_of_people,
       colours_and_themes, inspiration_photo_url, created_at,
       customer:customers ( full_name, email, whatsapp_number ),
       member:circle_members ( person_name, occasion_type, relationship_to_customer )
@@ -65,6 +65,9 @@ export default async function OrdersPage() {
       return {
         id: o.id,
         status: o.status || "enquiry",
+        payment_status: o.payment_status || "unpaid",
+        total_amount_zar: o.total_amount_zar,
+        amount_paid_zar: o.amount_paid_zar,
         customer_name: customer.full_name || "A customer",
         customer_email: customer.email || "",
         customer_phone: customer.whatsapp_number || null,

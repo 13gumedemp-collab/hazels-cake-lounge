@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 export interface OrderCard {
   id: string;
   status: string;
+  payment_status: string;
+  total_amount_zar: number | null;
+  amount_paid_zar: number | null;
   customer_name: string;
   customer_email: string;
   customer_phone: string | null;
@@ -21,7 +24,7 @@ export interface OrderCard {
 const STAGES: { key: string; label: string }[] = [
   { key: "enquiry", label: "New enquiries" },
   { key: "quoted", label: "Quoted" },
-  { key: "deposit_paid", label: "Paid in full" },
+  { key: "deposit_paid", label: "Confirmed" },
   { key: "baking", label: "Baking" },
   { key: "ready", label: "Ready" },
   { key: "completed", label: "Completed" },
@@ -64,6 +67,21 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
     } finally {
       setBusy(null);
     }
+  }
+
+  async function setPayment(id: string, payment_status: string) {
+    const totalRaw = window.prompt("Total order amount in ZAR. Leave blank to keep it unchanged.", "");
+    if (totalRaw === null) return;
+    const paidRaw = window.prompt("Amount paid in ZAR. Leave blank to keep it unchanged.", "");
+    if (paidRaw === null) return;
+    setBusy(id);
+    try {
+      const r = await fetch("/api/orders/payment", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: id, payment_status, total_amount_zar: totalRaw || null, amount_paid_zar: paidRaw || null }),
+      });
+      if (r.ok) router.refresh();
+    } finally { setBusy(null); }
   }
 
   const byStage = (k: string) => orders.filter((o) => statusOf(o) === k);
@@ -115,6 +133,7 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
                         {cd && <span className={`text-[11px] whitespace-nowrap ${cd.tone}`}>{cd.text}</span>}
                       </div>
                       <p className="text-sm text-gold mt-1">{o.celebration}</p>
+                      <p className="text-[11px] text-creamSoft mt-1">Payment: {o.payment_status.replaceAll("_", " ")}</p>
                       {o.occasion_date && <p className="text-[11px] text-muted mt-1">{o.occasion_date}</p>}
                       {o.photos.length > 0 && (
                         <div className="flex gap-1.5 mt-3">
@@ -136,6 +155,7 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
                           {o.number_of_people && <p className="text-creamSoft"><span className="text-muted">Serves:</span> {o.number_of_people}</p>}
                           {o.cake_description && <p className="text-creamSoft whitespace-pre-line"><span className="text-muted">Notes:</span> {o.cake_description}</p>}
                           {o.colours_and_themes && <p className="text-creamSoft"><span className="text-muted">Theme:</span> {o.colours_and_themes}</p>}
+                          {(o.total_amount_zar != null || o.amount_paid_zar != null) && <p className="text-creamSoft"><span className="text-muted">Payment:</span> R {Number(o.amount_paid_zar || 0).toFixed(2)} paid{o.total_amount_zar != null ? ` of R ${Number(o.total_amount_zar).toFixed(2)}` : ""}</p>}
                           {o.photos.length > 0 && (
                             <div className="flex flex-wrap gap-2 pt-1">
                               {o.photos.map((p, i) => (
@@ -148,6 +168,10 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
                           {/* Cinematic stage selector (chips) */}
                           {isOpen && (
                             <div className="pt-2">
+                              <label className="text-[11px] text-muted block mb-2">Payment status</label>
+                              <div className="flex flex-wrap gap-1.5 mb-3">
+                                {[['unpaid','Unpaid'],['deposit_paid','Deposit paid'],['paid_in_full','Paid in full']].map(([key,label]) => <button key={key} onClick={() => setPayment(o.id,key)} className={`px-2.5 py-1.5 rounded-full text-[11px] border ${o.payment_status === key ? "bg-gold text-ink border-gold" : "border-line text-creamSoft"}`}>{label}</button>)}
+                              </div>
                               <label className="text-[11px] text-muted block mb-2">Move to, or drag the card</label>
                               <div className="flex flex-wrap gap-1.5">
                                 {STAGES.map((s, i) => {

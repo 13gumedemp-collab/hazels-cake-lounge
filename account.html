@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>My Cake Calendar | Hazel's Cake Lounge</title>
+  <meta name="description" content="Sign in to view your Hazel's Cake Lounge calendar, orders, payments and reminders." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true"><div class="loader__inner"><span class="loader__name">Hazel's</span></div><div class="loader__count"><span id="loaderCount">00</span></div></div>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link"><span>Hazel's</span><em>Cake Lounge</em></a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a><a href="work.html" data-cursor="link">My Work</a>
+      <a href="occasion-book.html" data-cursor="link">The Occasion Book</a><a href="reviews.html" data-cursor="link">Community</a>
+      <a href="contact.html" data-cursor="link">Contact</a><a href="account.html" class="is-active" data-cursor="link">My Account</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
+  </header>
+
+  <main class="account-page" id="top">
+    <section class="account-auth" id="accountAuth">
+      <p class="page-hero__eyebrow">My Cake Calendar</p>
+      <h1>Everything you are<br /><em class="gold">celebrating.</em></h1>
+      <p>Sign in to see your saved dates, confirmed cakes, payments and reminders.</p>
+      <button class="btn btn--solid account-google" id="googleSignIn" type="button">Continue with Google</button>
+      <div class="account-divider"><span>or</span></div>
+      <form id="magicLinkForm" class="account-login-form">
+        <label class="field"><span>Email address</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com" /></label>
+        <button class="btn" type="submit">Email me a sign-in link</button>
+      </form>
+      <p class="form__status" id="authStatus" role="status"></p>
+    </section>
+
+    <section class="account-dashboard" id="accountDashboard" hidden>
+      <div class="account-welcome">
+        <div><p class="page-hero__eyebrow">My Cake Calendar</p><h1>Welcome, <span id="accountName">there</span>.</h1></div>
+        <button class="account-signout" id="signOut" type="button">Sign out</button>
+      </div>
+      <nav class="account-tabs" aria-label="Account sections">
+        <button class="is-active" data-account-tab="calendar">Calendar</button>
+        <button data-account-tab="orders">Orders</button>
+        <button data-account-tab="dates">Saved dates</button>
+        <button data-account-tab="profile">My details</button>
+      </nav>
+
+      <div class="account-panel is-active" data-account-panel="calendar">
+        <div class="account-section-head"><div><span>Coming up</span><h2>Your calendar</h2></div></div>
+        <div class="account-calendar" id="accountCalendar"></div>
+      </div>
+      <div class="account-panel" data-account-panel="orders">
+        <div class="account-section-head"><div><span>Cakes</span><h2>Your orders</h2></div></div>
+        <div class="account-list" id="accountOrders"></div>
+      </div>
+      <div class="account-panel" data-account-panel="dates">
+        <div class="account-section-head"><div><span>Occasion Book</span><h2>Saved dates</h2></div><a class="btn" href="occasion-book.html">Add a date</a></div>
+        <div class="account-list" id="accountDates"></div>
+      </div>
+      <div class="account-panel" data-account-panel="profile">
+        <div class="account-section-head"><div><span>South Africa</span><h2>Your details</h2></div></div>
+        <form class="account-profile" id="accountProfile">
+          <div class="form__row"><label class="field"><span>Full name</span><input name="full_name" required /></label><label class="field"><span>Phone number</span><input name="whatsapp_number" inputmode="tel" placeholder="+27" /></label></div>
+          <label class="field"><span>Address</span><input name="address_line_1" placeholder="Street address" /></label>
+          <label class="field"><span>Address line 2 <em class="field__opt">(optional)</em></span><input name="address_line_2" /></label>
+          <div class="form__row"><label class="field"><span>Suburb</span><input name="suburb" /></label><label class="field"><span>City</span><input name="city" /></label></div>
+          <div class="form__row"><label class="field"><span>Province</span><select name="province"><option value="">Choose one</option><option>Eastern Cape</option><option>Free State</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Limpopo</option><option>Mpumalanga</option><option>Northern Cape</option><option>North West</option><option>Western Cape</option></select></label><label class="field"><span>Postal code</span><input name="postal_code" inputmode="numeric" /></label></div>
+          <fieldset class="account-preferences"><legend>Reminder preferences</legend><label><input type="checkbox" name="email_consent" /> Email</label><label><input type="checkbox" name="whatsapp_consent" /> WhatsApp</label><label><input type="checkbox" name="phone_call_consent" /> Phone call from Hazel</label></fieldset>
+          <button class="btn btn--solid" type="submit">Save my details</button><p class="form__status" id="profileStatus"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="main.js"></script>
+  <script type="module" src="account.js"></script>
+</body>
+</html>
