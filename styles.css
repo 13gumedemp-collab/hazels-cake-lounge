@@ -868,6 +868,11 @@ html.enq-open, body.enq-open { overflow: hidden; }
 .enq__drop.is-drag { border-color: var(--gold); background: rgba(212,175,55,0.06); }
 .enq__drop-empty p { font-family: 'Jost', sans-serif; color: var(--cream); font-size: 0.9rem; }
 .enq__drop-empty small { display: block; margin-top: 0.4rem; color: var(--muted); font-size: 0.74rem; }
+.upload-copy--mobile { display: none; }
+@media (max-width: 760px) {
+  .upload-copy--desktop { display: none; }
+  .upload-copy--mobile { display: inline; }
+}
 .enq__drop-preview { position: relative; display: inline-block; }
 .enq__drop-preview img { max-height: 160px; border-radius: 3px; }
 .enq__drop-x { position: absolute; top: -10px; right: -10px; width: 26px; height: 26px;
