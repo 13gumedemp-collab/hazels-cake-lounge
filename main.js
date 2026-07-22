@@ -866,7 +866,7 @@
           if (otherField) otherField.hidden = t !== 'Other';
           if (hint) {
             if (ONE_OFF_TYPES.includes(t)) {
-              hint.textContent = 'A one off occasion. I will not repeat it every year, but you can still plan it here for any date down the line.';
+              hint.textContent = 'I will save this event only for the date you enter. It will not repeat every year.';
               hint.hidden = false;
             } else { hint.hidden = true; }
           }
@@ -886,7 +886,7 @@
         addStatus.textContent = '';
         const f = Object.fromEntries(new FormData(addForm));
         if (!String(f.full_name || '').trim() || !String(f.email || '').trim()) {
-          addStatus.textContent = 'Please add your name and email so I can find or start your record.';
+          addStatus.textContent = 'Please add your name and email so I can save the date and send your reminders.';
           return;
         }
         const items = $$('.occ-block', blocks).map((b) => ({
@@ -924,7 +924,7 @@
           } catch (err) { failed = true; }
         }
         if (added) {
-          addForm.innerHTML = '<div class="form-success"><h3>You are in the book.</h3><p>I have added ' + added + ' occasion' + (added > 1 ? 's' : '') + ' for you. I will reach out before each one so you never have to remember, whether or not you order ahead of time.</p></div>';
+          addForm.innerHTML = '<div class="form-success"><h3>Your date is saved.</h3><p>I have saved ' + added + ' occasion' + (added > 1 ? 's' : '') + ' for you. I will email you before each date. You can decide then whether you would like to order a cake.</p></div>';
         } else {
           if (btn) { btn.disabled = false; btn.textContent = label; }
           addStatus.textContent = 'Something went wrong. Please try again, or email hello@hazelscakelounge.co.za.';

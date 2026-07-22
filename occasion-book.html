@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0b0a08" />
   <title>The Occasion Book | Hazel's Cake Lounge</title>
-  <meta name="description" content="Every time you order with Hazel, your occasion goes into her Occasion Book. She reaches out before each one so you never have to remember." />
+  <meta name="description" content="Save a future cake date for free. Hazel will email you before the occasion, and you can choose to order and pay later." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -35,53 +35,53 @@
     <section class="page-hero">
       <p class="page-hero__eyebrow reveal-up">The Occasion Book</p>
       <h1 class="page-hero__title">
-        <span class="kinetic" data-split="words" data-stagger="0.06" data-distance="30">Every occasion.</span>
-        <span class="kinetic gold" data-split="words" data-stagger="0.06" data-distance="30" data-delay="0.12">Remembered.</span>
+        <span class="kinetic" data-split="words" data-stagger="0.06" data-distance="30">Save the date.</span>
+        <span class="kinetic gold" data-split="words" data-stagger="0.06" data-distance="30" data-delay="0.12">Order later.</span>
       </h1>
-      <p class="page-hero__lede reveal-up">Every time you order with me, I add your occasion to my personal record. Before each one arrives I will reach out so you never have to think about it. No reminders on your phone. No calendar alerts. I remember for you.</p>
+      <p class="page-hero__lede reveal-up">Not ready to order or pay for a cake yet? Add the date to my Occasion Book for free. I will email you before the occasion, and you can decide later if you would like to place an order.</p>
       <span class="hero-rule reveal-up"></span>
     </section>
 
     <!-- How I remember: a quiet, looping sequence -->
     <section class="seq reveal-up" aria-label="How I reach out before each occasion">
-      <p class="seq__eyebrow">How I reach out</p>
+      <p class="seq__eyebrow">Your email reminders</p>
       <div class="seq__track">
         <span class="seq__line"></span>
         <span class="seq__line seq__line--lit"></span>
         <div class="seq__step" style="--i:0">
           <span class="seq__dot"></span>
           <span class="seq__when">One month before</span>
-          <span class="seq__note">A first, gentle word so there is time to plan.</span>
+          <span class="seq__note">I will remind you early so there is enough time to plan.</span>
         </div>
         <div class="seq__step" style="--i:1">
           <span class="seq__dot"></span>
           <span class="seq__when">Two weeks before</span>
-          <span class="seq__note">A quiet check in so the details can settle.</span>
+          <span class="seq__note">I will check whether you would like to enquire about a cake.</span>
         </div>
         <div class="seq__step" style="--i:2">
           <span class="seq__dot"></span>
           <span class="seq__when">One week before</span>
-          <span class="seq__note">A final reminder, and the cake is taken care of.</span>
+          <span class="seq__note">I will send one last reminder so you can decide.</span>
         </div>
       </div>
-      <p class="seq__foot">Then every year, automatically. You never have to remember.</p>
+      <p class="seq__foot">Saving a date does not place an order or reserve a cake. You choose whether to order when you are ready.</p>
     </section>
 
     <!-- Add another occasion -->
     <section class="contactwrap">
       <aside class="info reveal-up">
-        <h2 class="info__title">Who is the cake for?</h2>
+        <h2 class="info__title">Save a date for later</h2>
         <div class="info__row">
           <span class="info__label">What this does</span>
-          <p>Fill in the people and dates you never want to miss. I save each one in my Occasion Book and reach out before the day arrives, so the cake is sorted long before you would have remembered to ask. You are not ordering anything right now. You are simply making sure I remember for you.</p>
+          <p>Add the event date and any cake ideas you already have. I will save them and email you as the date gets closer.</p>
         </div>
         <div class="info__row">
-          <span class="info__label">Everyone is welcome</span>
-          <p>You do not need to have ordered before, and you do not need to be ordering today. Add the occasions you care about and I will keep them safe.</p>
+          <span class="info__label">No order or payment now</span>
+          <p>You do not need to enquire, choose a cake, or pay anything today. The Occasion Book is simply a reminder service.</p>
         </div>
         <div class="info__row">
-          <span class="info__label">Yearly or one off</span>
-          <p>Birthdays and anniversaries I remember every single year. One off occasions like a wedding or a graduation I will not repeat, but you can still use this page to plan one for a date down the line. Add one person or your whole circle in one go.</p>
+          <span class="info__label">What happens next</span>
+          <p>When you receive a reminder, you can choose to enquire and pay for a cake then. Birthdays and anniversaries can stay in the book every year. Weddings, graduations, and other one time events are saved only for the date you enter.</p>
         </div>
       </aside>
 
@@ -101,7 +101,7 @@
           <div id="occBlocks"></div>
 
           <button type="button" class="enq__add" id="addAnother" data-cursor="link">+ Add another occasion</button>
-          <button type="submit" class="btn btn--solid" data-cursor="link">Add to my Occasion Book</button>
+          <button type="submit" class="btn btn--solid" data-cursor="link">Save this date</button>
           <p class="form__status" id="addOccasionStatus" role="status" aria-live="polite"></p>
         </form>
       </div>
@@ -141,8 +141,8 @@
           <input type="date" class="occ-date" />
         </label>
         <label class="field">
-          <span>Notes or flavour preferences</span>
-          <textarea class="occ-notes" rows="2" placeholder="Anything I should remember about them"></textarea>
+          <span>Cake ideas or notes <em class="field__opt">(optional)</em></span>
+          <textarea class="occ-notes" rows="2" placeholder="Add any ideas you already have"></textarea>
         </label>
         <button type="button" class="occ-remove" data-cursor="link" hidden>Remove this occasion</button>
       </div>
