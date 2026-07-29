@@ -22,6 +22,10 @@ const googleCalendarUrl = (title, date, details) => {
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 };
 
+// Everything the customer told me on the enquiry form, so the order card can
+// show it all back to them.
+const ORDER_FIELDS = 'id,status,payment_status,total_amount_zar,amount_paid_zar,occasion_date,order_date,cake_flavour,cake_description,colours_and_themes,number_of_people,delivery_or_collection,delivery_address,cake_photo_url,inspiration_photo_url,invoice_path,receipt_path,created_at,circle_member:circle_members(person_name,occasion_type,relationship_to_customer,notes)';
+
 const REDIRECT = location.origin + '/account.html';
 const PROVIDERS = { google: 'Google' };
 let pendingEmail = '';
@@ -77,11 +81,20 @@ function syncRequired(form) {
 
 function nextSignUpStep() {
   const form = $('#signUpForm');
-  for (const input of [form.elements.full_name, form.elements.email]) {
+  for (const input of [form.elements.first_name, form.elements.last_name, form.elements.email]) {
     if (!input.reportValidity()) return;
   }
   authStatus.textContent = '';
   signUpStep(2);
+}
+
+function nextSignUpStep2() {
+  const form = $('#signUpForm');
+  const password = String(form.elements.password.value || '');
+  if (password.length < 8) { authStatus.textContent = 'Please use at least 8 characters for your password.'; return; }
+  if (password !== String(form.elements.confirm_password.value || '')) { authStatus.textContent = 'Those two passwords do not match.'; return; }
+  authStatus.textContent = '';
+  signUpStep(3);
 }
 
 function signUpStep(n) {
@@ -91,6 +104,7 @@ function signUpStep(n) {
   if (!next || current === next) return;
   $('#signUpStepNum').textContent = String(n);
   swap(current, next);
+  if (n === 3) setTimeout(syncSignUpPrefs, REDUCED ? 0 : 340);
   setTimeout(() => syncRequired(form), REDUCED ? 0 : 320);
 }
 
@@ -140,18 +154,36 @@ async function signIn(e) {
   authStatus.textContent = friendly(error);
 }
 
+const syncSignUpPrefs = () => {};
+
 async function createAccount(e) {
   e.preventDefault();
-  // Enter on the first step means "continue", not "create my account".
+  // Enter part way through means "continue", not "create my account".
   if ($('[data-signup-step="2"]').hidden) { nextSignUpStep(); return; }
+  if ($('[data-signup-step="3"]').hidden) { nextSignUpStep2(); return; }
   const f = new FormData(e.currentTarget);
-  const full_name = String(f.get('full_name') || '').trim();
+  const first_name = String(f.get('first_name') || '').trim();
+  const last_name = String(f.get('last_name') || '').trim();
+  const full_name = [first_name, last_name].filter(Boolean).join(' ');
   const email = String(f.get('email') || '').trim();
   const password = String(f.get('password') || '');
   if (password.length < 8) { authStatus.textContent = 'Please use at least 8 characters for your password.'; return; }
   if (password !== String(f.get('confirm_password') || '')) { authStatus.textContent = 'Those two passwords do not match.'; return; }
+  const el = e.currentTarget.elements;
   authStatus.textContent = 'Creating your account...';
-  const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name }, emailRedirectTo: REDIRECT } });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: REDIRECT,
+      data: {
+        first_name, last_name, full_name,
+        email_consent: el.email_consent.checked,
+        whatsapp_consent: el.whatsapp_consent.checked,
+        phone_call_consent: el.phone_call_consent.checked,
+      },
+    },
+  });
   if (error) { authStatus.textContent = friendly(error); return; }
   // Supabase returns a user with no identities when the email is already taken.
   if (data.user && !data.user.identities?.length) {
@@ -222,21 +254,27 @@ async function loadAccount(session) {
   void supabase.functions.invoke('account-created-alert').catch(() => {});
   const [datesRes, ordersRes] = await Promise.all([
     supabase.from('circle_members').select('*').eq('customer_id', customer.id).order('occasion_date'),
-    supabase.from('orders').select('id,status,payment_status,total_amount_zar,amount_paid_zar,occasion_date,cake_flavour,cake_description,delivery_or_collection,invoice_path,receipt_path,created_at,circle_member:circle_members(person_name,occasion_type)').eq('customer_id', customer.id).order('occasion_date'),
+    supabase.from('orders').select(ORDER_FIELDS).eq('customer_id', customer.id).order('occasion_date'),
   ]);
   occasions = datesRes.data || [];
   orders = ordersRes.data || [];
   authBox.hidden = true; dashboard.hidden = false;
-  $('#accountName').textContent = (customer.full_name || session.user.email).split(' ')[0];
-  setNavName(customer.full_name);
+  $('#accountName').textContent = customer.first_name || (customer.full_name || session.user.email).split(' ')[0];
+  setNavName(customer.first_name || customer.full_name);
   fillProfile(); renderAll(); setUpProvince();
   // The tabs have no width until the dashboard is on screen.
   requestAnimationFrame(moveTabInk);
 }
 
 function calendarItems() {
+  // Once a cake is ordered for an occasion, the order speaks for it. Showing the
+  // saved date as well made the same celebration appear twice.
+  const booked = new Set(orders.filter((o) => o.circle_member)
+    .map((o) => `${o.occasion_date}|${o.circle_member.person_name}|${o.circle_member.occasion_type}`));
   return [
-    ...occasions.map((o) => ({ date: o.occasion_date, type: 'Saved date', title: `${o.person_name}'s ${o.occasion_type}`, detail: 'No cake is booked yet.' })),
+    ...occasions
+      .filter((o) => !booked.has(`${o.occasion_date}|${o.person_name}|${o.occasion_type}`))
+      .map((o) => ({ date: o.occasion_date, type: 'Saved date', title: `${o.person_name}'s ${o.occasion_type}`, detail: 'No cake is booked yet.' })),
     ...orders.map((o) => ({ date: o.occasion_date, type: 'Cake order', title: o.circle_member ? `${o.circle_member.person_name}'s ${o.circle_member.occasion_type}` : (o.cake_description || 'Cake order'), detail: `${statusLabel(o.status)}. ${paymentLabel(o.payment_status)}.` })),
   ].sort((a, b) => String(a.date).localeCompare(String(b.date)));
 }
@@ -249,6 +287,51 @@ let calSelected = null; // 'YYYY-MM-DD'
 
 const OCCASIONS = ['Birthday','Anniversary','Wedding','Baby shower','Graduation','Engagement','Baptism','Retirement','Just because','Other'];
 let editingDate = null;
+let openOrder = null;
+let reorderFor = null;
+
+// Everything the customer filled in, shown back to them exactly as given.
+function orderDetail(o) {
+  const cm = o.circle_member || {};
+  const rows = [
+    ['Occasion', cm.person_name ? `${cm.person_name}'s ${cm.occasion_type || 'celebration'}` : null],
+    ['Their relationship to you', cm.relationship_to_customer],
+    ['Needed for', o.occasion_date ? pretty(o.occasion_date) : null],
+    ['Flavour', o.cake_flavour],
+    ['What you asked for', o.cake_description],
+    ['Colours and theme', o.colours_and_themes],
+    ['Number of people', o.number_of_people],
+    ['Delivery or collection', o.delivery_or_collection],
+    ['Delivery address', o.delivery_address],
+    ['Your notes', cm.notes],
+    ['Enquiry sent', o.created_at ? pretty(String(o.created_at).slice(0, 10)) : null],
+  ].filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== '');
+
+  const photo = o.inspiration_photo_url || o.cake_photo_url;
+  return `<div class="odetail">
+    <h4>What you asked for</h4>
+    <dl class="odetail__list">${rows.map(([k, v]) => `<div><dt>${safe(k)}</dt><dd>${safe(v)}</dd></div>`).join('')}</dl>
+    ${photo ? `<a class="odetail__photo" href="${safe(photo)}" target="_blank" rel="noopener"><img src="${safe(photo)}" alt="The inspiration picture you sent" loading="lazy" /></a>` : ''}
+    <p class="odetail__foot">If any of this needs changing, reply to any email from me and I will sort it out.</p>
+  </div>`;
+}
+
+function reorderForm(o) {
+  const title = o.circle_member ? `${o.circle_member.person_name}'s ${o.circle_member.occasion_type}` : (o.cake_description || 'this cake');
+  return `<form class="oreorder" data-reorder-form="${o.id}">
+    <h4>Order this again</h4>
+    <p>I will start a fresh enquiry for ${safe(title)} using the same details. Tell me when you need it and I will confirm and quote.</p>
+    <div class="form__row">
+      <label class="field"><span>When do you need it</span><input type="date" name="requested_date" min="${earliestDate()}" required /></label>
+      <label class="field"><span>Anything different this time <em class="field__opt">(optional)</em></span><input type="text" name="note" placeholder="A different flavour, size, or colour" /></label>
+    </div>
+    <p class="account-fineprint account-fineprint--left">Every cake needs at least four full days' notice, so the earliest I can take is ${safe(pretty(earliestDate()))}.</p>
+    <div class="ecard__actions ecard__actions--edit">
+      <button type="submit">Send this enquiry</button>
+      <button type="button" data-cancel-reorder>Cancel</button>
+    </div>
+  </form>`;
+}
 
 // The site holds every cake date to four full days' notice.
 const earliestDate = () => {
@@ -268,7 +351,7 @@ function dateEditor(o) {
       </div>
       <div class="form__row">
         <label class="field"><span>Date</span><input type="date" name="occasion_date" value="${safe(o.occasion_date || '')}" min="${earliestDate()}" required /></label>
-        <label class="consent ecard__repeat"><input type="checkbox" name="recurring_yearly"${o.recurring_yearly ? ' checked' : ''} /><span class="consent__box" aria-hidden="true"></span><span>Remind me every year</span></label>
+        <label class="pref ecard__repeat"><input type="checkbox" name="recurring_yearly"${o.recurring_yearly ? ' checked' : ''} /><span class="pref__box" aria-hidden="true"></span><span>Remind me every year</span></label>
       </div>
       <div class="ecard__actions ecard__actions--edit">
         <button type="submit">Save changes</button>
@@ -311,6 +394,102 @@ function dayDetail(map) {
     </article>`).join('');
 }
 
+let calPicker = false;
+let sheetDate = null;
+
+// Tapping any day offers to put it in the Occasion Book.
+function openDateSheet(key) {
+  const sheet = $('#dateSheet');
+  const form = $('#dateSheetForm');
+  if (!sheet || !form) return;
+  sheetDate = key;
+  $('#sheetDate').textContent = pretty(key);
+  $('#sheetStatus').textContent = '';
+  form.reset();
+
+  const tooSoon = key < earliestDate();
+  $$('.sheet__fields, .sheet__actions .btn[type="submit"], .consent', sheet).forEach((el) => { el.hidden = tooSoon; });
+  $('#sheetStatus').textContent = tooSoon
+    ? `That date is either past or too close. I need four full days, so the earliest is ${pretty(earliestDate())}.`
+    : '';
+
+  const select = form.elements.occasion_type;
+  if (select && !select.options.length) {
+    select.innerHTML = ['<option value="" disabled selected>Choose one</option>']
+      .concat(OCCASIONS.map((o) => `<option>${safe(o)}</option>`)).join('');
+    window.hclEnhanceSelects?.(form);
+  }
+  sheet.hidden = false;
+  requestAnimationFrame(() => sheet.classList.add('is-open'));
+}
+
+function closeDateSheet() {
+  const sheet = $('#dateSheet');
+  sheet.classList.remove('is-open');
+  setTimeout(() => { sheet.hidden = true; }, REDUCED ? 0 : 320);
+  sheetDate = null;
+}
+
+async function saveSheetDate(e) {
+  e.preventDefault();
+  if (!sheetDate) return;
+  const f = new FormData(e.currentTarget);
+  const person = String(f.get('person_name') || '').trim();
+  const type = String(f.get('occasion_type') || '').trim();
+  if (!person || !type) { $('#sheetStatus').textContent = 'Please say who it is for and what the occasion is.'; return; }
+  $('#sheetStatus').textContent = 'Saving...';
+  const { error } = await supabase.from('circle_members').insert({
+    customer_id: customer.id,
+    person_name: person,
+    occasion_type: type,
+    occasion_date: sheetDate,
+    recurring_yearly: e.currentTarget.elements.recurring_yearly.checked,
+  });
+  if (error) { $('#sheetStatus').textContent = friendly(error); return; }
+  closeDateSheet();
+  await refreshData();
+}
+
+function monthPicker(year, month) {
+  return `<div class="calpick">
+    <div class="calpick__years">
+      <button type="button" data-cal-year="${year - 1}" aria-label="Previous year">&#8249;</button>
+      <b>${year}</b>
+      <button type="button" data-cal-year="${year + 1}" aria-label="Next year">&#8250;</button>
+    </div>
+    <div class="calpick__months">${MONTHS.map((m, i) => `<button type="button" class="${i === month ? 'is-active' : ''}" data-cal-month="${i}">${m.slice(0, 3)}</button>`).join('')}</div>
+    <button type="button" class="calpick__today" data-cal-today>Back to this month</button>
+  </div>`;
+}
+
+// The panel beside the calendar on desktop: who they are, what is coming, and
+// what the two colours of heartbeat mean.
+function renderCalSide(map) {
+  const side = $('#calSide');
+  if (!side) return;
+  const todayKey = ymd(new Date());
+  const first = customer?.first_name || String(customer?.full_name || '').trim().split(/\s+/)[0] || 'there';
+  const upcomingDates = occasions.filter((o) => String(o.occasion_date) >= todayKey).length;
+  const openOrders = orders.filter((o) => o.status !== 'completed').length;
+  const nextKey = [...map.keys()].filter((k) => k >= todayKey).sort()[0];
+  const nextItem = nextKey ? (map.get(nextKey) || [])[0] : null;
+
+  side.innerHTML = `
+    <p class="page-hero__eyebrow">Your Cake Calendar</p>
+    <h3 class="calside__title">Good to see you, ${safe(first)}.</h3>
+    <p class="calside__body">This is where your saved dates and orders live. Add anything you would rather not forget and I will remember it for you.</p>
+    <dl class="calside__stats">
+      <div><dt>Cakes on the go</dt><dd>${openOrders}</dd></div>
+      <div><dt>Dates saved</dt><dd>${upcomingDates}</dd></div>
+    </dl>
+    ${nextItem ? `<p class="calside__next"><span>Next up</span><b>${safe(nextItem.title)}</b><i>${safe(pretty(nextKey))}</i></p>` : ''}
+    <ul class="callegend">
+      <li><i class="cal__pip cal__pip--order"></i>A cake order</li>
+      <li><i class="cal__pip cal__pip--date"></i>A saved date from the Occasion Book</li>
+    </ul>
+    <p class="calside__hint">Reminders arrive a month, two weeks and a week before. Nothing is booked.</p>`;
+}
+
 function renderCalendar() {
   const map = itemsByDate();
   const todayKey = ymd(new Date());
@@ -327,22 +506,26 @@ function renderCalendar() {
   for (let i = 0; i < lead; i += 1) cells.push('<span class="cal__pad"></span>');
   for (let day = 1; day <= total; day += 1) {
     const key = ymd(new Date(year, month, day));
-    const marked = map.has(key);
-    const classes = ['cal__day', marked ? 'is-marked' : '', key === todayKey ? 'is-today' : '', key === calSelected ? 'is-selected' : ''].filter(Boolean).join(' ');
-    const label = marked ? ` aria-label="${map.get(key).length} on ${day} ${MONTHS[month]}"` : '';
-    cells.push(`<button type="button" class="${classes}" data-date="${key}"${label}><span>${day}</span></button>`);
+    const on = map.get(key) || [];
+    const kinds = [...new Set(on.map((i) => (i.type === 'Cake order' ? 'order' : 'date')))];
+    const classes = ['cal__day', on.length ? 'is-marked' : '', key === todayKey ? 'is-today' : '', key === calSelected ? 'is-selected' : ''].filter(Boolean).join(' ');
+    const label = on.length ? ` aria-label="${on.length} on ${day} ${MONTHS[month]}: ${on.map((i) => i.type).join(', ')}"` : '';
+    const pips = kinds.length ? `<span class="cal__pips">${kinds.map((k) => `<i class="cal__pip cal__pip--${k}"></i>`).join('')}</span>` : '';
+    cells.push(`<button type="button" class="${classes}" data-date="${key}"${label}><span>${day}</span>${pips}</button>`);
   }
 
   $('#accountCalendar').innerHTML = `
     <div class="cal">
       <div class="cal__head">
         <button type="button" class="cal__nav" data-cal-step="-1" aria-label="Previous month">&#8249;</button>
-        <h3 class="cal__month">${MONTHS[month]} ${year}</h3>
+        <button type="button" class="cal__month" data-cal-picker aria-expanded="${calPicker}" aria-label="Jump to another month">${MONTHS[month]} ${year}</button>
         <button type="button" class="cal__nav" data-cal-step="1" aria-label="Next month">&#8250;</button>
+        ${calPicker ? monthPicker(year, month) : ''}
       </div>
       <div class="cal__grid">${DOW.map((d) => `<span class="cal__dow">${d}</span>`).join('')}${cells.join('')}</div>
     </div>
     <div class="cal__detail">${dayDetail(map)}</div>`;
+  renderCalSide(map);
 }
 
 function renderAll() {
@@ -365,10 +548,14 @@ function renderAll() {
         ${money}
       </div>
       <div class="ecard__actions">
+        <button data-open-order="${o.id}" aria-expanded="${openOrder === o.id}">${openOrder === o.id ? 'Hide details' : 'View details'}</button>
         <button data-reorder="${o.id}">Order this again</button>
         ${o.invoice_path ? `<button data-file="invoice" data-order="${o.id}">Invoice</button>` : ''}
         ${o.receipt_path ? `<button data-file="receipt" data-order="${o.id}">Receipt</button>` : ''}
-      </div></article>`;
+      </div>
+      ${openOrder === o.id ? orderDetail(o) : ''}
+      ${reorderFor === o.id ? reorderForm(o) : ''}
+    </article>`;
   }).join('') : empty('No cakes ordered yet. When you send an enquiry it will appear here, and you can follow it from quote to collection.');
 
   $('#accountDates').innerHTML = occasions.length ? occasions.map((o) => (
@@ -382,6 +569,7 @@ function renderAll() {
       </div>
       <div class="ecard__actions"><button data-edit-date="${o.id}">Edit</button><button data-delete-date="${o.id}">Remove</button></div>
     </article>`)).join('') : empty('No dates saved yet. Add the birthdays and anniversaries you never want to miss and I will remind you, free, with no cake booked.');
+  window.hclEnhanceSelects?.($('#accountDates'));
 }
 
 const empty = (message) => `<p class="account-empty">${safe(message)}</p>`;
@@ -444,10 +632,30 @@ function setUpProvince() {
 
 function fillProfile() {
   const form = $('#accountProfile');
-  ['full_name','whatsapp_number','address_line_1','address_line_2','suburb','city','province','postal_code'].forEach((name) => { form.elements[name].value = customer[name] || ''; });
+  ['first_name','last_name','whatsapp_number','address_line_1','address_line_2','suburb','city','province','postal_code'].forEach((name) => { form.elements[name].value = customer[name] || ''; });
   ['email_consent','whatsapp_consent','phone_call_consent'].forEach((name) => { form.elements[name].checked = !!customer[name]; });
   const emailField = $('#emailChangeForm')?.elements.new_email;
   if (emailField) emailField.value = customer.email || '';
+  syncPrefsSummary();
+}
+
+// The closed disclosure has to say, at a glance, what they are signed up to.
+function syncPrefsSummary() {
+  const form = $('#accountProfile');
+  const out = $('#prefsSummary');
+  if (!form || !out) return;
+  const on = [
+    form.elements.email_consent?.checked && 'Email',
+    form.elements.whatsapp_consent?.checked && 'WhatsApp',
+    form.elements.phone_call_consent?.checked && 'Phone calls',
+  ].filter(Boolean);
+  out.textContent = on.length ? on.join(', ') : 'Order emails only';
+  const agreed = $('#prefsAgreed');
+  if (agreed) {
+    agreed.textContent = on.length
+      ? `Right now you have agreed to: ${on.join(', ').toLowerCase()}. Untick a box and I will stop that one.`
+      : 'You have not agreed to any reminders. I will only email you about a cake you have actually ordered.';
+  }
 }
 
 async function saveProfile(e) {
@@ -455,7 +663,7 @@ async function saveProfile(e) {
   const f = new FormData(e.currentTarget);
   const phone = String(f.get('whatsapp_number') || '').trim();
   if (phone && !/^(?:\+27|0)[6-8]\d{8}$/.test(phone.replace(/\s/g, ''))) { $('#profileStatus').textContent = 'Please enter a valid South African phone number.'; return; }
-  const payload = Object.fromEntries(['full_name','whatsapp_number','address_line_1','address_line_2','suburb','city','province','postal_code'].map((n) => [n, String(f.get(n) || '').trim() || null]));
+  const payload = Object.fromEntries(['first_name','last_name','whatsapp_number','address_line_1','address_line_2','suburb','city','province','postal_code'].map((n) => [n, String(f.get(n) || '').trim() || null]));
   payload.province = matchProvince(payload.province); // the column only accepts the nine
   ['email_consent','whatsapp_consent','phone_call_consent'].forEach((n) => { payload[n] = e.currentTarget.elements[n].checked; });
   // POPIA: record when WhatsApp consent was actually given, not just that it is on.
@@ -463,7 +671,7 @@ async function saveProfile(e) {
   if (!payload.whatsapp_consent) payload.whatsapp_consent_date = null;
   const { data, error } = await supabase.from('customers').update(payload).eq('id', customer.id).select().single();
   $('#profileStatus').textContent = error ? error.message : 'Your details are saved.';
-  if (data) { customer = data; setNavName(customer.full_name); $('#accountName').textContent = String(customer.full_name || '').split(' ')[0] || 'there'; }
+  if (data) { customer = data; setNavName(customer.first_name || customer.full_name); $('#accountName').textContent = customer.first_name || String(customer.full_name || '').split(' ')[0] || 'there'; }
 }
 
 const securityStatus = () => $('#securityStatus');
@@ -472,11 +680,39 @@ const securityStatus = () => $('#securityStatus');
 async function refreshData() {
   const [datesRes, ordersRes] = await Promise.all([
     supabase.from('circle_members').select('*').eq('customer_id', customer.id).order('occasion_date'),
-    supabase.from('orders').select('id,status,payment_status,total_amount_zar,amount_paid_zar,occasion_date,cake_flavour,cake_description,delivery_or_collection,invoice_path,receipt_path,created_at,circle_member:circle_members(person_name,occasion_type)').eq('customer_id', customer.id).order('occasion_date'),
+    supabase.from('orders').select(ORDER_FIELDS).eq('customer_id', customer.id).order('occasion_date'),
   ]);
   occasions = datesRes.data || occasions;
   orders = ordersRes.data || orders;
   renderAll();
+}
+
+async function sendReorder(e) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const id = form.dataset.reorderForm;
+  const date = String(new FormData(form).get('requested_date') || '');
+  const note = String(new FormData(form).get('note') || '').trim();
+  if (!date) return;
+  if (date < earliestDate()) { alert(`The earliest I can take is ${pretty(earliestDate())}, so there is time to bake.`); return; }
+  const btn = form.querySelector('button[type="submit"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  const { error } = await supabase.rpc('request_reorder', { source_order_id: id, requested_date: date });
+  if (error) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send this enquiry'; }
+    alert(error.message);
+    return;
+  }
+  if (note) {
+    // Keep the customer's change request with the occasion so Hazel sees it.
+    const src = orders.find((o) => o.id === id);
+    if (src?.circle_member) {
+      await supabase.from('circle_members').update({ notes: `Reorder request: ${note}` }).eq('person_name', src.circle_member.person_name).eq('customer_id', customer.id);
+    }
+  }
+  reorderFor = null;
+  await refreshData();
+  alert('Your enquiry is with Hazel. She will confirm and quote by email.');
 }
 
 async function saveDate(e) {
@@ -539,12 +775,11 @@ async function changePassword(e) {
 }
 
 async function accountAction(e) {
+  const open = e.target.closest('[data-open-order]');
+  if (open) { openOrder = openOrder === open.dataset.openOrder ? null : open.dataset.openOrder; renderAll(); return; }
   const reorder = e.target.closest('[data-reorder]');
-  if (reorder) {
-    const date = prompt('What date do you need the cake? Use YYYY-MM-DD.'); if (!date) return;
-    const { error } = await supabase.rpc('request_reorder', { source_order_id: reorder.dataset.reorder, requested_date: date });
-    alert(error ? error.message : 'Your new enquiry has been sent to Hazel.'); if (!error) location.reload(); return;
-  }
+  if (reorder) { reorderFor = reorderFor === reorder.dataset.reorder ? null : reorder.dataset.reorder; renderAll(); return; }
+  if (e.target.closest('[data-cancel-reorder]')) { reorderFor = null; renderAll(); return; }
   const edit = e.target.closest('[data-edit-date]');
   if (edit) { editingDate = edit.dataset.editDate; renderAll(); return; }
   const cancel = e.target.closest('[data-cancel-date]');
@@ -584,7 +819,9 @@ addEventListener('resize', moveTabInk);
 $('#googleSignIn').addEventListener('click', () => signInWithProvider('google'));
 $$('[data-auth-tab]').forEach((b) => b.addEventListener('click', () => { showPanel(b.dataset.authTab); authStatus.textContent = ''; }));
 $('#signUpNext').addEventListener('click', nextSignUpStep);
+$('#signUpNext2').addEventListener('click', nextSignUpStep2);
 $('#signUpBack').addEventListener('click', () => { authStatus.textContent = ''; signUpStep(1); });
+$('#signUpBack2').addEventListener('click', () => { authStatus.textContent = ''; signUpStep(2); });
 $('#signInForm').addEventListener('submit', signIn);
 $('#signUpForm').addEventListener('submit', createAccount);
 $('#otpForm').addEventListener('submit', confirmEmail);
@@ -600,17 +837,68 @@ $('#accountCalendar').addEventListener('click', (e) => {
   const step = e.target.closest('[data-cal-step]');
   if (step) {
     calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() + Number(step.dataset.calStep), 1);
+    calPicker = false;
+    renderCalendar();
+    return;
+  }
+  if (e.target.closest('[data-cal-picker]')) { calPicker = !calPicker; renderCalendar(); return; }
+  const yr = e.target.closest('[data-cal-year]');
+  if (yr) { calCursor = new Date(Number(yr.dataset.calYear), calCursor.getMonth(), 1); renderCalendar(); return; }
+  const mo = e.target.closest('[data-cal-month]');
+  if (mo) { calCursor = new Date(calCursor.getFullYear(), Number(mo.dataset.calMonth), 1); calPicker = false; renderCalendar(); return; }
+  if (e.target.closest('[data-cal-today]')) {
+    const now = new Date();
+    calCursor = new Date(now.getFullYear(), now.getMonth(), 1);
+    calPicker = false; calSelected = null;
     renderCalendar();
     return;
   }
   const day = e.target.closest('[data-date]');
   if (day) {
-    calSelected = calSelected === day.dataset.date ? null : day.dataset.date;
+    calSelected = day.dataset.date;
+    calPicker = false;
     renderCalendar();
+    openDateSheet(day.dataset.date);
   }
 });
+// Clicking away closes the month picker.
+document.addEventListener('click', (e) => {
+  if (calPicker && !e.target.closest('.cal__head')) { calPicker = false; renderCalendar(); }
+});
+$('#dateSheetForm').addEventListener('submit', saveSheetDate);
+$('#dateSheet').addEventListener('click', (e) => {
+  if (e.target.closest('[data-sheet-close]') || e.target === e.currentTarget) closeDateSheet();
+});
+
+// Ticking "remind me every year" explains itself before it sticks.
+let yearlyBox = null;
+const onYearlyTick = (e) => {
+  const box = e.target.closest('input[name="recurring_yearly"]');
+  if (box && box.checked) { yearlyBox = box; $('#yearlyModal').hidden = false; }
+};
+dashboard.addEventListener('change', onYearlyTick);
+dashboard.addEventListener('change', (e) => { if (e.target.closest('.prefs')) syncPrefsSummary(); });
+$('#dateSheet').addEventListener('change', onYearlyTick);
+$('#yearlyModal').addEventListener('click', (e) => {
+  const choice = e.target.closest('[data-yearly]');
+  if (!choice && e.target !== e.currentTarget) return;
+  if (choice && choice.dataset.yearly === 'no' && yearlyBox) yearlyBox.checked = false;
+  if (!choice && yearlyBox) yearlyBox.checked = false; // clicked the backdrop
+  $('#yearlyModal').hidden = true;
+  yearlyBox = null;
+});
+addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !$('#yearlyModal').hidden) {
+    if (yearlyBox) yearlyBox.checked = false;
+    $('#yearlyModal').hidden = true; yearlyBox = null;
+  }
+});
+
 dashboard.addEventListener('click', accountAction);
-dashboard.addEventListener('submit', (e) => { if (e.target.matches('[data-save-date]')) saveDate(e); });
+dashboard.addEventListener('submit', (e) => {
+  if (e.target.matches('[data-save-date]')) saveDate(e);
+  if (e.target.matches('[data-reorder-form]')) sendReorder(e);
+});
 $('#signOut').addEventListener('click', async () => { await supabase.auth.signOut(); setNavName(''); location.reload(); });
 
 // A cancelled or expired social sign-in comes back as an error in the URL, not a session.
