@@ -130,7 +130,7 @@ html.nav-open, body.nav-open { overflow: hidden; }
 .nav.hidden { transform: translateY(-120%); }
 .nav__brand { display: flex; align-items: center; gap: 0.6rem; line-height: 1; }
 .nav__brand-mark { display: block; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 12px;
-  background: #000 url('/brand/hazels-script-logo.png') 50% 42% / 150% auto no-repeat;
+  background: #000 url('/brand/hazels-h-logo.png') 50% 60% / 270% auto no-repeat;
   border: 1px solid rgba(212,175,55,0.28); box-shadow: 0 8px 24px rgba(0,0,0,0.26); }
 .nav__brand-copy { display: flex; flex-direction: column; }
 .nav__brand-copy > span { font-family: 'Fraunces', serif; font-size: 1.3rem; letter-spacing: 0.02em; }
