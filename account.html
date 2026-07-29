@@ -185,17 +185,16 @@
   <div class="sheet" id="dateSheet" hidden>
     <form class="sheet__inner" id="dateSheetForm">
       <button type="button" class="sheet__close" data-sheet-close aria-label="Close">&#215;</button>
-      <p class="page-hero__eyebrow">The Occasion Book</p>
-      <h3>Add <span id="sheetDate">this date</span></h3>
-      <p class="account-fineprint account-fineprint--left">Saving a date books nothing and costs nothing. I will email you before it comes round, in good time to order a cake if you want one.</p>
+      <p class="sheet__eyebrow">Save a date</p>
+      <h3><span id="sheetDate">This date</span></h3>
       <div class="sheet__fields">
-        <label class="field"><span>Who is it for</span><input name="person_name" required placeholder="Nomsa" /></label>
-        <label class="field"><span>Occasion</span><select name="occasion_type" required></select></label>
+        <label class="field"><span>Name</span><input name="person_name" required placeholder="Nomsa" /></label>
+        <label class="field"><span>Occasion</span><select name="occasion_type" required data-native-select="true"></select></label>
       </div>
-      <label class="pref"><input type="checkbox" name="recurring_yearly" /><span class="pref__box" aria-hidden="true"></span><span>Remind me every year</span></label>
+      <label class="pref"><input type="checkbox" name="recurring_yearly" /><span class="pref__box" aria-hidden="true"></span><span>Repeat every year</span></label>
       <div class="sheet__actions">
-        <button class="btn" type="submit">Save this date</button>
-        <button class="btn btn--ghost" type="button" data-sheet-close>Not now</button>
+        <button class="btn" type="submit">Save date</button>
+        <button class="btn btn--ghost" type="button" data-sheet-close>Cancel</button>
       </div>
       <p class="form__status" id="sheetStatus" role="status"></p>
     </form>
