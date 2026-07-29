@@ -20,9 +20,9 @@
     img.addEventListener('error', fail);
   });
 
-  /* ---- Shared brand mark ---- */
+  /* ---- Shared brand wordmark ---- */
   $$('.nav__brand').forEach((brand) => {
-    brand.innerHTML = '<span class="nav__brand-mark" role="img" aria-label="Hazel\'s Cake Lounge logo"></span><span class="nav__brand-copy"><span>Hazel\'s</span><em>Cake Lounge</em></span>';
+    brand.innerHTML = '<span class="nav__brand-copy"><span>Hazel\'s</span><em>Cake Lounge</em></span>';
   });
   let favicon = document.querySelector('link[rel="icon"]');
   if (!favicon) {
