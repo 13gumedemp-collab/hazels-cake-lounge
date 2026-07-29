@@ -42,11 +42,12 @@
       $('#hero')?.classList.add('in');
       setTimeout(() => loader.remove(), 1300);
     };
-    let firstVisit = false;
-    try {
-      firstVisit = !sessionStorage.getItem('hcl-brand-intro-v5');
-    } catch (_) {
-      firstVisit = location.pathname === '/' || location.pathname.endsWith('/index.html');
+    // The brand entrance belongs to the home page only. Everywhere else it
+    // would hold a 4 MB video behind a black curtain before the page appears.
+    const isHome = location.pathname === '/' || location.pathname.endsWith('/index.html');
+    let firstVisit = isHome;
+    if (isHome) {
+      try { firstVisit = !sessionStorage.getItem('hcl-brand-intro-v5'); } catch (_) { firstVisit = true; }
     }
 
     if (firstVisit) {
@@ -71,7 +72,7 @@
 
       let started = false;
       let handoffTimer;
-      let failSafe = setTimeout(fallback, 3500);
+      let failSafe;
       const finishIntro = () => {
         clearTimeout(failSafe);
         clearTimeout(handoffTimer);
@@ -105,6 +106,10 @@
       intro.addEventListener('loadeddata', startIntro, { once: true });
       intro.addEventListener('canplay', startIntro, { once: true });
       setTimeout(startIntro, 700);
+      // Armed only now: `fallback` is a const, so scheduling it any earlier
+      // reads it inside its temporal dead zone and throws, which killed the
+      // rest of this script and left the black curtain up for good.
+      failSafe = setTimeout(fallback, 3500);
     } else {
       window.addEventListener('load', () => setTimeout(reveal, reduce ? 0 : 900));
       setTimeout(reveal, 3200);
