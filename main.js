@@ -22,22 +22,46 @@
 
   /* ---- Loader curtain ---- */
   const loader = $('#loader');
-  const count  = $('#loaderCount');
   if (loader) {
-    let n = 0;
-    const tick = setInterval(() => {
-      n = Math.min(100, n + Math.ceil(Math.random() * 18));
-      if (count) count.textContent = String(n).padStart(2, '0');
-      if (n >= 100) clearInterval(tick);
-    }, 80);
     const reveal = () => {
       if (loader.classList.contains('done')) return;
       loader.classList.add('done');
       $('#hero')?.classList.add('in');
       setTimeout(() => loader.remove(), 1300);
     };
-    window.addEventListener('load', () => setTimeout(reveal, reduce ? 0 : 900));
-    setTimeout(reveal, 3200);
+    let firstVisit = false;
+    try {
+      firstVisit = !sessionStorage.getItem('hcl-brand-intro-seen');
+      sessionStorage.setItem('hcl-brand-intro-seen', 'true');
+    } catch (_) {
+      firstVisit = location.pathname === '/' || location.pathname.endsWith('/index.html');
+    }
+
+    if (firstVisit && !reduce) {
+      loader.classList.add('loader--brand-intro');
+      const intro = document.createElement('video');
+      intro.className = 'loader__brand-video';
+      intro.src = '/brand/hazels-logo-spotlight.mp4';
+      intro.poster = '/brand/hazels-logo.jpeg';
+      intro.autoplay = true;
+      intro.muted = true;
+      intro.playsInline = true;
+      intro.setAttribute('aria-label', "Hazel's Cake Lounge");
+      loader.append(intro);
+
+      let failSafe = setTimeout(reveal, 9000);
+      const finishIntro = () => {
+        clearTimeout(failSafe);
+        failSafe = 0;
+        reveal();
+      };
+      intro.addEventListener('ended', finishIntro, { once: true });
+      intro.addEventListener('error', () => setTimeout(finishIntro, 1100), { once: true });
+      intro.play().catch(() => setTimeout(finishIntro, 1800));
+    } else {
+      window.addEventListener('load', () => setTimeout(reveal, reduce ? 0 : 900));
+      setTimeout(reveal, 3200);
+    }
   }
 
   /* ---- Custom cursor ---- */
