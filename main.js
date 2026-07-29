@@ -47,7 +47,7 @@
     const isHome = location.pathname === '/' || location.pathname.endsWith('/index.html');
     let firstVisit = isHome;
     if (isHome) {
-      try { firstVisit = !sessionStorage.getItem('hcl-brand-intro-v5'); } catch (_) { firstVisit = true; }
+      try { firstVisit = !sessionStorage.getItem('hcl-brand-intro-v6'); } catch (_) { firstVisit = true; }
     }
 
     if (firstVisit) {
@@ -71,19 +71,16 @@
       intro.load();
 
       let started = false;
-      let handoffTimer;
       let failSafe;
       const finishIntro = () => {
         clearTimeout(failSafe);
-        clearTimeout(handoffTimer);
         reveal();
       };
       const rememberIntro = () => {
-        try { sessionStorage.setItem('hcl-brand-intro-v5', 'true'); } catch (_) {}
+        try { sessionStorage.setItem('hcl-brand-intro-v6', 'true'); } catch (_) {}
       };
       const fallback = () => {
         clearTimeout(failSafe);
-        clearTimeout(handoffTimer);
         intro.remove();
         loader.classList.remove('loader--brand-intro');
         reveal();
@@ -95,21 +92,20 @@
         if (playback) playback.catch(fallback);
       };
       intro.addEventListener('playing', () => {
+        clearTimeout(failSafe);
         intro.classList.add('is-playing');
         rememberIntro();
-        const duration = Number.isFinite(intro.duration) ? intro.duration * 1000 : 9000;
-        handoffTimer = setTimeout(finishIntro, Math.min(Math.max(duration, 8000), 10000));
       }, { once: true });
       intro.addEventListener('ended', finishIntro, { once: true });
       intro.addEventListener('error', fallback, { once: true });
       intro.addEventListener('loadedmetadata', startIntro, { once: true });
       intro.addEventListener('loadeddata', startIntro, { once: true });
       intro.addEventListener('canplay', startIntro, { once: true });
-      setTimeout(startIntro, 700);
       // Armed only now: `fallback` is a const, so scheduling it any earlier
       // reads it inside its temporal dead zone and throws, which killed the
       // rest of this script and left the black curtain up for good.
       failSafe = setTimeout(fallback, 3500);
+      setTimeout(startIntro, 700);
     } else {
       window.addEventListener('load', () => setTimeout(reveal, reduce ? 0 : 900));
       setTimeout(reveal, 3200);
