@@ -44,7 +44,7 @@
     };
     let firstVisit = false;
     try {
-      firstVisit = !sessionStorage.getItem('hcl-brand-intro-v4');
+      firstVisit = !sessionStorage.getItem('hcl-brand-intro-v5');
     } catch (_) {
       firstVisit = location.pathname === '/' || location.pathname.endsWith('/index.html');
     }
@@ -62,7 +62,6 @@
       intro.setAttribute('webkit-playsinline', '');
       intro.setAttribute('autoplay', '');
       intro.setAttribute('aria-label', "Hazel's Cake Lounge");
-      intro.loop = true;
       const source = document.createElement('source');
       source.src = '/brand/hazels-logo-spotlight.mp4';
       source.type = 'video/mp4';
@@ -72,21 +71,21 @@
 
       let started = false;
       let handoffTimer;
-      let failSafe = setTimeout(fallback, 18000);
+      let failSafe = setTimeout(fallback, 3500);
       const finishIntro = () => {
         clearTimeout(failSafe);
         clearTimeout(handoffTimer);
         reveal();
       };
       const rememberIntro = () => {
-        try { sessionStorage.setItem('hcl-brand-intro-v4', 'true'); } catch (_) {}
+        try { sessionStorage.setItem('hcl-brand-intro-v5', 'true'); } catch (_) {}
       };
       const fallback = () => {
         clearTimeout(failSafe);
         clearTimeout(handoffTimer);
         intro.remove();
         loader.classList.remove('loader--brand-intro');
-        setTimeout(reveal, 900);
+        reveal();
       };
       const startIntro = () => {
         if (started) return;
@@ -100,10 +99,12 @@
         const duration = Number.isFinite(intro.duration) ? intro.duration * 1000 : 9000;
         handoffTimer = setTimeout(finishIntro, Math.min(Math.max(duration, 8000), 10000));
       }, { once: true });
+      intro.addEventListener('ended', finishIntro, { once: true });
       intro.addEventListener('error', fallback, { once: true });
+      intro.addEventListener('loadedmetadata', startIntro, { once: true });
       intro.addEventListener('loadeddata', startIntro, { once: true });
       intro.addEventListener('canplay', startIntro, { once: true });
-      setTimeout(startIntro, 2200);
+      setTimeout(startIntro, 700);
     } else {
       window.addEventListener('load', () => setTimeout(reveal, reduce ? 0 : 900));
       setTimeout(reveal, 3200);
