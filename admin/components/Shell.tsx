@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { NAV } from "@/lib/nav";
 import Icon from "./Icon";
 import NotificationBell from "./NotificationBell";
+import BrandMark from "./BrandMark";
 
 const GROUPS: { label: string; items: typeof NAV }[] = [
   { label: "Today", items: NAV.filter((n) => ["/", "/orders", "/occasions"].includes(n.href)) },
@@ -37,6 +38,7 @@ export default function Shell({ counts, children }: { counts: Record<string, num
 
   const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
   const badge = (key: string | null) => (key && counts[key] ? counts[key] : 0);
+  const currentPage = NAV.find((item) => active(item.href))?.label || "Overview";
 
   async function logout() {
     await fetch("/api/logout", { method: "POST" }).catch(() => {});
@@ -46,12 +48,8 @@ export default function Shell({ counts, children }: { counts: Record<string, num
 
   const SidebarInner = (
     <>
-      <div className={`flex items-center gap-3 px-5 py-6 ${collapsed ? "md:px-0 md:justify-center" : ""}`}>
-        <div className="shrink-0 w-9 h-9 rounded-lg bg-gold/15 border border-gold/30 grid place-items-center font-serif italic text-gold text-lg">H</div>
-        <div className={`transition-all duration-300 ${collapsed ? "md:opacity-0 md:w-0 md:overflow-hidden" : "opacity-100"}`}>
-          <div className="font-serif text-xl text-gold leading-none whitespace-nowrap">Hazel&apos;s</div>
-          <div className="text-[0.6rem] tracking-[0.3em] uppercase text-creamSoft mt-1 whitespace-nowrap">Command Centre</div>
-        </div>
+      <div className={`px-5 py-6 ${collapsed ? "md:px-0 md:justify-center" : ""}`}>
+        <BrandMark compact={collapsed} />
       </div>
 
       <nav className="flex-1 px-3 space-y-5 overflow-y-auto">
@@ -101,22 +99,22 @@ export default function Shell({ counts, children }: { counts: Record<string, num
   );
 
   return (
-    <div className={`min-h-screen ${padTx} ${collapsed ? "md:pl-[76px]" : "md:pl-64"}`}>
+    <div className={`admin-app min-h-screen ${padTx} ${collapsed ? "md:pl-[88px]" : "md:pl-[280px]"}`}>
       {/* Desktop sidebar */}
-      <aside className={`hidden md:flex fixed inset-y-0 left-0 z-40 flex-col border-r border-line bg-ink2 ${widthTx} ${collapsed ? "w-[76px]" : "w-64"}`}>
+      <aside className={`admin-sidebar hidden md:flex fixed inset-y-0 left-0 z-40 flex-col ${widthTx} ${collapsed ? "w-[88px]" : "w-[280px]"}`}>
         {SidebarInner}
       </aside>
 
       {/* Mobile drawer */}
       <div className={`md:hidden fixed inset-0 z-50 transition-opacity duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
         <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-        <aside className={`absolute inset-y-0 left-0 w-64 flex flex-col border-r border-line bg-ink2 transition-transform duration-300 ease-cinematic ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <aside className={`admin-sidebar absolute inset-y-0 left-0 w-[280px] flex flex-col transition-transform duration-300 ease-cinematic ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
           {SidebarInner}
         </aside>
       </div>
 
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 h-16 border-b border-line bg-ink/80 backdrop-blur">
+      <header className="admin-topbar sticky top-0 z-30 flex items-center justify-between px-4 md:px-8 h-[76px] backdrop-blur">
         <div className="flex items-center gap-3">
           <button onClick={() => setMobileOpen(true)} className="md:hidden p-2 -ml-2 text-gold" aria-label="Open menu">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
@@ -124,14 +122,18 @@ export default function Shell({ counts, children }: { counts: Record<string, num
           <button onClick={() => setCollapsed((c) => !c)} className="hidden md:grid place-items-center p-2 -ml-2 text-gold hover:text-goldBright transition" aria-label="Toggle sidebar">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16" /></svg>
           </button>
+          <div className="hidden sm:block border-l border-white/10 pl-3">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-muted">Workspace</p>
+            <p className="text-sm font-medium text-cream">{currentPage}</p>
+          </div>
         </div>
         <NotificationBell />
       </header>
 
-      <main className="px-4 md:px-8 py-6 pb-24 md:pb-10">{children}</main>
+      <main className="admin-main px-4 md:px-8 py-6 pb-24 md:pb-10">{children}</main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-5 border-t border-line bg-ink2/95 backdrop-blur">
+      <nav className="admin-bottom-nav md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-5 backdrop-blur">
         {NAV.slice(0, 5).map((item) => (
           <Link key={item.href} href={item.href}
             className={`relative flex flex-col items-center gap-0.5 py-2.5 text-[10px] ${active(item.href) ? "text-gold" : "text-muted"}`}>

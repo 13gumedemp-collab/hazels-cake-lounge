@@ -20,6 +20,19 @@
     img.addEventListener('error', fail);
   });
 
+  /* ---- Shared brand mark ---- */
+  $$('.nav__brand').forEach((brand) => {
+    brand.innerHTML = '<span class="nav__brand-mark" role="img" aria-label="Hazel\'s Cake Lounge logo"></span><span class="nav__brand-copy"><span>Hazel\'s</span><em>Cake Lounge</em></span>';
+  });
+  let favicon = document.querySelector('link[rel="icon"]');
+  if (!favicon) {
+    favicon = document.createElement('link');
+    favicon.setAttribute('rel', 'icon');
+    favicon.setAttribute('type', 'image/png');
+    document.head.append(favicon);
+  }
+  favicon.setAttribute('href', '/brand/hazels-script-logo.png');
+
   /* ---- Loader curtain ---- */
   const loader = $('#loader');
   if (loader) {
@@ -31,13 +44,12 @@
     };
     let firstVisit = false;
     try {
-      firstVisit = !sessionStorage.getItem('hcl-brand-intro-seen');
-      sessionStorage.setItem('hcl-brand-intro-seen', 'true');
+      firstVisit = !sessionStorage.getItem('hcl-brand-intro-v2');
     } catch (_) {
       firstVisit = location.pathname === '/' || location.pathname.endsWith('/index.html');
     }
 
-    if (firstVisit && !reduce) {
+    if (firstVisit) {
       loader.classList.add('loader--brand-intro');
       const intro = document.createElement('video');
       intro.className = 'loader__brand-video';
@@ -45,19 +57,42 @@
       intro.poster = '/brand/hazels-logo.jpeg';
       intro.autoplay = true;
       intro.muted = true;
+      intro.defaultMuted = true;
       intro.playsInline = true;
+      intro.preload = 'auto';
+      intro.setAttribute('muted', '');
+      intro.setAttribute('playsinline', '');
+      intro.setAttribute('webkit-playsinline', '');
       intro.setAttribute('aria-label', "Hazel's Cake Lounge");
       loader.append(intro);
 
-      let failSafe = setTimeout(reveal, 9000);
+      let started = false;
+      let failSafe = setTimeout(fallback, 14000);
       const finishIntro = () => {
         clearTimeout(failSafe);
-        failSafe = 0;
         reveal();
       };
+      const rememberIntro = () => {
+        try { sessionStorage.setItem('hcl-brand-intro-v2', 'true'); } catch (_) {}
+      };
+      const fallback = () => {
+        clearTimeout(failSafe);
+        intro.remove();
+        loader.classList.remove('loader--brand-intro');
+        setTimeout(reveal, 900);
+      };
+      const startIntro = () => {
+        if (started) return;
+        started = true;
+        intro.play().then(() => {
+          intro.classList.add('is-playing');
+          rememberIntro();
+        }).catch(fallback);
+      };
       intro.addEventListener('ended', finishIntro, { once: true });
-      intro.addEventListener('error', () => setTimeout(finishIntro, 1100), { once: true });
-      intro.play().catch(() => setTimeout(finishIntro, 1800));
+      intro.addEventListener('error', fallback, { once: true });
+      intro.addEventListener('canplay', startIntro, { once: true });
+      setTimeout(startIntro, 650);
     } else {
       window.addEventListener('load', () => setTimeout(reveal, reduce ? 0 : 900));
       setTimeout(reveal, 3200);

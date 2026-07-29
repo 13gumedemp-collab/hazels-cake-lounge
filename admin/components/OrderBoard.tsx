@@ -87,7 +87,7 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
   const byStage = (k: string) => orders.filter((o) => statusOf(o) === k);
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
+    <div className="order-board flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
       {STAGES.map((stage) => {
         const cards = byStage(stage.key);
         const isOver = overStage === stage.key;
