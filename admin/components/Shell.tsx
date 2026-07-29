@@ -48,8 +48,8 @@ export default function Shell({ counts, children }: { counts: Record<string, num
   const SidebarInner = (
     <>
       <div className={`px-5 py-6 ${collapsed ? "md:px-0 md:justify-center" : ""}`}>
-        <div className={`sidebar-wordmark ${collapsed ? "sidebar-wordmark--compact" : ""}`}>
-          {collapsed ? <span>H</span> : <><strong>Hazel&apos;s</strong><em>Cake Lounge</em></>}
+      <div className={`sidebar-wordmark ${collapsed ? "sidebar-wordmark--compact" : ""}`}>
+        {collapsed ? <span className="sidebar-wordmark__mark" role="img" aria-label="Hazel's Cake Lounge logo" /> : <><strong>Hazel&apos;s</strong><em>Cake Lounge</em></>}
         </div>
       </div>
 

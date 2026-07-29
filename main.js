@@ -31,7 +31,7 @@
     favicon.setAttribute('type', 'image/png');
     document.head.append(favicon);
   }
-  favicon.setAttribute('href', '/brand/hazels-script-logo.png');
+  favicon.setAttribute('href', '/brand/hazels-h-logo.png');
 
   /* ---- Loader curtain ---- */
   const loader = $('#loader');
