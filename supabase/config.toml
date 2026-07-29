@@ -1,8 +1,34 @@
 project_id = "qgzpoyyijafblzfiyhoc"
 
+# These values mirror the existing production Auth configuration. Keep them
+# explicit so config deployments do not substitute local development defaults.
+[auth]
+site_url = "https://hazelscakelounge.co.za"
+additional_redirect_urls = ["https://hazelscakelounge.co.za/account.html", "https://www.hazelscakelounge.co.za/account.html", "http://localhost:5173/account.html"]
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[auth.email]
+enable_confirmations = true
+max_frequency = "1m0s"
+otp_length = 8
+
 # Public function — called from the website with the anon key, so no JWT gate.
 [functions.process-enquiry]
 verify_jwt = false
+
+# Google customer sign-in. The client secret is injected only while deploying
+# this configuration and is never committed to the repository.
+[auth.external.google]
+enabled = true
+client_id = "732761854674-iu5290u4h316avdc4tcr298ooifmelim.apps.googleusercontent.com"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+
+# The project is on the free tier, where vector buckets are unavailable.
+[storage.vector]
+enabled = false
 
 # Internal functions are invoked server-side (cron / admin) with the service
 # role key, which is a valid JWT, so the default verify_jwt = true is fine.
