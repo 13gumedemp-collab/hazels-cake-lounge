@@ -23,7 +23,7 @@ const googleCalendarUrl = (title, date, details) => {
 };
 
 const REDIRECT = location.origin + '/account.html';
-const PROVIDERS = { google: 'Google', facebook: 'Facebook' };
+const PROVIDERS = { google: 'Google' };
 let pendingEmail = '';
 // A recovery link signs the customer in, so the dashboard would otherwise open
 // behind the "choose a new password" step and win the race.
@@ -116,7 +116,7 @@ async function signInWithProvider(provider) {
   authStatus.textContent = `Opening ${PROVIDERS[provider]}...`;
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
-    options: { redirectTo: REDIRECT, ...(provider === 'facebook' ? { scopes: 'email,public_profile' } : {}) },
+    options: { redirectTo: REDIRECT },
   });
   if (error) authStatus.textContent = friendly(error);
 }
@@ -297,7 +297,6 @@ $$('[data-account-tab]').forEach((button) => button.addEventListener('click', ()
   $$('[data-account-panel]').forEach((p) => p.classList.toggle('is-active', p.dataset.accountPanel === button.dataset.accountTab));
 }));
 $('#googleSignIn').addEventListener('click', () => signInWithProvider('google'));
-$('#facebookSignIn').addEventListener('click', () => signInWithProvider('facebook'));
 $$('[data-auth-tab]').forEach((b) => b.addEventListener('click', () => { showPanel(b.dataset.authTab); authStatus.textContent = ''; }));
 $('#signUpNext').addEventListener('click', nextSignUpStep);
 $('#signUpBack').addEventListener('click', () => { authStatus.textContent = ''; signUpStep(1); });

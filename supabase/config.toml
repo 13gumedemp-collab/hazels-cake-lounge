@@ -26,16 +26,6 @@ enabled = true
 client_id = "732761854674-iu5290u4h316avdc4tcr298ooifmelim.apps.googleusercontent.com"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
 
-# Facebook customer sign-in. Switch enabled to true and fill in the App ID once
-# the Meta app exists, then push this config with
-# SUPABASE_AUTH_EXTERNAL_FACEBOOK_SECRET set in the environment. The Meta app
-# needs https://qgzpoyyijafblzfiyhoc.supabase.co/auth/v1/callback as a valid
-# OAuth redirect URI. The secret is never committed to the repository.
-[auth.external.facebook]
-enabled = false
-client_id = ""
-secret = "env(SUPABASE_AUTH_EXTERNAL_FACEBOOK_SECRET)"
-
 # The project is on the free tier, where vector buckets are unavailable.
 [storage.vector]
 enabled = false
