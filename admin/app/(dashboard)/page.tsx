@@ -60,9 +60,9 @@ export default function Overview() {
           <ul className="space-y-3">
             {week.map((m, i) => (
               <li key={i} className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-cream text-sm">{m.person_name}&apos;s {m.occasion_type}</p>
-                  <p className="text-muted text-xs">{m.customer} &middot; {prettyDate(m.next)}</p>
+                <div className="min-w-0">
+                  <p className="text-cream text-sm truncate">{m.person_name}&apos;s {m.occasion_type}</p>
+                  <p className="text-muted text-xs truncate">{m.customer} &middot; {prettyDate(m.next)}</p>
                 </div>
                 <span className="text-gold text-xs whitespace-nowrap">{m.d === 0 ? "Today" : `in ${m.d} day${m.d > 1 ? "s" : ""}`}</span>
               </li>

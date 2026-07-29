@@ -30,7 +30,7 @@ export default function NotificationBell() {
 
   return (
     <div className="relative">
-      <button onClick={() => setOpen((o) => !o)} className="relative p-2 text-gold hover:text-goldBright" aria-label="Notifications">
+      <button onClick={() => setOpen((o) => !o)} className="relative min-w-11 min-h-11 grid place-items-center text-gold hover:text-goldBright" aria-label="Notifications">
         <Icon name="bell" />
         {unread > 0 && (
           <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-ink text-[11px] font-semibold grid place-items-center">{unread}</span>
