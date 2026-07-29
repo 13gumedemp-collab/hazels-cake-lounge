@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const SB_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
-const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJxZ3pwb3l5aWphZmJsemZpeWhvYyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzgyMzg5NzMyLCJleHAiOjIwOTc5NjU3MzJ9.g-INXAO6kNGwN750J5rreKlroMFFro7Bl9uJXcr-vug';
+const SB_ANON = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
 const supabase = createClient(SB_URL, SB_ANON);
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
