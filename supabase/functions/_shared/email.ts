@@ -5,9 +5,13 @@ import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { businessVars, fillTemplate, firstName, notify } from "./client.ts";
 
 const RESEND_API = "https://api.resend.com/emails";
+// Must be on a domain verified in Resend. A free mail address such as gmail.com
+// can never be verified, and every send is rejected with a 403.
 const FROM = Deno.env.get("RESEND_FROM_NAME") && Deno.env.get("RESEND_FROM_EMAIL")
   ? `${Deno.env.get("RESEND_FROM_NAME")} <${Deno.env.get("RESEND_FROM_EMAIL")}>`
   : (Deno.env.get("FROM_EMAIL") ?? "Hazel's Cake Lounge <hello@hazelscakelounge.co.za>");
+// No mailbox exists on the sending domain, so replies go to Hazel's real inbox.
+const REPLY_TO = Deno.env.get("BUSINESS_EMAIL") || undefined;
 
 export interface SendEmailInput {
   customer_id: string;
@@ -35,7 +39,7 @@ export async function sendToAddress(
     const res = await fetch(RESEND_API, {
       method: "POST",
       headers: { "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to: [to], subject: fillTemplate(template.subject, merged), html: fillTemplate(template.body, merged) }),
+      body: JSON.stringify({ from: FROM, reply_to: REPLY_TO, to: [to], subject: fillTemplate(template.subject, merged), html: fillTemplate(template.body, merged) }),
     });
     if (!res.ok) return { status: "failed", error: `Resend ${res.status}: ${await res.text()}` };
     return { status: "sent" };
@@ -81,7 +85,7 @@ export async function sendEmail(supabase: SupabaseClient, input: SendEmailInput)
     const res = await fetch(RESEND_API, {
       method: "POST",
       headers: { "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to: [customer.email], subject, html, attachments: input.attachments }),
+      body: JSON.stringify({ from: FROM, reply_to: REPLY_TO, to: [customer.email], subject, html, attachments: input.attachments }),
     });
     if (!res.ok) { status = "failed"; errorMessage = `Resend ${res.status}: ${await res.text()}`; }
   } catch (e) { status = "failed"; errorMessage = String(e); }
