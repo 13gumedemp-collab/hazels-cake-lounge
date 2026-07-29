@@ -293,13 +293,16 @@
 
   /* ---- Mobile menu ---- */
   const toggle = $('#menuToggle');
-  const closeMenu = () => {
+  let menuFocusOrigin = null;
+  const closeMenu = ({ restoreFocus = false } = {}) => {
     if (!nav || !toggle) return;
     nav.classList.remove('open');
     document.documentElement.classList.remove('nav-open');
     document.body.classList.remove('nav-open');
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-label', 'Open menu');
+    if (restoreFocus) menuFocusOrigin?.focus?.();
+    menuFocusOrigin = null;
   };
   toggle?.addEventListener('click', () => {
     const open = nav.classList.toggle('open');
@@ -308,9 +311,23 @@
     document.body.classList.toggle('nav-open', open);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    if (open) {
+      menuFocusOrigin = document.activeElement;
+      requestAnimationFrame(() => navLinks?.querySelector('a')?.focus());
+    } else {
+      menuFocusOrigin = null;
+    }
   });
   $$('.nav__links a').forEach((a) => a.addEventListener('click', closeMenu));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeMenu({ restoreFocus: true }); return; }
+    if (e.key !== 'Tab' || !nav?.classList.contains('open')) return;
+    const focusable = [toggle, ...$$('a', navLinks)].filter(Boolean);
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
 
   /* ---- Floating Enquire button (landing only) ---- */
   const floatBtn = $('#floatEnquire');
