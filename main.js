@@ -44,7 +44,7 @@
     };
     let firstVisit = false;
     try {
-      firstVisit = !sessionStorage.getItem('hcl-brand-intro-v3');
+      firstVisit = !sessionStorage.getItem('hcl-brand-intro-v4');
     } catch (_) {
       firstVisit = location.pathname === '/' || location.pathname.endsWith('/index.html');
     }
@@ -62,7 +62,7 @@
       intro.setAttribute('webkit-playsinline', '');
       intro.setAttribute('autoplay', '');
       intro.setAttribute('aria-label', "Hazel's Cake Lounge");
-      intro.poster = '/brand/hazels-h-mark.png';
+      intro.loop = true;
       const source = document.createElement('source');
       source.src = '/brand/hazels-logo-spotlight.mp4';
       source.type = 'video/mp4';
@@ -71,16 +71,19 @@
       intro.load();
 
       let started = false;
-      let failSafe = setTimeout(fallback, 14000);
+      let handoffTimer;
+      let failSafe = setTimeout(fallback, 18000);
       const finishIntro = () => {
         clearTimeout(failSafe);
+        clearTimeout(handoffTimer);
         reveal();
       };
       const rememberIntro = () => {
-        try { sessionStorage.setItem('hcl-brand-intro-v3', 'true'); } catch (_) {}
+        try { sessionStorage.setItem('hcl-brand-intro-v4', 'true'); } catch (_) {}
       };
       const fallback = () => {
         clearTimeout(failSafe);
+        clearTimeout(handoffTimer);
         intro.remove();
         loader.classList.remove('loader--brand-intro');
         setTimeout(reveal, 900);
@@ -94,8 +97,9 @@
       intro.addEventListener('playing', () => {
         intro.classList.add('is-playing');
         rememberIntro();
+        const duration = Number.isFinite(intro.duration) ? intro.duration * 1000 : 9000;
+        handoffTimer = setTimeout(finishIntro, Math.min(Math.max(duration, 8000), 10000));
       }, { once: true });
-      intro.addEventListener('ended', finishIntro, { once: true });
       intro.addEventListener('error', fallback, { once: true });
       intro.addEventListener('loadeddata', startIntro, { once: true });
       intro.addEventListener('canplay', startIntro, { once: true });
