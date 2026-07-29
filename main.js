@@ -185,11 +185,30 @@
   /* ---- Nav: hide on scroll down, solid on scroll ---- */
   const nav = $('#nav');
   const navLinks = $('.nav__links');
+  /* ---- Account link: named after the signed-in customer, never "My", so it
+     is never mistaken for Hazel's own pages (My Work, My Story) ---- */
+  const NAME_KEY = 'hcl.firstName';
+  const readName = () => { try { return (localStorage.getItem(NAME_KEY) || '').trim(); } catch { return ''; } };
+  const possessive = (name) => (/s$/i.test(name) ? `${name}'` : `${name}'s`);
+  const paintAccountLink = () => {
+    const link = navLinks?.querySelector('a[href="account.html"]');
+    if (!link) return;
+    const first = readName();
+    link.textContent = first ? `${possessive(first)} Account` : 'Your Account';
+  };
   if (navLinks && !navLinks.querySelector('a[href="account.html"]')) {
     const accountLink = document.createElement('a');
-    accountLink.href = 'account.html'; accountLink.textContent = 'My Account'; accountLink.dataset.cursor = 'link';
+    accountLink.href = 'account.html'; accountLink.dataset.cursor = 'link';
     navLinks.appendChild(accountLink);
   }
+  paintAccountLink();
+  window.hclSetAccountName = (fullName) => {
+    const candidate = String(fullName || '').trim().split(/\s+/)[0] || '';
+    // Fall back to "Your Account" when we only have an email-style handle, not a real name.
+    const first = /^\p{L}[\p{L}'’-]*$/u.test(candidate) ? candidate : '';
+    try { first ? localStorage.setItem(NAME_KEY, first) : localStorage.removeItem(NAME_KEY); } catch { /* private mode */ }
+    paintAccountLink();
+  };
   let lastY = 0;
   addEventListener('scroll', () => {
     const y = scrollY;

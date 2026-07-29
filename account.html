@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0b0a08" />
-  <title>My Cake Calendar | Hazel's Cake Lounge</title>
+  <title>Your Cake Calendar | Hazel's Cake Lounge</title>
   <meta name="description" content="Sign in to view your Hazel's Cake Lounge calendar, orders, payments and reminders." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,19 +19,20 @@
     <nav class="nav__links" id="navLinks">
       <a href="menu.html" data-cursor="link">Menu</a><a href="work.html" data-cursor="link">My Work</a>
       <a href="occasion-book.html" data-cursor="link">The Occasion Book</a><a href="reviews.html" data-cursor="link">Community</a>
-      <a href="contact.html" data-cursor="link">Contact</a><a href="account.html" class="is-active" data-cursor="link">My Account</a>
+      <a href="contact.html" data-cursor="link">Contact</a><a href="account.html" class="is-active" data-cursor="link">Your Account</a>
     </nav>
     <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
   </header>
 
   <main class="account-page" id="top">
     <section class="account-auth" id="accountAuth">
-      <p class="page-hero__eyebrow">My Cake Calendar</p>
+      <p class="page-hero__eyebrow">Your Cake Calendar</p>
       <h1>Everything you are<br /><em class="gold">celebrating.</em></h1>
       <p>Sign in to see your saved dates, confirmed cakes, payments and reminders.</p>
       <button class="btn btn--solid account-google" id="googleSignIn" type="button">Continue with Google</button>
       <div class="account-divider"><span>or</span></div>
       <form id="magicLinkForm" class="account-login-form">
+        <label class="field"><span>Your name <em class="field__opt">(first time here)</em></span><input type="text" name="full_name" autocomplete="name" placeholder="Nomsa Dlamini" /></label>
         <label class="field"><span>Email address</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com" /></label>
         <button class="btn" type="submit">Email me a sign-in link</button>
       </form>
@@ -40,14 +41,14 @@
 
     <section class="account-dashboard" id="accountDashboard" hidden>
       <div class="account-welcome">
-        <div><p class="page-hero__eyebrow">My Cake Calendar</p><h1>Welcome, <span id="accountName">there</span>.</h1></div>
+        <div><p class="page-hero__eyebrow">Your Cake Calendar</p><h1>Welcome, <span id="accountName">there</span>.</h1></div>
         <button class="account-signout" id="signOut" type="button">Sign out</button>
       </div>
       <nav class="account-tabs" aria-label="Account sections">
         <button class="is-active" data-account-tab="calendar">Calendar</button>
         <button data-account-tab="orders">Orders</button>
         <button data-account-tab="dates">Saved dates</button>
-        <button data-account-tab="profile">My details</button>
+        <button data-account-tab="profile">Your details</button>
       </nav>
 
       <div class="account-panel is-active" data-account-panel="calendar">
@@ -71,7 +72,7 @@
           <div class="form__row"><label class="field"><span>Suburb</span><input name="suburb" /></label><label class="field"><span>City</span><input name="city" /></label></div>
           <div class="form__row"><label class="field"><span>Province</span><select name="province"><option value="">Choose one</option><option>Eastern Cape</option><option>Free State</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Limpopo</option><option>Mpumalanga</option><option>Northern Cape</option><option>North West</option><option>Western Cape</option></select></label><label class="field"><span>Postal code</span><input name="postal_code" inputmode="numeric" /></label></div>
           <fieldset class="account-preferences"><legend>Reminder preferences</legend><label><input type="checkbox" name="email_consent" /> Email</label><label><input type="checkbox" name="whatsapp_consent" /> WhatsApp</label><label><input type="checkbox" name="phone_call_consent" /> Phone call from Hazel</label></fieldset>
-          <button class="btn btn--solid" type="submit">Save my details</button><p class="form__status" id="profileStatus"></p>
+          <button class="btn btn--solid" type="submit">Save details</button><p class="form__status" id="profileStatus"></p>
         </form>
       </div>
     </section>
