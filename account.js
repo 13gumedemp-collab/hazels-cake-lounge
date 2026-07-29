@@ -227,6 +227,8 @@ async function loadAccount(session) {
   $('#accountName').textContent = (customer.full_name || session.user.email).split(' ')[0];
   setNavName(customer.full_name);
   fillProfile(); renderAll();
+  // The tabs have no width until the dashboard is on screen.
+  requestAnimationFrame(moveTabInk);
 }
 
 function calendarItems() {
@@ -350,10 +352,25 @@ async function accountAction(e) {
   }
 }
 
+// Slides the gold bar under whichever tab is active. Measured, not guessed,
+// because the tabs are different widths and the strip scrolls on mobile.
+function moveTabInk() {
+  const tabs = $('.account-tabs');
+  const active = $('[data-account-tab].is-active');
+  if (!tabs || !active || !active.offsetWidth) return;
+  let ink = $('.account-tabs__ink', tabs);
+  if (!ink) { ink = document.createElement('span'); ink.className = 'account-tabs__ink'; tabs.append(ink); }
+  tabs.style.setProperty('--tab-x', `${active.offsetLeft}px`);
+  tabs.style.setProperty('--tab-w', `${active.offsetWidth}px`);
+}
+
 $$('[data-account-tab]').forEach((button) => button.addEventListener('click', () => {
   $$('[data-account-tab]').forEach((b) => b.classList.toggle('is-active', b === button));
   $$('[data-account-panel]').forEach((p) => p.classList.toggle('is-active', p.dataset.accountPanel === button.dataset.accountTab));
+  button.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  moveTabInk();
 }));
+addEventListener('resize', moveTabInk);
 $('#googleSignIn').addEventListener('click', () => signInWithProvider('google'));
 $$('[data-auth-tab]').forEach((b) => b.addEventListener('click', () => { showPanel(b.dataset.authTab); authStatus.textContent = ''; }));
 $('#signUpNext').addEventListener('click', nextSignUpStep);
