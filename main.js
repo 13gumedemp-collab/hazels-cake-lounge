@@ -31,7 +31,7 @@
     favicon.setAttribute('type', 'image/png');
     document.head.append(favicon);
   }
-  favicon.setAttribute('href', '/brand/hazels-h-logo.png');
+  favicon.setAttribute('href', '/brand/hazels-h-mark.png');
 
   /* ---- Loader curtain ---- */
   const loader = $('#loader');
@@ -44,7 +44,7 @@
     };
     let firstVisit = false;
     try {
-      firstVisit = !sessionStorage.getItem('hcl-brand-intro-v2');
+      firstVisit = !sessionStorage.getItem('hcl-brand-intro-v3');
     } catch (_) {
       firstVisit = location.pathname === '/' || location.pathname.endsWith('/index.html');
     }
@@ -53,9 +53,6 @@
       loader.classList.add('loader--brand-intro');
       const intro = document.createElement('video');
       intro.className = 'loader__brand-video';
-      intro.src = '/brand/hazels-logo-spotlight.mp4';
-      intro.poster = '/brand/hazels-logo.jpeg';
-      intro.autoplay = true;
       intro.muted = true;
       intro.defaultMuted = true;
       intro.playsInline = true;
@@ -63,8 +60,15 @@
       intro.setAttribute('muted', '');
       intro.setAttribute('playsinline', '');
       intro.setAttribute('webkit-playsinline', '');
+      intro.setAttribute('autoplay', '');
       intro.setAttribute('aria-label', "Hazel's Cake Lounge");
+      intro.poster = '/brand/hazels-h-mark.png';
+      const source = document.createElement('source');
+      source.src = '/brand/hazels-logo-spotlight.mp4';
+      source.type = 'video/mp4';
+      intro.append(source);
       loader.append(intro);
+      intro.load();
 
       let started = false;
       let failSafe = setTimeout(fallback, 14000);
@@ -73,7 +77,7 @@
         reveal();
       };
       const rememberIntro = () => {
-        try { sessionStorage.setItem('hcl-brand-intro-v2', 'true'); } catch (_) {}
+        try { sessionStorage.setItem('hcl-brand-intro-v3', 'true'); } catch (_) {}
       };
       const fallback = () => {
         clearTimeout(failSafe);
@@ -84,15 +88,18 @@
       const startIntro = () => {
         if (started) return;
         started = true;
-        intro.play().then(() => {
-          intro.classList.add('is-playing');
-          rememberIntro();
-        }).catch(fallback);
+        const playback = intro.play();
+        if (playback) playback.catch(fallback);
       };
+      intro.addEventListener('playing', () => {
+        intro.classList.add('is-playing');
+        rememberIntro();
+      }, { once: true });
       intro.addEventListener('ended', finishIntro, { once: true });
       intro.addEventListener('error', fallback, { once: true });
+      intro.addEventListener('loadeddata', startIntro, { once: true });
       intro.addEventListener('canplay', startIntro, { once: true });
-      setTimeout(startIntro, 650);
+      setTimeout(startIntro, 2200);
     } else {
       window.addEventListener('load', () => setTimeout(reveal, reduce ? 0 : 900));
       setTimeout(reveal, 3200);

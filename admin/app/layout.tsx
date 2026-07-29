@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "Private command centre for Hazel's Cake Lounge.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Hazel's CC" },
-  icons: { icon: "/hazels-h-logo.png", apple: "/hazels-h-logo.png" },
+  icons: { icon: "/hazels-h-mark.png", apple: "/hazels-h-mark.png" },
 };
 
 export const viewport: Viewport = {
