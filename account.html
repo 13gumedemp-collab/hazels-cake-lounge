@@ -29,12 +29,50 @@
       <p class="page-hero__eyebrow">Your Cake Calendar</p>
       <h1>Everything you are<br /><em class="gold">celebrating.</em></h1>
       <p>Sign in to see your saved dates, confirmed cakes, payments and reminders.</p>
-      <button class="btn btn--solid account-google" id="googleSignIn" type="button">Continue with Google</button>
+      <div class="account-oauth">
+        <button class="btn account-oauth__btn" id="googleSignIn" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" /></svg>
+          <span>Continue with Google</span>
+        </button>
+        <button class="btn account-oauth__btn" id="facebookSignIn" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.412c0-3.026 1.792-4.697 4.533-4.697 1.313 0 2.686.236 2.686.236v2.971h-1.513c-1.491 0-1.956.93-1.956 1.886v2.265h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" /></svg>
+          <span>Continue with Facebook</span>
+        </button>
+      </div>
       <div class="account-divider"><span>or</span></div>
-      <form id="magicLinkForm" class="account-login-form">
-        <label class="field"><span>Your name <em class="field__opt">(first time here)</em></span><input type="text" name="full_name" autocomplete="name" placeholder="Nomsa Dlamini" /></label>
+
+      <div class="account-switch" id="authSwitch">
+        <button type="button" class="is-active" data-auth-tab="signin">Sign in</button>
+        <button type="button" data-auth-tab="signup">Create an account</button>
+      </div>
+
+      <form id="signInForm" class="account-login-form" data-auth-panel="signin">
         <label class="field"><span>Email address</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com" /></label>
-        <button class="btn" type="submit">Email me a sign-in link</button>
+        <label class="field"><span>Password</span><input type="password" name="password" autocomplete="current-password" required /></label>
+        <button class="btn" type="submit">Sign in</button>
+        <button type="button" class="account-link" id="forgotPassword">Forgotten your password?</button>
+      </form>
+
+      <form id="signUpForm" class="account-login-form" data-auth-panel="signup" hidden>
+        <label class="field"><span>Your name</span><input type="text" name="full_name" autocomplete="name" required placeholder="Nomsa Dlamini" /></label>
+        <label class="field"><span>Email address</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com" /></label>
+        <label class="field"><span>Password</span><input type="password" name="password" autocomplete="new-password" required minlength="8" /></label>
+        <label class="field"><span>Confirm password</span><input type="password" name="confirm_password" autocomplete="new-password" required minlength="8" /></label>
+        <button class="btn" type="submit">Create my account</button>
+        <p class="account-fineprint">At least 8 characters. We will email you a code to confirm your address.</p>
+      </form>
+
+      <form id="otpForm" class="account-login-form" data-auth-panel="otp" hidden>
+        <p class="account-fineprint">Enter the code we sent to <strong id="otpTarget"></strong>. You can also just tap the link in that email.</p>
+        <label class="field"><span>Confirmation code</span><input type="text" name="token" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required placeholder="123456" class="account-code" /></label>
+        <button class="btn" type="submit">Confirm my email</button>
+        <button type="button" class="account-link" id="resendCode">Send the code again</button>
+      </form>
+
+      <form id="newPasswordForm" class="account-login-form" data-auth-panel="recovery" hidden>
+        <label class="field"><span>New password</span><input type="password" name="password" autocomplete="new-password" required minlength="8" /></label>
+        <label class="field"><span>Confirm new password</span><input type="password" name="confirm_password" autocomplete="new-password" required minlength="8" /></label>
+        <button class="btn" type="submit">Save my new password</button>
       </form>
       <p class="form__status" id="authStatus" role="status"></p>
     </section>

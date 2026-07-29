@@ -803,7 +803,18 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .account-auth { width: min(560px,100%); margin: 0 auto; text-align: center; }
 .account-auth h1, .account-welcome h1 { font-family: 'Fraunces',serif; font-size: clamp(2.6rem,7vw,5rem); font-weight: 400; }
 .account-auth > p:not(.page-hero__eyebrow):not(.form__status) { color: var(--cream-soft); max-width: 42ch; margin: 1.3rem auto 2rem; }
-.account-google, .account-login-form .btn { width: 100%; }
+.account-switch { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.8rem; border-bottom: 1px solid var(--line); }
+.account-switch button { background: none; border: 0; color: var(--muted); padding: 0.8rem 1.2rem; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.account-switch button.is-active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+.account-link { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 0.85rem; padding: 0.2rem; justify-self: center; }
+.account-link:hover { color: var(--gold); }
+.account-fineprint { color: var(--muted); font-size: 0.82rem; text-align: center; }
+.account-fineprint strong { color: var(--cream); }
+.account-code { text-align: center; letter-spacing: 0.4em; font-size: 1.2rem; }
+.account-oauth { display: grid; gap: 0.8rem; }
+.account-oauth__btn, .account-login-form .btn { width: 100%; }
+.account-oauth__btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem; }
+.account-oauth__btn svg { width: 1.05rem; height: 1.05rem; fill: currentColor; flex: none; }
 .account-divider { display: flex; align-items: center; gap: 1rem; color: var(--muted); margin: 1.5rem 0; }
 .account-divider::before,.account-divider::after { content:''; height:1px; background:var(--line); flex:1; }
 .account-login-form { display:grid; gap:1rem; text-align:left; }

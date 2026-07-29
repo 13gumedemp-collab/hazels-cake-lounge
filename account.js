@@ -22,29 +22,130 @@ const googleCalendarUrl = (title, date, details) => {
   return 'https://calendar.google.com/calendar/render?' + params.toString();
 };
 
-async function signInGoogle() {
-  authStatus.textContent = 'Opening Google...';
-  const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + '/account.html' } });
-  if (error) authStatus.textContent = error.message;
+const REDIRECT = location.origin + '/account.html';
+const PROVIDERS = { google: 'Google', facebook: 'Facebook' };
+let pendingEmail = '';
+// A recovery link signs the customer in, so the dashboard would otherwise open
+// behind the "choose a new password" step and win the race.
+let recoveryMode = new URLSearchParams(location.hash.slice(1)).get('type') === 'recovery';
+
+// Supabase speaks developer. Customers do not.
+function friendly(error, fallback = 'Something went wrong. Please try again.') {
+  const m = String(error?.message || '');
+  if (/invalid login credentials/i.test(m)) return 'That email and password do not match. Please try again.';
+  if (/already registered/i.test(m)) return 'This email already has an account. Please sign in instead.';
+  if (/not confirmed/i.test(m)) return 'Please confirm your email address first.';
+  if (/provider is not enabled|unsupported provider/i.test(m)) return 'That sign-in option is not switched on yet. Please use your email address instead.';
+  if (/signups not allowed|disabled/i.test(m)) return 'New accounts are not open right now. Please contact Hazel.';
+  if (/rate limit|too many|after \d+ seconds/i.test(m)) return 'Please wait a moment before trying again.';
+  if (/password/i.test(m) && /short|least/i.test(m)) return 'Please use at least 8 characters for your password.';
+  return m || fallback;
 }
 
-async function sendMagicLink(e) {
+function showPanel(name) {
+  $$('[data-auth-panel]').forEach((p) => { p.hidden = p.dataset.authPanel !== name; });
+  $$('[data-auth-tab]').forEach((b) => b.classList.toggle('is-active', b.dataset.authTab === name));
+  // The tabs only make sense while choosing between signing in and signing up.
+  $('#authSwitch').hidden = name === 'otp' || name === 'recovery';
+  $('.account-oauth').hidden = name === 'otp' || name === 'recovery';
+  $('.account-divider').hidden = name === 'otp' || name === 'recovery';
+}
+
+async function signInWithProvider(provider) {
+  authStatus.textContent = `Opening ${PROVIDERS[provider]}...`;
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: REDIRECT, ...(provider === 'facebook' ? { scopes: 'email,public_profile' } : {}) },
+  });
+  if (error) authStatus.textContent = friendly(error);
+}
+
+async function signIn(e) {
   e.preventDefault();
-  const form = new FormData(e.currentTarget);
-  const email = form.get('email');
-  const fullName = String(form.get('full_name') || '').trim();
-  authStatus.textContent = 'Sending your sign-in link...';
-  const options = { emailRedirectTo: location.origin + '/account.html' };
-  // Only used when the account is created. Existing customers keep the name they already have.
-  if (fullName) options.data = { full_name: fullName };
-  const { error } = await supabase.auth.signInWithOtp({ email, options });
-  authStatus.textContent = error ? error.message : 'Check your email for your sign-in link.';
+  const f = new FormData(e.currentTarget);
+  const email = String(f.get('email') || '').trim();
+  const password = String(f.get('password') || '');
+  authStatus.textContent = 'Signing you in...';
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (!error) return;
+  if (/not confirmed/i.test(error.message)) {
+    pendingEmail = email;
+    $('#otpTarget').textContent = email;
+    await supabase.auth.resend({ type: 'signup', email });
+    showPanel('otp');
+    authStatus.textContent = 'Please confirm your email first. We have sent you a new code.';
+    return;
+  }
+  authStatus.textContent = friendly(error);
+}
+
+async function createAccount(e) {
+  e.preventDefault();
+  const f = new FormData(e.currentTarget);
+  const full_name = String(f.get('full_name') || '').trim();
+  const email = String(f.get('email') || '').trim();
+  const password = String(f.get('password') || '');
+  if (password.length < 8) { authStatus.textContent = 'Please use at least 8 characters for your password.'; return; }
+  if (password !== String(f.get('confirm_password') || '')) { authStatus.textContent = 'Those two passwords do not match.'; return; }
+  authStatus.textContent = 'Creating your account...';
+  const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name }, emailRedirectTo: REDIRECT } });
+  if (error) { authStatus.textContent = friendly(error); return; }
+  // Supabase returns a user with no identities when the email is already taken.
+  if (data.user && !data.user.identities?.length) {
+    showPanel('signin');
+    authStatus.textContent = 'This email already has an account. Please sign in instead.';
+    return;
+  }
+  if (data.session) return; // Confirmation is switched off, so they are already in.
+  pendingEmail = email;
+  $('#otpTarget').textContent = email;
+  showPanel('otp');
+  authStatus.textContent = 'Check your email for your confirmation code.';
+}
+
+async function confirmEmail(e) {
+  e.preventDefault();
+  const token = String(new FormData(e.currentTarget).get('token') || '').replace(/\s/g, '');
+  authStatus.textContent = 'Checking your code...';
+  const { error } = await supabase.auth.verifyOtp({ email: pendingEmail, token, type: 'signup' });
+  if (error) authStatus.textContent = 'That code is not right, or it has expired. Try again or send a new one.';
+}
+
+async function resendCode() {
+  if (!pendingEmail) return;
+  authStatus.textContent = 'Sending a new code...';
+  const { error } = await supabase.auth.resend({ type: 'signup', email: pendingEmail });
+  authStatus.textContent = error ? friendly(error) : 'A new code is on its way.';
+}
+
+async function forgotPassword() {
+  const email = String($('#signInForm').elements.email.value || '').trim();
+  if (!email) { authStatus.textContent = 'Please type your email address first, then tap this again.'; return; }
+  authStatus.textContent = 'Sending your reset link...';
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: REDIRECT });
+  authStatus.textContent = error ? friendly(error) : 'Check your email for a link to set a new password.';
+}
+
+async function setNewPassword(e) {
+  e.preventDefault();
+  const f = new FormData(e.currentTarget);
+  const password = String(f.get('password') || '');
+  if (password.length < 8) { authStatus.textContent = 'Please use at least 8 characters for your password.'; return; }
+  if (password !== String(f.get('confirm_password') || '')) { authStatus.textContent = 'Those two passwords do not match.'; return; }
+  authStatus.textContent = 'Saving your new password...';
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) { authStatus.textContent = friendly(error); return; }
+  recoveryMode = false;
+  showPanel('signin');
+  const { data } = await supabase.auth.getSession();
+  loadAccount(data.session);
 }
 
 // Names the account after the customer, with the right possessive apostrophe.
 const setNavName = (fullName) => window.hclSetAccountName?.(fullName || '');
 
 async function loadAccount(session) {
+  if (recoveryMode) { authBox.hidden = false; dashboard.hidden = true; showPanel('recovery'); return; }
   if (!session) { authBox.hidden = false; dashboard.hidden = true; setNavName(''); return; }
   const { data: rows, error } = await supabase.from('customers').select('*').eq('auth_user_id', session.user.id).limit(1);
   if (error || !rows?.length) {
@@ -132,10 +233,35 @@ $$('[data-account-tab]').forEach((button) => button.addEventListener('click', ()
   $$('[data-account-tab]').forEach((b) => b.classList.toggle('is-active', b === button));
   $$('[data-account-panel]').forEach((p) => p.classList.toggle('is-active', p.dataset.accountPanel === button.dataset.accountTab));
 }));
-$('#googleSignIn').addEventListener('click', signInGoogle);
-$('#magicLinkForm').addEventListener('submit', sendMagicLink);
+$('#googleSignIn').addEventListener('click', () => signInWithProvider('google'));
+$('#facebookSignIn').addEventListener('click', () => signInWithProvider('facebook'));
+$$('[data-auth-tab]').forEach((b) => b.addEventListener('click', () => { showPanel(b.dataset.authTab); authStatus.textContent = ''; }));
+$('#signInForm').addEventListener('submit', signIn);
+$('#signUpForm').addEventListener('submit', createAccount);
+$('#otpForm').addEventListener('submit', confirmEmail);
+$('#newPasswordForm').addEventListener('submit', setNewPassword);
+$('#forgotPassword').addEventListener('click', forgotPassword);
+$('#resendCode').addEventListener('click', resendCode);
 $('#accountProfile').addEventListener('submit', saveProfile);
 dashboard.addEventListener('click', accountAction);
 $('#signOut').addEventListener('click', async () => { await supabase.auth.signOut(); setNavName(''); location.reload(); });
-supabase.auth.onAuthStateChange((_event, session) => loadAccount(session));
+
+// A cancelled or expired social sign-in comes back as an error in the URL, not a session.
+const urlError = new URLSearchParams(location.hash.slice(1)).get('error_description')
+  || new URLSearchParams(location.search).get('error_description');
+if (urlError) {
+  authStatus.textContent = decodeURIComponent(urlError).replace(/\+/g, ' ');
+  history.replaceState(null, '', location.pathname);
+}
+
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    recoveryMode = true;
+    authBox.hidden = false; dashboard.hidden = true;
+    showPanel('recovery');
+    authStatus.textContent = 'Choose your new password.';
+    return;
+  }
+  loadAccount(session);
+});
 supabase.auth.getSession().then(({ data }) => loadAccount(data.session));
