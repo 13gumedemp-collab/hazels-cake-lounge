@@ -20,6 +20,10 @@
 
   --ease:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-2:  cubic-bezier(0.65, 0, 0.35, 1);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -137,6 +141,9 @@ html.nav-open, body.nav-open { overflow: hidden; }
 .nav--solid { background: rgba(8,7,5,0.92); border-bottom: 1px solid var(--line); }
 .nav.hidden { transform: translateY(-120%); }
 .nav__brand { display: flex; align-items: center; gap: 0.6rem; line-height: 1; }
+.nav__brand > span { font-family: 'Fraunces', serif; font-size: 1.3rem; letter-spacing: 0.02em; }
+.nav__brand > em { font-size: 0.6rem; letter-spacing: 0.42em; text-transform: uppercase;
+  font-style: normal; color: var(--gold); }
 .nav__brand-copy { display: flex; flex-direction: column; }
 .nav__brand-copy > span { font-family: 'Fraunces', serif; font-size: 1.3rem; letter-spacing: 0.02em; }
 .nav__brand-copy em { font-size: 0.6rem; letter-spacing: 0.42em; text-transform: uppercase;
@@ -151,14 +158,14 @@ html.nav-open, body.nav-open { overflow: hidden; }
 .nav__links a.is-active::after { width: 100%; }
 .nav__menu { display: none; background: none; border: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
 .nav__menu span { width: 26px; height: 2px; background: var(--gold); display: block; transition: transform 0.4s var(--ease), opacity 0.3s; }
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .nav__links { display: none; }
   .nav__brand, .nav__menu { position: relative; z-index: 2; }
-  .nav__menu { display: flex; }
+  .nav__menu { display: flex; width: 44px; min-height: 44px; align-items: center; justify-content: center; }
   .nav.open .nav__links { display: flex; position: fixed; inset: 0; background: var(--bg);
     z-index: 1; flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
     min-height: 100dvh; overflow-y: auto; }
-  .nav.open .nav__links a { font-size: 1.7rem; letter-spacing: 0.05em; font-family: 'Fraunces', serif; }
+  .nav.open .nav__links a { font-size: clamp(1.25rem, 3.5vw, 1.7rem); letter-spacing: 0.05em; font-family: 'Fraunces', serif; }
   .nav.open .nav__menu span:first-child { transform: translateY(3.5px) rotate(45deg); }
   .nav.open .nav__menu span:last-child { transform: translateY(-3.5px) rotate(-45deg); }
 }
@@ -1401,3 +1408,48 @@ html.enq-open, body.enq-open { overflow: hidden; }
   width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
 .article.legal li b { color: var(--cream); font-weight: 500; }
 .article.legal a { color: var(--gold-bright); }
+
+/* ---------- Responsive hardening: phones and tablets ---------- */
+@media (max-width: 1024px) {
+  .nav { padding-top: max(1rem, var(--safe-top)); padding-right: max(1.1rem, var(--safe-right));
+    padding-left: max(1.1rem, var(--safe-left)); }
+  .nav.open .nav__links { padding: max(5.5rem, calc(var(--safe-top) + 4.5rem)) max(1.5rem, var(--safe-right))
+      max(2rem, var(--safe-bottom)) max(1.5rem, var(--safe-left)); }
+  .page-hero, .account-page { padding-left: max(1.2rem, var(--safe-left)); padding-right: max(1.2rem, var(--safe-right)); }
+  .workfilter { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-inline: contain;
+    scrollbar-width: none; padding-inline: max(1.2rem, var(--safe-left)); scroll-padding-inline: max(1.2rem, var(--safe-left)); }
+  .workfilter::-webkit-scrollbar { display: none; }
+  .workfilter__btn { flex: 0 0 auto; min-height: 44px; }
+  .mcarousel__track { overscroll-behavior-inline: contain; }
+  .cards.is-carousel { overscroll-behavior-inline: contain; }
+  .cselect__panel { max-height: min(50dvh, 360px); }
+  .account-tabs { overscroll-behavior-inline: contain; scroll-padding-inline: 1rem; }
+  .account-tabs button { min-height: 44px; }
+  .cal { width: 100%; }
+  .cal__nav, .cal__month { min-width: 44px; min-height: 44px; }
+  .calpick__years button { width: 44px; height: 44px; }
+  .calpick__months button, .calpick__today { min-height: 40px; }
+  .sheet__inner { max-height: min(82dvh, 620px); padding-bottom: max(1.45rem, calc(var(--safe-bottom) + 1rem)); }
+  .modal { padding: max(1rem, var(--safe-top)) max(1rem, var(--safe-right)) max(1rem, var(--safe-bottom)) max(1rem, var(--safe-left)); }
+  .enq__bar { padding-top: max(1rem, var(--safe-top)); padding-right: max(1.2rem, var(--safe-right)); padding-left: max(1.2rem, var(--safe-left)); }
+  .enq__step { padding-bottom: max(2rem, calc(var(--safe-bottom) + 1rem)); }
+  .float-enquire { right: max(1rem, calc(var(--safe-right) + .5rem)); bottom: max(1rem, calc(var(--safe-bottom) + .5rem)); }
+}
+
+@media (pointer: coarse) {
+  .btn, .card__enquire, .cselect__trigger, .account-link, .account-signout,
+  .account-card__actions button, .ecard__actions button, .sheet__close,
+  .enq__close, .enq__back, .enq__add, .occ-remove { min-height: 44px; }
+  .card__enquire, .account-link, .account-signout, .enq__back, .occ-remove { padding-inline: .5rem; }
+  .field input, .field textarea, .field select { min-height: 44px; }
+  .field textarea { min-height: 112px; }
+}
+
+@media (max-width: 600px) {
+  .hero__actions .btn, .cta-band__actions .btn { min-height: 48px; }
+  .sheet__actions { display: grid; grid-template-columns: 1fr; }
+  .sheet__actions .btn { width: 100%; }
+  .account-preferences { padding: 1rem; gap: 1rem; }
+  .pref { align-items: flex-start; }
+  .pref__box { margin-top: .15rem; }
+}
