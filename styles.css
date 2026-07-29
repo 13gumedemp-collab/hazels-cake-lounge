@@ -224,8 +224,6 @@ section { position: relative; }
     radial-gradient(120% 80% at 50% 120%, rgba(212,175,55,0.10) 0%, transparent 55%),
     linear-gradient(180deg, rgba(8,7,5,0.55) 0%, rgba(8,7,5,0.2) 35%, rgba(8,7,5,0.88) 100%); }
 .hero__content { color: var(--cream); max-width: 70rem; }
-.hero__eyebrow { font-size: 0.74rem; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 1.6rem;
-  color: var(--gold); }
 .hero__title { font-size: clamp(2.8rem, 9.5vw, 7.5rem); font-weight: 300; letter-spacing: -0.02em; }
 .hero__title em { background: var(--gold-grad); -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent; }
@@ -860,6 +858,32 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .account-section-head { margin-bottom:1.5rem; }.account-section-head span,.account-card span,.account-event div>span { color:var(--gold); font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; }
 .account-section-head h2 { font-size:clamp(2rem,5vw,3.5rem); }
 .account-list,.account-calendar { display:grid; gap:1rem; }
+
+/* Month calendar */
+.cal { border:1px solid var(--line); background:var(--bg-2); border-radius:6px; padding:clamp(1rem,3vw,1.5rem); }
+.cal__head { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; }
+.cal__month { font-family:'Fraunces',serif; font-size:1.35rem; font-weight:400; letter-spacing:.01em; }
+.cal__nav { width:34px; height:34px; border-radius:50%; background:none; border:1px solid var(--line);
+  color:var(--gold); font-size:1.1rem; line-height:1; transition:border-color .3s var(--ease), color .3s var(--ease); }
+.cal__nav:hover { border-color:var(--gold); color:var(--gold-bright); }
+.cal__grid { display:grid; grid-template-columns:repeat(7,1fr); gap:.25rem; }
+.cal__dow { text-align:center; color:var(--muted); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; padding-bottom:.6rem; }
+.cal__pad { aspect-ratio:1; }
+.cal__day { position:relative; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+  background:none; border:1px solid transparent; border-radius:50%; color:var(--cream-soft);
+  font-size:.9rem; transition:border-color .3s var(--ease), color .3s var(--ease); }
+.cal__day:hover { border-color:rgba(212,175,55,.35); color:var(--cream); }
+.cal__day.is-today { color:var(--gold); }
+.cal__day.is-selected { border-color:var(--gold); color:var(--cream); }
+/* A saved occasion shows as a slow gold heartbeat under the date. */
+.cal__day.is-marked::after { content:''; position:absolute; bottom:13%; width:5px; height:5px; border-radius:50%;
+  background:var(--gold); animation:calHeartbeat 2.8s ease-in-out infinite; }
+@keyframes calHeartbeat {
+  0%,100% { opacity:.4; transform:scale(.9); box-shadow:0 0 0 rgba(212,175,55,0); }
+  50%     { opacity:1; transform:scale(1.15); box-shadow:0 0 9px rgba(212,175,55,.55); }
+}
+.cal__detail { display:grid; gap:1rem; margin-top:1.4rem; }
+@media (prefers-reduced-motion: reduce) { .cal__day.is-marked::after { animation:none; opacity:.85; } }
 .account-card,.account-event { display:flex; align-items:center; justify-content:space-between; gap:1.2rem; padding:1.3rem; border:1px solid var(--line); background:var(--bg-2); border-radius:6px; }
 .account-card h3,.account-event h3 { font-size:1.25rem; margin:.2rem 0; }.account-card p,.account-event p { color:var(--cream-soft); font-size:.88rem; }
 .account-event time { min-width:130px; color:var(--cream); }.account-event>a { color:var(--gold); font-size:.78rem; }
