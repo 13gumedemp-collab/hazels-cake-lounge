@@ -229,7 +229,7 @@ async function loadAccount(session) {
   authBox.hidden = true; dashboard.hidden = false;
   $('#accountName').textContent = (customer.full_name || session.user.email).split(' ')[0];
   setNavName(customer.full_name);
-  fillProfile(); renderAll();
+  fillProfile(); renderAll(); setUpProvince();
   // The tabs have no width until the dashboard is on screen.
   requestAnimationFrame(moveTabInk);
 }
@@ -246,6 +246,42 @@ const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 let calCursor = null;   // first day of the month on screen
 let calSelected = null; // 'YYYY-MM-DD'
+
+const OCCASIONS = ['Birthday','Anniversary','Wedding','Baby shower','Graduation','Engagement','Baptism','Retirement','Just because','Other'];
+let editingDate = null;
+
+// The site holds every cake date to four full days' notice.
+const earliestDate = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 4);
+  return ymd(d);
+};
+
+function dateEditor(o) {
+  const options = OCCASIONS.concat(OCCASIONS.includes(o.occasion_type) ? [] : [o.occasion_type])
+    .map((t) => `<option value="${safe(t)}"${t === o.occasion_type ? ' selected' : ''}>${safe(t)}</option>`).join('');
+  return `<form class="ecard ecard--editing" data-save-date="${o.id}">
+    <div class="ecard__body ecard__edit">
+      <div class="form__row">
+        <label class="field"><span>Who is it for</span><input name="person_name" value="${safe(o.person_name || '')}" required /></label>
+        <label class="field"><span>Occasion</span><select name="occasion_type" required>${options}</select></label>
+      </div>
+      <div class="form__row">
+        <label class="field"><span>Date</span><input type="date" name="occasion_date" value="${safe(o.occasion_date || '')}" min="${earliestDate()}" required /></label>
+        <label class="consent ecard__repeat"><input type="checkbox" name="recurring_yearly"${o.recurring_yearly ? ' checked' : ''} /><span class="consent__box" aria-hidden="true"></span><span>Remind me every year</span></label>
+      </div>
+      <div class="ecard__actions ecard__actions--edit">
+        <button type="submit">Save changes</button>
+        <button type="button" data-cancel-date>Cancel</button>
+      </div>
+    </div>
+  </form>`;
+}
+
+// Compact date plate used on every card.
+const dateBlock = (d) => d
+  ? `<div class="ecard__date"><b>${Number(d.slice(8, 10))}</b><span>${MONTHS[Number(d.slice(5, 7)) - 1].slice(0, 3)}</span><i>${d.slice(0, 4)}</i></div>`
+  : '<div class="ecard__date ecard__date--tbc"><b>&middot;</b><span>TBC</span></div>';
 
 function itemsByDate() {
   const map = new Map();
@@ -264,8 +300,15 @@ function dayDetail(map) {
   const items = key ? (map.get(key) || []) : [];
   if (!items.length) return empty(calSelected ? 'Nothing saved on this date.' : 'No dates or orders yet.');
   return items.map((item) => `
-    <article class="account-event"><time>${safe(pretty(item.date))}</time><div><span>${safe(item.type)}</span><h3>${safe(item.title)}</h3><p>${safe(item.detail)}</p></div>
-    <a href="${safe(googleCalendarUrl(item.title, item.date, item.detail))}" target="_blank" rel="noopener">Add to Google Calendar</a></article>`).join('');
+    <article class="ecard">
+      ${dateBlock(item.date)}
+      <div class="ecard__body">
+        <h3>${safe(item.title)}</h3>
+        <p class="chips"><em class="chip">${safe(item.type)}</em></p>
+        <p class="ecard__note">${safe(item.detail)}</p>
+      </div>
+      <div class="ecard__actions"><a class="ecard__link" href="${safe(googleCalendarUrl(item.title, item.date, item.detail))}" target="_blank" rel="noopener">Add to Google Calendar</a></div>
+    </article>`).join('');
 }
 
 function renderCalendar() {
@@ -307,18 +350,104 @@ function renderAll() {
 
   $('#accountOrders').innerHTML = orders.length ? orders.map((o) => {
     const title = o.circle_member ? `${o.circle_member.person_name}'s ${o.circle_member.occasion_type}` : (o.cake_description || 'Cake order');
-    return `<article class="account-card"><div><span>${safe(pretty(o.occasion_date))}</span><h3>${safe(title)}</h3><p>${safe(statusLabel(o.status))} · ${safe(paymentLabel(o.payment_status))}</p>${o.total_amount_zar != null ? `<p>R ${Number(o.amount_paid_zar || 0).toFixed(2)} paid of R ${Number(o.total_amount_zar).toFixed(2)}</p>` : ''}</div><div class="account-card__actions"><button data-reorder="${o.id}">Order this again</button>${o.invoice_path ? `<button data-file="invoice" data-order="${o.id}">Invoice</button>` : ''}${o.receipt_path ? `<button data-file="receipt" data-order="${o.id}">Receipt</button>` : ''}</div></article>`;
-  }).join('') : empty('No cake orders yet.');
+    const total = Number(o.total_amount_zar || 0);
+    const paid = Number(o.amount_paid_zar || 0);
+    const owing = Math.max(total - paid, 0);
+    const money = o.total_amount_zar == null
+      ? '<p class="account-card__note">Hazel is still working out your quote.</p>'
+      : `<p class="account-card__note">R${paid.toFixed(2)} paid of R${total.toFixed(2)}${owing > 0 ? `, R${owing.toFixed(2)} still to pay` : '. Fully paid, thank you'}</p>
+         <span class="bar"><i style="width:${total ? Math.min(100, (paid / total) * 100).toFixed(0) : 0}%"></i></span>`;
+    return `<article class="ecard ecard--order">
+      ${dateBlock(o.occasion_date)}
+      <div class="ecard__body">
+        <h3>${safe(title)}</h3>
+        <p class="chips"><em class="chip chip--${safe(o.status || 'enquiry')}">${safe(statusLabel(o.status))}</em><em class="chip chip--pay-${safe(o.payment_status || 'unpaid')}">${safe(paymentLabel(o.payment_status))}</em></p>
+        ${money}
+      </div>
+      <div class="ecard__actions">
+        <button data-reorder="${o.id}">Order this again</button>
+        ${o.invoice_path ? `<button data-file="invoice" data-order="${o.id}">Invoice</button>` : ''}
+        ${o.receipt_path ? `<button data-file="receipt" data-order="${o.id}">Receipt</button>` : ''}
+      </div></article>`;
+  }).join('') : empty('No cakes ordered yet. When you send an enquiry it will appear here, and you can follow it from quote to collection.');
 
-  $('#accountDates').innerHTML = occasions.length ? occasions.map((o) => `<article class="account-card"><div><span>${safe(pretty(o.occasion_date))}</span><h3>${safe(o.person_name)} · ${safe(o.occasion_type)}</h3><p>${o.recurring_yearly ? 'Repeats every year' : 'Saved once'}</p></div><div class="account-card__actions"><button data-edit-date="${o.id}">Change date</button><button data-delete-date="${o.id}">Remove</button></div></article>`).join('') : empty('No saved dates yet.');
+  $('#accountDates').innerHTML = occasions.length ? occasions.map((o) => (
+    editingDate === o.id ? dateEditor(o) : `
+    <article class="ecard ecard--date">
+      ${dateBlock(o.occasion_date)}
+      <div class="ecard__body">
+        <h3>${safe(o.person_name)} &middot; ${safe(o.occasion_type)}</h3>
+        <p class="chips"><em class="chip"><i class="pip" aria-hidden="true"></i>${o.recurring_yearly ? 'Every year' : 'One time'}</em><em class="chip">No cake booked</em></p>
+        <p class="ecard__note">${o.recurring_yearly ? 'I will remind you a month, two weeks and a week before, every year.' : 'I will remind you in good time before this date arrives.'}</p>
+      </div>
+      <div class="ecard__actions"><button data-edit-date="${o.id}">Edit</button><button data-delete-date="${o.id}">Remove</button></div>
+    </article>`)).join('') : empty('No dates saved yet. Add the birthdays and anniversaries you never want to miss and I will remind you, free, with no cake booked.');
 }
 
 const empty = (message) => `<p class="account-empty">${safe(message)}</p>`;
+
+// The customers table has a CHECK constraint on province, so only these nine
+// values may ever reach the database.
+const PROVINCES = ['Eastern Cape','Free State','Gauteng','KwaZulu-Natal','Limpopo','Mpumalanga','Northern Cape','North West','Western Cape'];
+const matchProvince = (value) => PROVINCES.find((p) => p.toLowerCase() === String(value || '').trim().toLowerCase()) || null;
+
+function setUpProvince() {
+  const input = $('#provinceInput');
+  const list = $('#provinceList');
+  if (!input || !list) return;
+  let active = -1;
+
+  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); active = -1; };
+  const options = () => $$('li[data-value]', list);
+
+  const open = () => {
+    const typed = input.value.trim().toLowerCase();
+    const exact = matchProvince(input.value);
+    // A chosen value should still show the whole list, not just itself.
+    const shown = (!typed || exact) ? PROVINCES : PROVINCES.filter((p) => p.toLowerCase().includes(typed));
+    list.innerHTML = shown.length
+      ? shown.map((p) => `<li role="option" data-value="${safe(p)}" aria-selected="${p === exact}">${safe(p)}</li>`).join('')
+      : '<li class="combo__empty">No province matches that</li>';
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    active = -1;
+  };
+
+  const choose = (value) => { input.value = value; close(); };
+
+  input.addEventListener('focus', open);
+  input.addEventListener('input', open);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { close(); return; }
+    const items = options();
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (list.hidden) { open(); return; }
+      active = (active + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      items.forEach((li, i) => li.classList.toggle('is-active', i === active));
+      items[active]?.scrollIntoView({ block: 'nearest' });
+      return;
+    }
+    if (e.key === 'Enter') {
+      if (!list.hidden && items.length) { e.preventDefault(); choose(items[Math.max(active, 0)].dataset.value); }
+    }
+  });
+  list.addEventListener('mousedown', (e) => {
+    const li = e.target.closest('li[data-value]');
+    if (li) { e.preventDefault(); choose(li.dataset.value); }
+  });
+  // Anything that is not one of the nine is not a province.
+  input.addEventListener('blur', () => {
+    setTimeout(() => { input.value = matchProvince(input.value) || ''; close(); }, 120);
+  });
+}
 
 function fillProfile() {
   const form = $('#accountProfile');
   ['full_name','whatsapp_number','address_line_1','address_line_2','suburb','city','province','postal_code'].forEach((name) => { form.elements[name].value = customer[name] || ''; });
   ['email_consent','whatsapp_consent','phone_call_consent'].forEach((name) => { form.elements[name].checked = !!customer[name]; });
+  const emailField = $('#emailChangeForm')?.elements.new_email;
+  if (emailField) emailField.value = customer.email || '';
 }
 
 async function saveProfile(e) {
@@ -327,10 +456,86 @@ async function saveProfile(e) {
   const phone = String(f.get('whatsapp_number') || '').trim();
   if (phone && !/^(?:\+27|0)[6-8]\d{8}$/.test(phone.replace(/\s/g, ''))) { $('#profileStatus').textContent = 'Please enter a valid South African phone number.'; return; }
   const payload = Object.fromEntries(['full_name','whatsapp_number','address_line_1','address_line_2','suburb','city','province','postal_code'].map((n) => [n, String(f.get(n) || '').trim() || null]));
+  payload.province = matchProvince(payload.province); // the column only accepts the nine
   ['email_consent','whatsapp_consent','phone_call_consent'].forEach((n) => { payload[n] = e.currentTarget.elements[n].checked; });
+  // POPIA: record when WhatsApp consent was actually given, not just that it is on.
+  if (payload.whatsapp_consent && !customer.whatsapp_consent) payload.whatsapp_consent_date = new Date().toISOString();
+  if (!payload.whatsapp_consent) payload.whatsapp_consent_date = null;
   const { data, error } = await supabase.from('customers').update(payload).eq('id', customer.id).select().single();
   $('#profileStatus').textContent = error ? error.message : 'Your details are saved.';
   if (data) { customer = data; setNavName(customer.full_name); $('#accountName').textContent = String(customer.full_name || '').split(' ')[0] || 'there'; }
+}
+
+const securityStatus = () => $('#securityStatus');
+
+// Re-reads the customer's dates and orders without throwing away the page.
+async function refreshData() {
+  const [datesRes, ordersRes] = await Promise.all([
+    supabase.from('circle_members').select('*').eq('customer_id', customer.id).order('occasion_date'),
+    supabase.from('orders').select('id,status,payment_status,total_amount_zar,amount_paid_zar,occasion_date,cake_flavour,cake_description,delivery_or_collection,invoice_path,receipt_path,created_at,circle_member:circle_members(person_name,occasion_type)').eq('customer_id', customer.id).order('occasion_date'),
+  ]);
+  occasions = datesRes.data || occasions;
+  orders = ordersRes.data || orders;
+  renderAll();
+}
+
+async function saveDate(e) {
+  e.preventDefault();
+  const id = e.currentTarget.dataset.saveDate;
+  const f = new FormData(e.currentTarget);
+  const patch = {
+    person_name: String(f.get('person_name') || '').trim(),
+    occasion_type: String(f.get('occasion_type') || '').trim(),
+    occasion_date: String(f.get('occasion_date') || ''),
+    recurring_yearly: e.currentTarget.elements.recurring_yearly.checked,
+  };
+  if (!patch.person_name || !patch.occasion_date) return;
+  if (patch.occasion_date < earliestDate()) { alert('Please choose a date at least four days from now, so there is time to bake.'); return; }
+  const { error } = await supabase.from('circle_members').update(patch).eq('id', id);
+  if (error) { alert(error.message); return; }
+  editingDate = null;
+  await refreshData();
+}
+
+async function changeEmail(e) {
+  e.preventDefault();
+  const next = String(new FormData(e.currentTarget).get('new_email') || '').trim();
+  if (!next || next.toLowerCase() === String(customer.email || '').toLowerCase()) {
+    securityStatus().textContent = 'That is already your email address.';
+    return;
+  }
+  securityStatus().textContent = 'Sending a code to your new address...';
+  const { error } = await supabase.auth.updateUser({ email: next }, { emailRedirectTo: REDIRECT });
+  if (error) { securityStatus().textContent = friendly(error); return; }
+  pendingEmail = next;
+  $('#emailChangeTarget').textContent = next;
+  $('#emailOtpForm').hidden = false;
+  securityStatus().textContent = 'Check the new address for your code. Your old email keeps working until you confirm.';
+}
+
+async function confirmEmailChange(e) {
+  e.preventDefault();
+  const token = String(new FormData(e.currentTarget).get('token') || '').replace(/\s/g, '');
+  securityStatus().textContent = 'Checking your code...';
+  const { error } = await supabase.auth.verifyOtp({ email: pendingEmail, token, type: 'email_change' });
+  if (error) { securityStatus().textContent = 'That code is not right, or it has expired. Try changing your email again.'; return; }
+  $('#emailOtpForm').hidden = true;
+  e.currentTarget.reset();
+  securityStatus().textContent = 'Your email address is updated. Use it next time you sign in.';
+  const { data } = await supabase.auth.getSession();
+  if (data.session) loadAccount(data.session);
+}
+
+async function changePassword(e) {
+  e.preventDefault();
+  const f = new FormData(e.currentTarget);
+  const password = String(f.get('password') || '');
+  if (password.length < 8) { securityStatus().textContent = 'Please use at least 8 characters.'; return; }
+  if (password !== String(f.get('confirm_password') || '')) { securityStatus().textContent = 'Those two passwords do not match.'; return; }
+  securityStatus().textContent = 'Saving your new password...';
+  const { error } = await supabase.auth.updateUser({ password });
+  securityStatus().textContent = error ? friendly(error) : 'Your password is updated.';
+  if (!error) e.currentTarget.reset();
 }
 
 async function accountAction(e) {
@@ -341,13 +546,15 @@ async function accountAction(e) {
     alert(error ? error.message : 'Your new enquiry has been sent to Hazel.'); if (!error) location.reload(); return;
   }
   const edit = e.target.closest('[data-edit-date]');
-  if (edit) {
-    const date = prompt('Enter the new date as YYYY-MM-DD.'); if (!date) return;
-    const { error } = await supabase.from('circle_members').update({ occasion_date: date }).eq('id', edit.dataset.editDate);
-    alert(error ? error.message : 'Date updated.'); if (!error) location.reload(); return;
-  }
+  if (edit) { editingDate = edit.dataset.editDate; renderAll(); return; }
+  const cancel = e.target.closest('[data-cancel-date]');
+  if (cancel) { editingDate = null; renderAll(); return; }
   const remove = e.target.closest('[data-delete-date]');
-  if (remove && confirm('Remove this saved date?')) { const { error } = await supabase.from('circle_members').delete().eq('id', remove.dataset.deleteDate); if (error) alert(error.message); else location.reload(); }
+  if (remove && confirm('Remove this saved date? Your reminders for it will stop.')) {
+    const { error } = await supabase.from('circle_members').delete().eq('id', remove.dataset.deleteDate);
+    if (error) { alert(error.message); return; }
+    await refreshData();
+  }
   const file = e.target.closest('[data-file]');
   if (file) {
     const { data, error } = await supabase.functions.invoke('customer-file', { body: { order_id: file.dataset.order, kind: file.dataset.file } });
@@ -385,6 +592,9 @@ $('#newPasswordForm').addEventListener('submit', setNewPassword);
 $('#forgotPassword').addEventListener('click', forgotPassword);
 $('#resendCode').addEventListener('click', resendCode);
 $('#accountProfile').addEventListener('submit', saveProfile);
+$('#emailChangeForm').addEventListener('submit', changeEmail);
+$('#emailOtpForm').addEventListener('submit', confirmEmailChange);
+$('#passwordChangeForm').addEventListener('submit', changePassword);
 // Bound to the container, so it survives every re-render of the grid.
 $('#accountCalendar').addEventListener('click', (e) => {
   const step = e.target.closest('[data-cal-step]');
@@ -400,6 +610,7 @@ $('#accountCalendar').addEventListener('click', (e) => {
   }
 });
 dashboard.addEventListener('click', accountAction);
+dashboard.addEventListener('submit', (e) => { if (e.target.matches('[data-save-date]')) saveDate(e); });
 $('#signOut').addEventListener('click', async () => { await supabase.auth.signOut(); setNavName(''); location.reload(); });
 
 // A cancelled or expired social sign-in comes back as an error in the URL, not a session.

@@ -82,7 +82,6 @@
     <section class="account-dashboard" id="accountDashboard" hidden>
       <div class="account-welcome">
         <div><p class="page-hero__eyebrow">Your Cake Calendar</p><h1>Welcome, <span id="accountName">there</span>.</h1></div>
-        <button class="account-signout" id="signOut" type="button">Sign out</button>
       </div>
       <nav class="account-tabs" aria-label="Account sections">
         <button class="is-active" data-account-tab="calendar">Calendar</button>
@@ -97,10 +96,12 @@
       </div>
       <div class="account-panel" data-account-panel="orders">
         <div class="account-section-head"><div><span>Cakes</span><h2>Your orders</h2></div></div>
+        <p class="account-intro">Cakes you have asked me to make. Each one shows where it is up to in my kitchen and what is still to pay. Once a cake is done you can order it again in one tap.</p>
         <div class="account-list" id="accountOrders"></div>
       </div>
       <div class="account-panel" data-account-panel="dates">
         <div class="account-section-head"><div><span>Occasion Book</span><h2>Saved dates</h2></div><a class="btn" href="occasion-book.html">Add a date</a></div>
+        <p class="account-intro">Occasions you have asked me to remember. Nothing is booked and nothing is owed. I will email you before each one, in good time to order a cake if you want one.</p>
         <div class="account-list" id="accountDates"></div>
       </div>
       <div class="account-panel" data-account-panel="profile">
@@ -110,10 +111,48 @@
           <label class="field"><span>Address</span><input name="address_line_1" placeholder="Street address" /></label>
           <label class="field"><span>Address line 2 <em class="field__opt">(optional)</em></span><input name="address_line_2" /></label>
           <div class="form__row"><label class="field"><span>Suburb</span><input name="suburb" /></label><label class="field"><span>City</span><input name="city" /></label></div>
-          <div class="form__row"><label class="field"><span>Province</span><select name="province"><option value="">Choose one</option><option>Eastern Cape</option><option>Free State</option><option>Gauteng</option><option>KwaZulu-Natal</option><option>Limpopo</option><option>Mpumalanga</option><option>Northern Cape</option><option>North West</option><option>Western Cape</option></select></label><label class="field"><span>Postal code</span><input name="postal_code" inputmode="numeric" /></label></div>
-          <fieldset class="account-preferences"><legend>Reminder preferences</legend><label><input type="checkbox" name="email_consent" /> Email</label><label><input type="checkbox" name="whatsapp_consent" /> WhatsApp</label><label><input type="checkbox" name="phone_call_consent" /> Phone call from Hazel</label></fieldset>
+          <div class="form__row">
+            <label class="field field--combo">
+              <span>Province</span>
+              <input type="text" name="province" id="provinceInput" autocomplete="address-level1" placeholder="Start typing" role="combobox" aria-expanded="false" aria-controls="provinceList" aria-autocomplete="list" />
+              <ul class="combo" id="provinceList" role="listbox" aria-label="Provinces" hidden></ul>
+            </label>
+            <label class="field"><span>Postal code</span><input name="postal_code" inputmode="numeric" /></label>
+          </div>
+          <p class="account-fineprint account-fineprint--left">Your address is used to deliver your cake, and your number to reach you about an order. Nothing is shared or sold. See the <a href="privacy.html">privacy policy</a>.</p>
+          <fieldset class="account-preferences">
+            <legend>How I may contact you</legend>
+            <p class="account-fineprint account-fineprint--left">Ticking a box is your consent to be contacted that way about your saved dates and orders. Leave them all unticked and I will only ever email you about a cake you have actually ordered. You can change this whenever you like, and every reminder has an unsubscribe link. This is covered by the <a href="privacy.html">privacy policy</a>, and WhatsApp messages by the <a href="messaging-terms.html">messaging terms</a>.</p>
+            <label class="consent"><input type="checkbox" name="email_consent" /><span class="consent__box" aria-hidden="true"></span><span>Email me my occasion reminders</span></label>
+            <label class="consent"><input type="checkbox" name="whatsapp_consent" /><span class="consent__box" aria-hidden="true"></span><span>Message me on WhatsApp</span></label>
+            <label class="consent"><input type="checkbox" name="phone_call_consent" /><span class="consent__box" aria-hidden="true"></span><span>Hazel may phone me before a big date</span></label>
+          </fieldset>
           <button class="btn btn--solid" type="submit">Save details</button><p class="form__status" id="profileStatus"></p>
         </form>
+
+        <section class="account-security">
+          <div class="account-section-head"><div><span>Sign in</span><h2>Email and password</h2></div></div>
+          <p class="account-intro">Change what you sign in with. A new email address has to be confirmed with a code before it takes over, so you never get locked out.</p>
+
+          <form id="emailChangeForm" class="account-security__form">
+            <label class="field"><span>Email address</span><input type="email" name="new_email" autocomplete="email" required /></label>
+            <button class="btn" type="submit">Change email</button>
+          </form>
+
+          <form id="emailOtpForm" class="account-security__form" hidden>
+            <label class="field"><span>Code sent to <strong id="emailChangeTarget"></strong></span><input type="text" name="token" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required class="account-code" placeholder="12345678" /></label>
+            <button class="btn" type="submit">Confirm new email</button>
+          </form>
+
+          <form id="passwordChangeForm" class="account-security__form">
+            <label class="field"><span>New password <em class="field__opt">(8 or more characters)</em></span><input type="password" name="password" autocomplete="new-password" minlength="8" required /></label>
+            <label class="field"><span>Confirm password</span><input type="password" name="confirm_password" autocomplete="new-password" minlength="8" required /></label>
+            <button class="btn" type="submit">Update password</button>
+          </form>
+
+          <p class="form__status" id="securityStatus" role="status"></p>
+          <button class="btn btn--ghost account-signout" id="signOut" type="button">Sign out</button>
+        </section>
       </div>
     </section>
   </main>
