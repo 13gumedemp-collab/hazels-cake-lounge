@@ -39,7 +39,7 @@ export default function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 mt-2 w-[22rem] max-w-[92vw] max-h-[72vh] overflow-y-auto z-50 rounded-2xl border border-line bg-ink2 shadow-2xl p-4 rise">
+          <div className="notification-panel absolute right-0 mt-2 z-50 rise">
             <NotificationList notes={notes} onMarkAll={markAll} />
           </div>
         </>

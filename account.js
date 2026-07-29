@@ -217,6 +217,9 @@ async function loadAccount(session) {
     return;
   }
   customer = rows[0];
+  // This secured function deduplicates server-side, so it is safe to call on
+  // every signed-in load. It only alerts Hazel for a genuinely new account.
+  void supabase.functions.invoke('account-created-alert').catch(() => {});
   const [datesRes, ordersRes] = await Promise.all([
     supabase.from('circle_members').select('*').eq('customer_id', customer.id).order('occasion_date'),
     supabase.from('orders').select('id,status,payment_status,total_amount_zar,amount_paid_zar,occasion_date,cake_flavour,cake_description,delivery_or_collection,invoice_path,receipt_path,created_at,circle_member:circle_members(person_name,occasion_type)').eq('customer_id', customer.id).order('occasion_date'),

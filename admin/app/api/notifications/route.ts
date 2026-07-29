@@ -10,7 +10,7 @@ export async function GET() {
   const sb = supabaseAdmin();
   const { data } = await sb
     .from("notifications")
-    .select("id, type, message, priority, read, created_at")
+    .select("id, type, message, priority, read, created_at, action_url")
     .order("created_at", { ascending: false })
     .limit(20);
   return NextResponse.json({ notifications: data ?? [] });
