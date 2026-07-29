@@ -24,6 +24,11 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Any author display rule beats the user agent [hidden] rule, so a component
+   styled display:flex or display:grid stays on screen even when hidden is set.
+   State it once, globally, rather than remembering it per component. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
 body {
@@ -990,6 +995,8 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
   padding:2rem clamp(1.3rem,4vw,2rem); display:grid; gap:.9rem; animation:authRise .45s var(--ease) both; }
 .modal__sheet h3 { font-family:'Fraunces',serif; font-size:1.6rem; font-weight:400; }
 .modal__sheet p { color:var(--cream-soft); font-size:.92rem; }
+.modal__for { display:block; padding:.7rem 1rem; border:1px solid var(--line); border-radius:8px;
+  background:rgba(212,175,55,.06); color:var(--gold); font-size:.86rem; letter-spacing:.02em; }
 .modal__points { list-style:none; display:grid; gap:.5rem; margin:.3rem 0; }
 .modal__points li { position:relative; padding-left:1.1rem; color:var(--cream-soft); font-size:.86rem; }
 .modal__points li::before { content:''; position:absolute; left:0; top:.55em; width:4px; height:4px; border-radius:50%; background:var(--gold); }

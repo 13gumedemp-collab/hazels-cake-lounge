@@ -874,7 +874,18 @@ $('#dateSheet').addEventListener('click', (e) => {
 let yearlyBox = null;
 const onYearlyTick = (e) => {
   const box = e.target.closest('input[name="recurring_yearly"]');
-  if (box && box.checked) { yearlyBox = box; $('#yearlyModal').hidden = false; }
+  if (!box || !box.checked) return;
+  yearlyBox = box;
+  // Say plainly which date is about to repeat.
+  const form = box.closest('form');
+  const when = form?.elements?.occasion_date?.value || sheetDate;
+  const who = String(form?.elements?.person_name?.value || '').trim();
+  const what = String(form?.elements?.occasion_type?.value || '').trim();
+  const label = [when ? pretty(when) : '', who && what ? `${who}'s ${what}` : (who || what)].filter(Boolean).join('  ·  ');
+  const target = $('#yearlyFor');
+  target.textContent = label;
+  target.hidden = !label;
+  $('#yearlyModal').hidden = false;
 };
 dashboard.addEventListener('change', onYearlyTick);
 dashboard.addEventListener('change', (e) => { if (e.target.closest('.prefs')) syncPrefsSummary(); });
