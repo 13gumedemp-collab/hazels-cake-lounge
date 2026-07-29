@@ -340,17 +340,38 @@ const earliestDate = () => {
   return ymd(d);
 };
 
+// The reminder run is a month, two weeks and a week before. A date closer than
+// that is allowed, the customer just needs to know what will actually reach them.
+function reminderNotice(dateStr, recurring) {
+  if (!dateStr) return '';
+  const days = Math.round((new Date(`${dateStr}T00:00:00`) - new Date(`${ymd(new Date())}T00:00:00`)) / 86400000);
+  if (days < 0) {
+    return recurring
+      ? 'This date has already passed this year, so your reminders will begin next year.'
+      : 'This date has already passed, so there is nothing left to remind you about.';
+  }
+  if (days < 7) {
+    return recurring
+      ? 'This is less than a week away, so there is no room for reminders this year. The full run starts next year.'
+      : 'This is less than a week away, so I cannot get the usual reminders to you in time.';
+  }
+  if (days < 14) return 'Under two weeks away, so only the one week reminder will reach you this time.';
+  if (days < 31) return 'Under a month away, so you will get the two week and one week reminders this time, and the full run from next year.';
+  return '';
+}
+
 function dateEditor(o) {
   const options = OCCASIONS.concat(OCCASIONS.includes(o.occasion_type) ? [] : [o.occasion_type])
     .map((t) => `<option value="${safe(t)}"${t === o.occasion_type ? ' selected' : ''}>${safe(t)}</option>`).join('');
   return `<form class="ecard ecard--editing" data-save-date="${o.id}">
+    ${dateBlock(o.occasion_date)}
     <div class="ecard__body ecard__edit">
       <div class="form__row">
         <label class="field"><span>Who is it for</span><input name="person_name" value="${safe(o.person_name || '')}" required /></label>
         <label class="field"><span>Occasion</span><select name="occasion_type" required>${options}</select></label>
       </div>
       <div class="form__row">
-        <label class="field"><span>Date</span><input type="date" name="occasion_date" value="${safe(o.occasion_date || '')}" min="${earliestDate()}" required /></label>
+        <label class="field"><span>Date</span><input type="date" name="occasion_date" value="${safe(o.occasion_date || '')}" required /></label>
         <label class="pref ecard__repeat"><input type="checkbox" name="recurring_yearly"${o.recurring_yearly ? ' checked' : ''} /><span class="pref__box" aria-hidden="true"></span><span>Remind me every year</span></label>
       </div>
       <div class="ecard__actions ecard__actions--edit">
@@ -358,6 +379,7 @@ function dateEditor(o) {
         <button type="button" data-cancel-date>Cancel</button>
       </div>
     </div>
+    <p class="ecard__notice" data-reminder-notice>${safe(reminderNotice(o.occasion_date, o.recurring_yearly))}</p>
   </form>`;
 }
 
@@ -407,11 +429,10 @@ function openDateSheet(key) {
   $('#sheetStatus').textContent = '';
   form.reset();
 
-  const tooSoon = key < earliestDate();
-  $$('.sheet__fields, .sheet__actions .btn[type="submit"], .pref', sheet).forEach((el) => { el.hidden = tooSoon; });
-  $('#sheetStatus').textContent = tooSoon
-    ? `Please choose a date at least four days away. The earliest is ${pretty(earliestDate())}.`
-    : '';
+  // Any date may go in the Occasion Book. It is a reminder, not an order.
+  const notice = $('[data-reminder-notice]', sheet);
+  if (notice) notice.textContent = reminderNotice(key, false);
+  $('#sheetStatus').textContent = '';
 
   const select = form.elements.occasion_type;
   if (select) {
@@ -724,8 +745,9 @@ async function saveDate(e) {
     occasion_date: String(f.get('occasion_date') || ''),
     recurring_yearly: e.currentTarget.elements.recurring_yearly.checked,
   };
+  // An Occasion Book date is only a reminder, so any date is allowed. The four
+  // day rule belongs to cake orders, not to remembering a birthday.
   if (!patch.person_name || !patch.occasion_date) return;
-  if (patch.occasion_date < earliestDate()) { alert('Please choose a date at least four days from now, so there is time to bake.'); return; }
   const { error } = await supabase.from('circle_members').update(patch).eq('id', id);
   if (error) { alert(error.message); return; }
   editingDate = null;
@@ -888,6 +910,16 @@ const onYearlyTick = (e) => {
 };
 dashboard.addEventListener('change', onYearlyTick);
 dashboard.addEventListener('change', (e) => { if (e.target.closest('.prefs')) syncPrefsSummary(); });
+// Keep the reminder notice honest as the date or the yearly tick changes.
+const refreshNotice = (e) => {
+  const form = e.target.closest('form');
+  const out = form && $('[data-reminder-notice]', form);
+  if (!out) return;
+  out.textContent = reminderNotice(form.elements.occasion_date?.value || sheetDate, form.elements.recurring_yearly?.checked);
+};
+dashboard.addEventListener('change', refreshNotice);
+dashboard.addEventListener('input', refreshNotice);
+$('#dateSheet').addEventListener('change', refreshNotice);
 $('#dateSheet').addEventListener('change', onYearlyTick);
 $('#yearlyModal').addEventListener('click', (e) => {
   const choice = e.target.closest('[data-yearly]');

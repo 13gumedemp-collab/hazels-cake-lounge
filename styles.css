@@ -1031,8 +1031,13 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .ecard__actions { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:flex-end; }
 .ecard__link { color:var(--gold); font-size:.76rem; letter-spacing:.06em; border-bottom:1px solid transparent; transition:border-color .3s var(--ease); }
 .ecard__link:hover { border-color:var(--gold); }
-.ecard--editing { grid-template-columns:1fr; border-color:rgba(212,175,55,.35); }
+/* The card clips its sheen, which also clipped the dropdown panel inside the
+   editor. While editing, let it out. */
+.ecard--editing { grid-template-columns:auto 1fr; border-color:rgba(212,175,55,.35); overflow:visible; }
 .ecard--editing::before { display:none; }
+.ecard__notice { grid-column:1 / -1; margin-top:.2rem; padding:.7rem .9rem; border-radius:8px;
+  border:1px solid rgba(212,175,55,.28); background:rgba(212,175,55,.06); color:var(--cream-soft); font-size:.82rem; }
+.ecard__notice:empty { display:none; }
 .ecard__edit { display:grid; gap:1rem; width:100%; }
 .ecard__repeat { align-self:end; padding-bottom:.6rem; }
 .ecard__actions--edit { justify-content:flex-start; }
