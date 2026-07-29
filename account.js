@@ -408,16 +408,15 @@ function openDateSheet(key) {
   form.reset();
 
   const tooSoon = key < earliestDate();
-  $$('.sheet__fields, .sheet__actions .btn[type="submit"], .consent', sheet).forEach((el) => { el.hidden = tooSoon; });
+  $$('.sheet__fields, .sheet__actions .btn[type="submit"], .pref', sheet).forEach((el) => { el.hidden = tooSoon; });
   $('#sheetStatus').textContent = tooSoon
-    ? `That date is either past or too close. I need four full days, so the earliest is ${pretty(earliestDate())}.`
+    ? `Please choose a date at least four days away. The earliest is ${pretty(earliestDate())}.`
     : '';
 
   const select = form.elements.occasion_type;
-  if (select && !select.options.length) {
-    select.innerHTML = ['<option value="" disabled selected>Choose one</option>']
+  if (select) {
+    select.innerHTML = ['<option value="" disabled selected>Choose an occasion</option>']
       .concat(OCCASIONS.map((o) => `<option>${safe(o)}</option>`)).join('');
-    window.hclEnhanceSelects?.(form);
   }
   sheet.hidden = false;
   requestAnimationFrame(() => sheet.classList.add('is-open'));

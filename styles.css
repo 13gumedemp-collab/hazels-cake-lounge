@@ -892,7 +892,7 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 /* Deliberately small. The cells are square, so without a cap each one grows to
    a sixth of the dashboard width. */
 .cal { max-width:430px; border:1px solid var(--line); background:var(--bg-2); border-radius:6px; padding:1.1rem; }
-.cal__head { display:flex; align-items:center; justify-content:space-between; margin-bottom:.9rem; }
+.cal__head { position:relative; display:flex; align-items:center; justify-content:space-between; margin-bottom:.9rem; }
 .cal__month { font-family:'Fraunces',serif; font-size:1.05rem; font-weight:400; letter-spacing:.01em; }
 .cal__nav { width:28px; height:28px; border-radius:50%; background:none; border:1px solid var(--line);
   color:var(--gold); font-size:.95rem; line-height:1; transition:border-color .3s var(--ease), color .3s var(--ease); }
@@ -977,15 +977,16 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .sheet { position:fixed; inset:0; z-index:2000; display:flex; align-items:flex-end; justify-content:center;
   background:rgba(4,3,2,.62); opacity:0; transition:opacity .32s var(--ease); }
 .sheet.is-open { opacity:1; }
-.sheet__inner { position:relative; width:min(560px,100%); max-height:88vh; overflow-y:auto; display:grid; gap:1rem;
+.sheet__inner { position:relative; width:min(440px,calc(100% - 2rem)); max-height:76vh; overflow-y:auto; display:grid; gap:.8rem;
   background:var(--bg-2); border:1px solid var(--line); border-bottom:0; border-radius:16px 16px 0 0;
-  padding:1.8rem clamp(1.2rem,4vw,2.2rem) 2rem; transform:translateY(100%); transition:transform .42s var(--ease); }
+  padding:1.35rem clamp(1.1rem,4vw,1.6rem) 1.45rem; transform:translateY(100%); transition:transform .42s var(--ease); }
 .sheet.is-open .sheet__inner { transform:translateY(0); }
-.sheet__inner h3 { font-family:'Fraunces',serif; font-size:1.5rem; font-weight:400; }
+.sheet__eyebrow { color:var(--gold); font-size:.68rem; letter-spacing:.17em; text-transform:uppercase; }
+.sheet__inner h3 { font-family:'Fraunces',serif; font-size:1.35rem; font-weight:400; }
 .sheet__close { position:absolute; top:.9rem; right:1.1rem; background:none; border:0; color:var(--muted); font-size:1.5rem; line-height:1; }
 .sheet__close:hover { color:var(--gold); }
-.sheet__fields { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
-.sheet__actions { display:flex; flex-wrap:wrap; gap:.7rem; margin-top:.4rem; }
+.sheet__fields { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+.sheet__actions { display:flex; flex-wrap:wrap; gap:.7rem; margin-top:.1rem; }
 @media (max-width: 560px) { .sheet__fields { grid-template-columns:1fr; } .sheet__actions .btn { width:100%; } }
 
 /* Yearly reminder dialog */

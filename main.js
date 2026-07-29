@@ -340,7 +340,7 @@
   /* Cinematic dropdown: replace native <select> with an animated custom menu
      that stays synced to the hidden select (so form value + pre-select still work) */
   const enhanceSelect = (sel) => {
-    if (sel.dataset.enhanced) return; sel.dataset.enhanced = '1';
+    if (sel.dataset.enhanced || sel.dataset.nativeSelect === 'true') return; sel.dataset.enhanced = '1';
     const phOpt = [...sel.options].find((o) => o.disabled) || sel.options[0];
     const placeholder = phOpt ? phOpt.text : 'Select';
     const wrap = document.createElement('div'); wrap.className = 'cselect';

@@ -1,5 +1,5 @@
 -- ============================================================================
--- 0009: keep first name and surname separately
+-- 0010: keep first name and surname separately
 --
 -- full_name stays as the single source used by every email template and the
 -- admin board, so nothing downstream changes. first_name and last_name are
