@@ -851,10 +851,27 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .account-dashboard { max-width: 1180px; margin: 0 auto; }
 .account-welcome,.account-section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; }
 .account-signout { background:none; border:0; color:var(--muted); text-decoration:underline; }
-.account-tabs { display:flex; gap:.5rem; overflow-x:auto; margin:2.5rem 0; border-bottom:1px solid var(--line); }
-.account-tabs button { background:none; border:0; color:var(--muted); padding:.8rem 1rem; white-space:nowrap; }
-.account-tabs button.is-active { color:var(--gold); border-bottom:2px solid var(--gold); }
-.account-panel { display:none; }.account-panel.is-active { display:block; }
+.account-tabs { position:relative; display:flex; gap:.5rem; overflow-x:auto; margin:2.5rem 0; border-bottom:1px solid var(--line); }
+.account-tabs button { position:relative; background:none; border:0; color:var(--muted); padding:.8rem 1rem; white-space:nowrap;
+  transition:color .35s var(--ease), letter-spacing .45s var(--ease); }
+.account-tabs button:hover { color:var(--cream); letter-spacing:.03em; }
+.account-tabs button.is-active { color:var(--gold); }
+/* Faint rule that opens out from the centre on hover. */
+.account-tabs button::after { content:''; position:absolute; left:50%; right:50%; bottom:0; height:1px;
+  background:rgba(212,175,55,.45); transition:left .45s var(--ease), right .45s var(--ease); }
+.account-tabs button:hover::after, .account-tabs button:focus-visible::after { left:14%; right:14%; }
+.account-tabs button.is-active::after { left:50%; right:50%; }
+/* The gold bar travels to whichever tab is chosen. */
+.account-tabs__ink { position:absolute; bottom:-1px; left:0; height:2px; width:var(--tab-w,0);
+  transform:translateX(var(--tab-x,0)); pointer-events:none;
+  background:linear-gradient(90deg, transparent, var(--gold-bright, var(--gold)), transparent);
+  transition:transform .55s var(--ease), width .55s var(--ease); }
+.account-panel { display:none; }
+.account-panel.is-active { display:block; animation:authRise .5s var(--ease) both; }
+@media (prefers-reduced-motion: reduce) {
+  .account-tabs__ink { transition:none; }
+  .account-panel.is-active { animation:none; }
+}
 .account-section-head { margin-bottom:1.5rem; }.account-section-head span,.account-card span,.account-event div>span { color:var(--gold); font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; }
 .account-section-head h2 { font-size:clamp(2rem,5vw,3.5rem); }
 .account-list,.account-calendar { display:grid; gap:1rem; }
