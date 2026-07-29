@@ -30,14 +30,22 @@ async function signInGoogle() {
 
 async function sendMagicLink(e) {
   e.preventDefault();
-  const email = new FormData(e.currentTarget).get('email');
+  const form = new FormData(e.currentTarget);
+  const email = form.get('email');
+  const fullName = String(form.get('full_name') || '').trim();
   authStatus.textContent = 'Sending your sign-in link...';
-  const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + '/account.html' } });
+  const options = { emailRedirectTo: location.origin + '/account.html' };
+  // Only used when the account is created. Existing customers keep the name they already have.
+  if (fullName) options.data = { full_name: fullName };
+  const { error } = await supabase.auth.signInWithOtp({ email, options });
   authStatus.textContent = error ? error.message : 'Check your email for your sign-in link.';
 }
 
+// Names the account after the customer, with the right possessive apostrophe.
+const setNavName = (fullName) => window.hclSetAccountName?.(fullName || '');
+
 async function loadAccount(session) {
-  if (!session) { authBox.hidden = false; dashboard.hidden = true; return; }
+  if (!session) { authBox.hidden = false; dashboard.hidden = true; setNavName(''); return; }
   const { data: rows, error } = await supabase.from('customers').select('*').eq('auth_user_id', session.user.id).limit(1);
   if (error || !rows?.length) {
     authBox.hidden = false; dashboard.hidden = true;
@@ -53,6 +61,7 @@ async function loadAccount(session) {
   orders = ordersRes.data || [];
   authBox.hidden = true; dashboard.hidden = false;
   $('#accountName').textContent = (customer.full_name || session.user.email).split(' ')[0];
+  setNavName(customer.full_name);
   fillProfile(); renderAll();
 }
 
@@ -94,7 +103,7 @@ async function saveProfile(e) {
   ['email_consent','whatsapp_consent','phone_call_consent'].forEach((n) => { payload[n] = e.currentTarget.elements[n].checked; });
   const { data, error } = await supabase.from('customers').update(payload).eq('id', customer.id).select().single();
   $('#profileStatus').textContent = error ? error.message : 'Your details are saved.';
-  if (data) customer = data;
+  if (data) { customer = data; setNavName(customer.full_name); $('#accountName').textContent = String(customer.full_name || '').split(' ')[0] || 'there'; }
 }
 
 async function accountAction(e) {
@@ -127,6 +136,6 @@ $('#googleSignIn').addEventListener('click', signInGoogle);
 $('#magicLinkForm').addEventListener('submit', sendMagicLink);
 $('#accountProfile').addEventListener('submit', saveProfile);
 dashboard.addEventListener('click', accountAction);
-$('#signOut').addEventListener('click', async () => { await supabase.auth.signOut(); location.reload(); });
+$('#signOut').addEventListener('click', async () => { await supabase.auth.signOut(); setNavName(''); location.reload(); });
 supabase.auth.onAuthStateChange((_event, session) => loadAccount(session));
 supabase.auth.getSession().then(({ data }) => loadAccount(data.session));
