@@ -803,9 +803,35 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .account-auth { width: min(560px,100%); margin: 0 auto; text-align: center; }
 .account-auth h1, .account-welcome h1 { font-family: 'Fraunces',serif; font-size: clamp(2.6rem,7vw,5rem); font-weight: 400; }
 .account-auth > p:not(.page-hero__eyebrow):not(.form__status) { color: var(--cream-soft); max-width: 42ch; margin: 1.3rem auto 2rem; }
-.account-switch { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.8rem; border-bottom: 1px solid var(--line); }
-.account-switch button { background: none; border: 0; color: var(--muted); padding: 0.8rem 1.2rem; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; }
-.account-switch button.is-active { color: var(--gold); border-bottom: 2px solid var(--gold); }
+/* An author display rule beats the UA [hidden] rule, so state it explicitly. */
+.account-auth [hidden] { display: none !important; }
+
+.account-switch { position: relative; display: flex; justify-content: center; margin-bottom: 1.8rem; border-bottom: 1px solid var(--line); }
+.account-switch button { flex: 1; background: none; border: 0; color: var(--muted); padding: 0.8rem 1.2rem; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; transition: color 0.45s var(--ease); }
+.account-switch button.is-active { color: var(--gold); }
+/* Gold rule that travels between the two tabs. */
+.account-switch::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright, var(--gold)), transparent);
+  transform: translateX(calc(var(--auth-tab, 0) * 100%));
+  transition: transform 0.65s var(--ease); }
+
+.account-step { color: var(--gold); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; text-align: center; }
+.account-step-panel { display: grid; gap: 1rem; }
+
+@keyframes authLeave { to { opacity: 0; transform: translateY(-16px) scale(0.985); filter: blur(7px); } }
+@keyframes authRise { from { opacity: 0; transform: translateY(22px); filter: blur(5px); } }
+.account-auth .is-leaving { animation: authLeave 0.3s var(--ease) both; pointer-events: none; }
+.account-auth .is-entering > * { animation: authRise 0.6s var(--ease) both; }
+.account-auth .is-entering > *:nth-child(1) { animation-delay: 0.02s; }
+.account-auth .is-entering > *:nth-child(2) { animation-delay: 0.09s; }
+.account-auth .is-entering > *:nth-child(3) { animation-delay: 0.16s; }
+.account-auth .is-entering > *:nth-child(4) { animation-delay: 0.23s; }
+.account-auth .is-entering > *:nth-child(5) { animation-delay: 0.3s; }
+.account-auth .is-entering > *:nth-child(6) { animation-delay: 0.37s; }
+@media (prefers-reduced-motion: reduce) {
+  .account-auth .is-leaving, .account-auth .is-entering > * { animation: none; }
+  .account-switch::after { transition: none; }
+}
 .account-link { background: none; border: 0; color: var(--muted); text-decoration: underline; font-size: 0.85rem; padding: 0.2rem; justify-self: center; }
 .account-link:hover { color: var(--gold); }
 .account-fineprint { color: var(--muted); font-size: 0.82rem; text-align: center; }
