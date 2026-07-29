@@ -84,17 +84,17 @@ export default async function OrdersPage() {
   );
 
   return (
-    <div className="max-w-[1400px] mx-auto">
-      <div className="flex items-end justify-between mb-6 flex-wrap gap-2">
+    <div className="admin-page max-w-[1500px] mx-auto">
+      <div className="page-heading flex items-end justify-between mb-6 flex-wrap gap-2">
         <div>
-          <h1 className="font-serif text-3xl md:text-4xl text-cream">Order Board</h1>
+          <p className="eyebrow">Production flow</p><h1>Order Board</h1>
           <p className="text-creamSoft mt-1">Every enquiry, from first hello to the finished cake.</p>
         </div>
         <span className="text-sm text-muted">{cards.length} order{cards.length === 1 ? "" : "s"}</span>
       </div>
 
       {cards.length === 0 ? (
-        <div className="rounded-2xl border border-line bg-ink2/50 p-10 text-center">
+        <div className="surface-card p-10 text-center">
           <p className="text-creamSoft">No enquiries yet. They will appear here the moment someone sends one.</p>
         </div>
       ) : (

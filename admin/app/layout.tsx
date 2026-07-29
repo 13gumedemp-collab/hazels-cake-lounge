@@ -11,11 +11,11 @@ export const metadata: Metadata = {
   description: "Private command centre for Hazel's Cake Lounge.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Hazel's CC" },
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  icons: { icon: "/hazels-script-logo.png", apple: "/hazels-script-logo.png" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0a08",
+  themeColor: "#08090d",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

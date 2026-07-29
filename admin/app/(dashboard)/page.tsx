@@ -36,11 +36,17 @@ export default function Overview() {
   const recent = data?.recent ?? [];
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h1 className="font-serif text-3xl md:text-4xl text-cream">{greeting()}, Hazel.</h1>
-      <p className="text-creamSoft mt-1">Here is your day at a glance.</p>
+    <div className="admin-dashboard max-w-7xl mx-auto">
+      <section className="dashboard-hero">
+        <div>
+          <p className="eyebrow">Hazel&apos;s command centre</p>
+          <h1>{greeting()}, Hazel.</h1>
+          <p>Everything moving through the kitchen, in one calm view.</p>
+        </div>
+        <div className="dashboard-hero__status"><span /> Live workspace</div>
+      </section>
 
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
+      <section className="metric-grid grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
         <StatCard label="New enquiries today" value={c?.enquiriesToday ?? 0} icon="mail" href="/orders" accent delay={0} />
         <StatCard label="Occasions in 30 days" value={c?.occ30 ?? 0} icon="calendar" href="/occasions" delay={80} />
         <StatCard label="Active orders" value={c?.activeOrders ?? 0} icon="kanban" href="/orders" delay={160} />
@@ -48,8 +54,8 @@ export default function Overview() {
       </section>
 
       <div className="grid lg:grid-cols-2 gap-5 mt-8">
-        <section className="rounded-2xl border border-line bg-ink2 p-5">
-          <h2 className="font-serif text-xl text-cream mb-4">This week&apos;s occasions</h2>
+        <section className="surface-card p-5 md:p-6">
+          <p className="eyebrow mb-2">Calendar</p><h2>This week&apos;s occasions</h2>
           {week.length === 0 && <p className="text-muted text-sm">Nothing in the next 7 days.</p>}
           <ul className="space-y-3">
             {week.map((m, i) => (
@@ -64,8 +70,8 @@ export default function Overview() {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-line bg-ink2 p-5">
-          <h2 className="font-serif text-xl text-cream mb-4">Recent activity</h2>
+        <section className="surface-card p-5 md:p-6">
+          <p className="eyebrow mb-2">Live feed</p><h2>Recent activity</h2>
           {recent.length === 0 && <p className="text-muted text-sm">No activity yet.</p>}
           <ul className="space-y-3">
             {recent.map((n, i) => (
@@ -79,7 +85,7 @@ export default function Overview() {
       </div>
 
       <section className="mt-8">
-        <h2 className="font-serif text-xl text-cream mb-3">Quick actions</h2>
+        <p className="eyebrow mb-2">Shortcuts</p><h2 className="font-serif text-xl text-cream mb-3">Quick actions</h2>
         <div className="flex flex-wrap gap-3">
           {[
             { href: "/customers", label: "View customers" },
@@ -88,7 +94,7 @@ export default function Overview() {
             { href: "/occasions", label: "Occasion calendar" },
           ].map((a) => (
             <Link key={a.href} href={a.href}
-              className="rounded-full border border-gold/40 text-gold text-sm px-5 py-2.5 hover:bg-gold hover:text-ink transition">
+              className="quick-action text-sm px-5 py-2.5 transition">
               {a.label}
             </Link>
           ))}
