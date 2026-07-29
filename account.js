@@ -236,11 +236,69 @@ function calendarItems() {
   ].sort((a, b) => String(a.date).localeCompare(String(b.date)));
 }
 
-function renderAll() {
-  const calendar = calendarItems();
-  $('#accountCalendar').innerHTML = calendar.length ? calendar.map((item) => `
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+let calCursor = null;   // first day of the month on screen
+let calSelected = null; // 'YYYY-MM-DD'
+
+function itemsByDate() {
+  const map = new Map();
+  calendarItems().forEach((item) => {
+    if (!item.date) return;
+    if (!map.has(item.date)) map.set(item.date, []);
+    map.get(item.date).push(item);
+  });
+  return map;
+}
+
+function dayDetail(map) {
+  const todayKey = ymd(new Date());
+  // With nothing chosen, show the next date that has something on it.
+  const key = calSelected || [...map.keys()].filter((k) => k >= todayKey).sort()[0];
+  const items = key ? (map.get(key) || []) : [];
+  if (!items.length) return empty(calSelected ? 'Nothing saved on this date.' : 'No dates or orders yet.');
+  return items.map((item) => `
     <article class="account-event"><time>${safe(pretty(item.date))}</time><div><span>${safe(item.type)}</span><h3>${safe(item.title)}</h3><p>${safe(item.detail)}</p></div>
-    <a href="${safe(googleCalendarUrl(item.title, item.date, item.detail))}" target="_blank" rel="noopener">Add to Google Calendar</a></article>`).join('') : empty('No dates or orders yet.');
+    <a href="${safe(googleCalendarUrl(item.title, item.date, item.detail))}" target="_blank" rel="noopener">Add to Google Calendar</a></article>`).join('');
+}
+
+function renderCalendar() {
+  const map = itemsByDate();
+  const todayKey = ymd(new Date());
+  if (!calCursor) {
+    const next = [...map.keys()].filter((k) => k >= todayKey).sort()[0] || todayKey;
+    calCursor = new Date(Number(next.slice(0, 4)), Number(next.slice(5, 7)) - 1, 1);
+  }
+  const year = calCursor.getFullYear();
+  const month = calCursor.getMonth();
+  const lead = (new Date(year, month, 1).getDay() + 6) % 7; // weeks start on Monday
+  const total = new Date(year, month + 1, 0).getDate();
+
+  const cells = [];
+  for (let i = 0; i < lead; i += 1) cells.push('<span class="cal__pad"></span>');
+  for (let day = 1; day <= total; day += 1) {
+    const key = ymd(new Date(year, month, day));
+    const marked = map.has(key);
+    const classes = ['cal__day', marked ? 'is-marked' : '', key === todayKey ? 'is-today' : '', key === calSelected ? 'is-selected' : ''].filter(Boolean).join(' ');
+    const label = marked ? ` aria-label="${map.get(key).length} on ${day} ${MONTHS[month]}"` : '';
+    cells.push(`<button type="button" class="${classes}" data-date="${key}"${label}><span>${day}</span></button>`);
+  }
+
+  $('#accountCalendar').innerHTML = `
+    <div class="cal">
+      <div class="cal__head">
+        <button type="button" class="cal__nav" data-cal-step="-1" aria-label="Previous month">&#8249;</button>
+        <h3 class="cal__month">${MONTHS[month]} ${year}</h3>
+        <button type="button" class="cal__nav" data-cal-step="1" aria-label="Next month">&#8250;</button>
+      </div>
+      <div class="cal__grid">${DOW.map((d) => `<span class="cal__dow">${d}</span>`).join('')}${cells.join('')}</div>
+    </div>
+    <div class="cal__detail">${dayDetail(map)}</div>`;
+}
+
+function renderAll() {
+  renderCalendar();
 
   $('#accountOrders').innerHTML = orders.length ? orders.map((o) => {
     const title = o.circle_member ? `${o.circle_member.person_name}'s ${o.circle_member.occasion_type}` : (o.cake_description || 'Cake order');
@@ -307,6 +365,20 @@ $('#newPasswordForm').addEventListener('submit', setNewPassword);
 $('#forgotPassword').addEventListener('click', forgotPassword);
 $('#resendCode').addEventListener('click', resendCode);
 $('#accountProfile').addEventListener('submit', saveProfile);
+// Bound to the container, so it survives every re-render of the grid.
+$('#accountCalendar').addEventListener('click', (e) => {
+  const step = e.target.closest('[data-cal-step]');
+  if (step) {
+    calCursor = new Date(calCursor.getFullYear(), calCursor.getMonth() + Number(step.dataset.calStep), 1);
+    renderCalendar();
+    return;
+  }
+  const day = e.target.closest('[data-date]');
+  if (day) {
+    calSelected = calSelected === day.dataset.date ? null : day.dataset.date;
+    renderCalendar();
+  }
+});
 dashboard.addEventListener('click', accountAction);
 $('#signOut').addEventListener('click', async () => { await supabase.auth.signOut(); setNavName(''); location.reload(); });
 
