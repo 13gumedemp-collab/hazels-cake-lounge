@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { NAV } from "@/lib/nav";
 import Icon from "./Icon";
 import NotificationBell from "./NotificationBell";
-import BrandMark from "./BrandMark";
 
 const GROUPS: { label: string; items: typeof NAV }[] = [
   { label: "Today", items: NAV.filter((n) => ["/", "/orders", "/occasions"].includes(n.href)) },
@@ -49,7 +48,9 @@ export default function Shell({ counts, children }: { counts: Record<string, num
   const SidebarInner = (
     <>
       <div className={`px-5 py-6 ${collapsed ? "md:px-0 md:justify-center" : ""}`}>
-        <BrandMark compact={collapsed} />
+        <div className={`sidebar-wordmark ${collapsed ? "sidebar-wordmark--compact" : ""}`}>
+          {collapsed ? <span>H</span> : <><strong>Hazel&apos;s</strong><em>Cake Lounge</em></>}
+        </div>
       </div>
 
       <nav className="flex-1 px-3 space-y-5 overflow-y-auto">
