@@ -169,7 +169,7 @@ section { position: relative; }
 .btn {
   --liquid-button-background-color: var(--gold);
   --liquid-button-color: #0b0a08;
-  --liquid-button-fill: 3px;            /* fillHeight at rest */
+  --liquid-button-fill: 0px;            /* empty at rest; fills on hover or tap */
   position: relative; overflow: hidden; isolation: isolate;
   display: inline-block; font-size: 0.8rem; letter-spacing: 0.16em; text-transform: uppercase;
   font-weight: 500; padding: 1rem 1.9rem; border-radius: 100px;
