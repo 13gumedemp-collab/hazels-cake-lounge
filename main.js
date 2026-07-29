@@ -383,6 +383,9 @@
     sync();
   };
   $$('select').forEach(enhanceSelect);
+  // Selects rendered later (the account dashboard builds its own) must get the
+  // same branded menu, otherwise the operating system draws a blue popup.
+  window.hclEnhanceSelects = (root = document) => $$('select', root).forEach(enhanceSelect);
 
   const setProduct = (product) => {
     if (select && product) {
