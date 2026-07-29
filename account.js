@@ -42,13 +42,74 @@ function friendly(error, fallback = 'Something went wrong. Please try again.') {
   return m || fallback;
 }
 
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Cinematic swap: the outgoing panel lifts and blurs away, the incoming one
+// rises through it and its fields stagger in behind it.
+function enter(el) {
+  el.classList.remove('is-entering');
+  void el.offsetWidth; // restart the animation
+  el.classList.add('is-entering');
+  clearTimeout(el._enterT);
+  el._enterT = setTimeout(() => el.classList.remove('is-entering'), 900);
+}
+
+function swap(outEl, inEl) {
+  if (!inEl || outEl === inEl) return;
+  if (!outEl || REDUCED) { if (outEl) outEl.hidden = true; inEl.hidden = false; return; }
+  outEl.classList.add('is-leaving');
+  clearTimeout(outEl._leaveT);
+  outEl._leaveT = setTimeout(() => {
+    outEl.classList.remove('is-leaving');
+    outEl.hidden = true;
+    inEl.hidden = false;
+    enter(inEl);
+  }, 300);
+}
+
+// Hidden required fields cannot be focused, so the browser refuses to submit.
+// Only the step on screen carries the constraint.
+function syncRequired(form) {
+  $$('[data-signup-step]', form).forEach((step) => {
+    $$('input[data-required]', step).forEach((input) => { input.required = !step.hidden; });
+  });
+}
+
+function nextSignUpStep() {
+  const form = $('#signUpForm');
+  for (const input of [form.elements.full_name, form.elements.email]) {
+    if (!input.reportValidity()) return;
+  }
+  authStatus.textContent = '';
+  signUpStep(2);
+}
+
+function signUpStep(n) {
+  const form = $('#signUpForm');
+  const current = $$('[data-signup-step]', form).find((s) => !s.hidden);
+  const next = $(`[data-signup-step="${n}"]`, form);
+  if (!next || current === next) return;
+  $('#signUpStepNum').textContent = String(n);
+  swap(current, next);
+  setTimeout(() => syncRequired(form), REDUCED ? 0 : 320);
+}
+
 function showPanel(name) {
-  $$('[data-auth-panel]').forEach((p) => { p.hidden = p.dataset.authPanel !== name; });
+  const next = $(`[data-auth-panel="${name}"]`);
+  const current = $$('[data-auth-panel]').find((p) => !p.hidden);
+  if (!next) return;
+  // The tabs and social buttons only make sense while choosing how to get in.
+  const chromeHidden = name === 'otp' || name === 'recovery';
+  [$('.account-oauth'), $('.account-divider'), $('#authSwitch')].forEach((el) => { if (el) el.hidden = chromeHidden; });
   $$('[data-auth-tab]').forEach((b) => b.classList.toggle('is-active', b.dataset.authTab === name));
-  // The tabs only make sense while choosing between signing in and signing up.
-  $('#authSwitch').hidden = name === 'otp' || name === 'recovery';
-  $('.account-oauth').hidden = name === 'otp' || name === 'recovery';
-  $('.account-divider').hidden = name === 'otp' || name === 'recovery';
+  $('#authSwitch').style.setProperty('--auth-tab', name === 'signup' ? '1' : '0');
+  if (name === 'signup') {
+    const form = $('#signUpForm');
+    $$('[data-signup-step]', form).forEach((s) => { s.hidden = s.dataset.signupStep !== '1'; });
+    $('#signUpStepNum').textContent = '1';
+    syncRequired(form);
+  }
+  swap(current, next);
 }
 
 async function signInWithProvider(provider) {
@@ -81,6 +142,8 @@ async function signIn(e) {
 
 async function createAccount(e) {
   e.preventDefault();
+  // Enter on the first step means "continue", not "create my account".
+  if ($('[data-signup-step="2"]').hidden) { nextSignUpStep(); return; }
   const f = new FormData(e.currentTarget);
   const full_name = String(f.get('full_name') || '').trim();
   const email = String(f.get('email') || '').trim();
@@ -236,6 +299,8 @@ $$('[data-account-tab]').forEach((button) => button.addEventListener('click', ()
 $('#googleSignIn').addEventListener('click', () => signInWithProvider('google'));
 $('#facebookSignIn').addEventListener('click', () => signInWithProvider('facebook'));
 $$('[data-auth-tab]').forEach((b) => b.addEventListener('click', () => { showPanel(b.dataset.authTab); authStatus.textContent = ''; }));
+$('#signUpNext').addEventListener('click', nextSignUpStep);
+$('#signUpBack').addEventListener('click', () => { authStatus.textContent = ''; signUpStep(1); });
 $('#signInForm').addEventListener('submit', signIn);
 $('#signUpForm').addEventListener('submit', createAccount);
 $('#otpForm').addEventListener('submit', confirmEmail);

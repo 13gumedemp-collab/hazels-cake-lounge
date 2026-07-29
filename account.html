@@ -47,32 +47,38 @@
       </div>
 
       <form id="signInForm" class="account-login-form" data-auth-panel="signin">
-        <label class="field"><span>Email address</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com" /></label>
+        <label class="field"><span>Email</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com" /></label>
         <label class="field"><span>Password</span><input type="password" name="password" autocomplete="current-password" required /></label>
         <button class="btn" type="submit">Sign in</button>
-        <button type="button" class="account-link" id="forgotPassword">Forgotten your password?</button>
+        <button type="button" class="account-link" id="forgotPassword">Forgot your password?</button>
       </form>
 
       <form id="signUpForm" class="account-login-form" data-auth-panel="signup" hidden>
-        <label class="field"><span>Your name</span><input type="text" name="full_name" autocomplete="name" required placeholder="Nomsa Dlamini" /></label>
-        <label class="field"><span>Email address</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com" /></label>
-        <label class="field"><span>Password</span><input type="password" name="password" autocomplete="new-password" required minlength="8" /></label>
-        <label class="field"><span>Confirm password</span><input type="password" name="confirm_password" autocomplete="new-password" required minlength="8" /></label>
-        <button class="btn" type="submit">Create my account</button>
-        <p class="account-fineprint">At least 8 characters. We will email you a code to confirm your address.</p>
+        <p class="account-step">Step <span id="signUpStepNum">1</span> of 2</p>
+        <div class="account-step-panel" data-signup-step="1">
+          <label class="field"><span>Name</span><input type="text" name="full_name" autocomplete="name" data-required placeholder="Nomsa Dlamini" /></label>
+          <label class="field"><span>Email</span><input type="email" name="email" autocomplete="email" data-required placeholder="you@example.com" /></label>
+          <button class="btn" type="button" id="signUpNext">Continue</button>
+        </div>
+        <div class="account-step-panel" data-signup-step="2" hidden>
+          <label class="field"><span>Password <em class="field__opt">(8 or more characters)</em></span><input type="password" name="password" autocomplete="new-password" data-required minlength="8" /></label>
+          <label class="field"><span>Confirm password</span><input type="password" name="confirm_password" autocomplete="new-password" data-required minlength="8" /></label>
+          <button class="btn" type="submit">Create account</button>
+          <button type="button" class="account-link" id="signUpBack">Back</button>
+        </div>
       </form>
 
       <form id="otpForm" class="account-login-form" data-auth-panel="otp" hidden>
-        <p class="account-fineprint">Enter the code we sent to <strong id="otpTarget"></strong>. You can also just tap the link in that email.</p>
-        <label class="field"><span>Confirmation code</span><input type="text" name="token" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required placeholder="12345678" class="account-code" /></label>
-        <button class="btn" type="submit">Confirm my email</button>
-        <button type="button" class="account-link" id="resendCode">Send the code again</button>
+        <p class="account-fineprint">We emailed a code to <strong id="otpTarget"></strong></p>
+        <label class="field"><span>Code</span><input type="text" name="token" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required placeholder="12345678" class="account-code" /></label>
+        <button class="btn" type="submit">Confirm</button>
+        <button type="button" class="account-link" id="resendCode">Resend code</button>
       </form>
 
       <form id="newPasswordForm" class="account-login-form" data-auth-panel="recovery" hidden>
-        <label class="field"><span>New password</span><input type="password" name="password" autocomplete="new-password" required minlength="8" /></label>
-        <label class="field"><span>Confirm new password</span><input type="password" name="confirm_password" autocomplete="new-password" required minlength="8" /></label>
-        <button class="btn" type="submit">Save my new password</button>
+        <label class="field"><span>New password <em class="field__opt">(8 or more characters)</em></span><input type="password" name="password" autocomplete="new-password" required minlength="8" /></label>
+        <label class="field"><span>Confirm password</span><input type="password" name="confirm_password" autocomplete="new-password" required minlength="8" /></label>
+        <button class="btn" type="submit">Save password</button>
       </form>
       <p class="form__status" id="authStatus" role="status"></p>
     </section>
