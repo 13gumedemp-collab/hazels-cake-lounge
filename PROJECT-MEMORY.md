@@ -73,6 +73,9 @@ once and had to be renamed to `0010`.
   - Public site: `npm run dev` → http://localhost:5173
   - Production-equivalent check: `npm run build` then `npm run preview`
   - Admin: `cd admin && npm run dev` → http://localhost:3000
+- The admin dev server is slow to start on this machine because the repo sits in OneDrive:
+  roughly 30s to "Ready" and then a further ~100s compiling on the first request. It is
+  not hung. An unauthenticated `GET /` correctly answers `307 → /login`.
 - Committing and pushing to GitHub is still fine and expected — pushing does **not**
   trigger a deploy here; deploys are CLI-only.
 - Deploy only when the user explicitly asks. Batch several changes into one deploy.
@@ -273,6 +276,10 @@ Where the tool is not certain it is not claimed.
 - Added [CLAUDE.md](CLAUDE.md) so every future session loads these rules automatically.
 - Switched the standing workflow to **localhost verification only**. Vercel deploys now
   happen only on explicit request, to stop exhausting the free-tier daily limit.
+- Verified both halves of that workflow end to end: `npm run build` succeeds on all 11
+  public pages, the Vite dev server serves `/`, `/account.html` and `/work.html` with 200
+  on port 5173, and the admin dev server answers on port 3000 with the expected
+  `307 → /login` redirect for an unauthenticated request.
 
 ---
 
