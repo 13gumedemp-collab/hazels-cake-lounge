@@ -793,6 +793,32 @@ Phone calls are now mandatory; email and WhatsApp remain their choice.
   caller's own `<customer id>/` folder, taken from their JWT and never from the request.
   Thumbnails start in a loading state rather than rendering an empty `<img>`.
 
+### 09/08/2026 — Committed and deployed *(Claude Code)*
+
+**Live on https://hazelscakelounge.co.za.** Commits `0cc985c` and `a5754da`, deployed with
+`npx vercel --prod --yes --scope 13gumedemp-collabs-projects`, both Ready and aliased.
+Verified after the deploy: all pages 200 through the `www.` redirect, `save-date.html`
+serving, all eight account tabs present, `phone_call_consent` gone from the markup, and the
+new accents and card CSS present in the hashed bundles.
+
+**Deployed from a git worktree, and this is why.** The working tree held Codex's
+uncommitted admin work *and* an uncommitted change to `index.html` that removed the loader
+subtitle. `vercel --prod` uploads the working directory, so deploying from the repo root
+would have shipped another session's unfinished edit. The §3 technique was used:
+`git worktree add --detach <tmp> <commit>`, copy `.vercel` in, run the CLI there. Only my
+own files were staged; everything under `admin/`, plus `index.html`,
+`_shared/email.ts` and `daily-occasion-checker/index.ts`, was left untouched for Codex.
+
+**On the occasion accents, third attempt.** Two failures worth recording, both the same
+mistake in different clothes. A diagonal gradient read as a smudge. Then a flat
+`color-mix(accent 9%, transparent)` was used, which is simply `rgba(accent, .09)` and is
+invisible over a near-black page. Mixing into `var(--bg-2)` rather than into `transparent`
+gives an opaque tint that actually shows. **Measure, do not eyeball:** the accents were
+then checked by computing the mixed colour's hue and luminance lift, which showed Wedding
+resolving to near-neutral grey and Birthday, Retirement and "Just because" sitting within
+15 degrees of each other. Every named occasion is now at least 20 degrees from every other,
+with "Just because" and "Other" sharing the brand gold deliberately.
+
 ---
 
 ## 6. Open threads
