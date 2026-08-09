@@ -834,6 +834,20 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   and the public site is live through the `hazelscakelounge.co.za` to `www.` redirect while
   the admin redirects unauthenticated visitors to its live sign-in page.
 
+### 09/08/2026 Admin compatibility review for migrations `0014` to `0016` (Codex)
+
+- Updated only the two database-normalised colour-map keys in
+  `admin/lib/occasions.ts`: `Baby shower` and `Just because`. Existing ivory-admin colour
+  values are unchanged. Local TypeScript transpilation passes and the local admin returns
+  its expected unauthenticated `307` redirect to `/login`.
+- Confirmed every current admin write path uses the service-role Supabase client, either
+  directly through `supabaseAdmin()` or by calling the order-status edge function with the
+  service-role key. The new order-lock trigger therefore does not block Hazel's admin work.
+- The admin has no customer-facing `phone_call_consent` control, and its customer-detail
+  route is presently a placeholder that renders neither `notes` nor `photo_paths`. No
+  misleading consent control or raw legacy inspiration-storage paths require a change.
+  Verified locally only. No deployment was performed.
+
 ---
 
 ## 6. Open threads
