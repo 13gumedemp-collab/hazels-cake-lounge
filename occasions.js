@@ -94,12 +94,12 @@ export const personLabel = (o = {}) => (isSelf(o) ? 'You' : (String(o.person_nam
 const ACCENTS = {
   Birthday: '#e9a83c',       // warm amber
   Anniversary: '#d97878',    // rose
-  Wedding: '#b9c6d8',        // silver blue
+  Wedding: '#8fbce8',        // cool silver blue, saturated enough to read
   Engagement: '#dd8fae',     // blush
   'Baby shower': '#6fc2a8',  // mint
-  Baptism: '#7fa7dc',        // sky
+  Baptism: '#a596dd',        // soft violet, kept clear of the wedding blue
   Graduation: '#a8c464',     // sage
-  Retirement: '#c9925e',     // terracotta
+  Retirement: '#3fc9c9',     // cyan; sits in the gap between the mint and the wedding blue
   'Just because': '#d4af37',
   Other: '#d4af37',
 };
