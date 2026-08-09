@@ -181,6 +181,19 @@ Deno.serve(async (req) => {
     }
   }
 
-  await notify(supabase, "daily_check", `Daily check: ${emails} emails, ${waTasks} WhatsApp tasks, ${callTasks} call tasks, ${postCeleb} post-celebration, ${anniversaries} anniversaries, ${followups} circle follow-ups, ${dupes} dupes, ${failures} failures${reset ? `, ${reset} reset, ${summaries} summaries` : ""}`);
+  const activity = [
+    emails && `${emails} email${emails === 1 ? "" : "s"}`,
+    waTasks && `${waTasks} WhatsApp task${waTasks === 1 ? "" : "s"}`,
+    callTasks && `${callTasks} call task${callTasks === 1 ? "" : "s"}`,
+    postCeleb && `${postCeleb} post-celebration follow-up${postCeleb === 1 ? "" : "s"}`,
+    anniversaries && `${anniversaries} anniversary reminder${anniversaries === 1 ? "" : "s"}`,
+    followups && `${followups} circle follow-up${followups === 1 ? "" : "s"}`,
+    failures && `${failures} failure${failures === 1 ? "" : "s"}`,
+    reset && `${reset} recurring date reset${reset === 1 ? "" : "s"}`,
+    summaries && `${summaries} yearly summar${summaries === 1 ? "y" : "ies"}`,
+  ].filter(Boolean);
+  if (activity.length) {
+    await notify(supabase, "daily_check", `Daily check: ${activity.join(", ")}.`, failures ? "high" : "standard");
+  }
   return json({ status: "ok", emails, waTasks, callTasks, postCeleb, anniversaries, followups, dupes, failures, reset, summaries });
 });
