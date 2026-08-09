@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { activityLabel, activityMessage } from "@/lib/activityPresentation";
 
 export interface Note { id: string; type: string; message: string; priority: string; read: boolean; created_at: string; action_url: string | null; }
 
@@ -11,14 +12,6 @@ function timeAgo(iso: string) {
   return Math.floor(s / 86400) + "d ago";
 }
 const dotTone = (p: string) => (p === "high" ? "bg-rose" : "bg-gold");
-const typeLabel = (type: string) => ({
-  account_created: "New account",
-  new_enquiry: "New enquiry",
-  callback_requested: "Callback request",
-  enquiry_overdue_reply: "Reply needed",
-  reminder_failed: "Delivery issue",
-}[type] || "Activity");
-
 export default function NotificationList({ notes, onMarkAll }: { notes: Note[]; onMarkAll: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const unread = notes.filter((n) => !n.read).length;
@@ -50,10 +43,10 @@ export default function NotificationList({ notes, onMarkAll }: { notes: Note[]; 
             <span className={`notification-item__dot ${dotTone(n.priority)}`} />
             <div className="notification-item__body">
               <div className="notification-item__meta">
-                <p>{typeLabel(n.type)}</p>
+                <p>{activityLabel(n.type)}</p>
                 <time dateTime={n.created_at}>{timeAgo(n.created_at)}</time>
               </div>
-              <p className="notification-item__message">{n.message}</p>
+              <p className="notification-item__message">{activityMessage(n)}</p>
               {n.action_url && <a href={n.action_url} className="notification-item__action">Open</a>}
             </div>
           </article>

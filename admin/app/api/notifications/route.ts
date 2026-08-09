@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseServer";
 import { cookies } from "next/headers";
 import { COOKIE, verifySession } from "@/lib/auth";
+import { isMeaningfulActivity } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ export async function GET() {
     .from("notifications")
     .select("id, type, message, priority, read, created_at, action_url")
     .order("created_at", { ascending: false })
-    .limit(20);
-  return NextResponse.json({ notifications: data ?? [] });
+    .limit(100);
+  const notifications = (data ?? []).filter(isMeaningfulActivity).slice(0, 20);
+  return NextResponse.json({ notifications });
 }

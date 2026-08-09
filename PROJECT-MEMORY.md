@@ -819,6 +819,17 @@ resolving to near-neutral grey and Birthday, Retirement and "Just because" sitti
 15 degrees of each other. Every named occasion is now at least 20 degrees from every other,
 with "Just because" and "Other" sharing the brand gold deliberately.
 
+### 09/08/2026 Pending activity and sign-up release (Codex)
+
+- Prepared the local recovery-state fix, meaningful admin activity feed, plain-language
+  email failure presentation, no-empty daily-check notifications, and returning-customer
+  login activity for release. Public Vite build and focused admin TypeScript checks pass;
+  the full local Next.js optimiser remains too slow for this OneDrive workspace.
+- Local migration state matches remote through `0016`; `0012_customer_login_activity` is
+  already applied. The release still needs the `account-login-activity` edge function and
+  each edge function that imports the changed shared email helper deployed alongside the
+  public and admin Vercel projects.
+
 ---
 
 ## 6. Open threads

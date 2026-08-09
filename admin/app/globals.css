@@ -190,6 +190,31 @@ body {
 .welcome { background: #fffdf8 !important; }
 .welcome__glow { background: radial-gradient(circle, rgba(198,170,114,0.24), transparent 60%); }
 
+/* Autofill: the browser paints its own pale blue box and near-black text over
+   any field it fills, from a user agent !important rule that author !important
+   cannot reach. Only a transition outranks it, so one long enough never to
+   finish keeps the ivory palette. -webkit-text-fill-color holds the text. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:active,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+select:-webkit-autofill:active {
+  -webkit-text-fill-color: #302d27;
+  caret-color: #a98a4d;
+  transition: border-color 180ms ease,
+              background-color 600000s 0s,
+              color 600000s 0s,
+              -webkit-text-fill-color 600000s 0s;
+}
+input:autofill, textarea:autofill, select:autofill { filter: none; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.25); border-radius: 6px; }

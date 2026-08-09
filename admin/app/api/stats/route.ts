@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseServer";
 import { daysUntil, nextOccurrence } from "@/lib/occasions";
 import { cookies } from "next/headers";
 import { COOKIE, verifySession } from "@/lib/auth";
+import { isMeaningfulActivity } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export async function GET() {
     sb.from("orders").select("status, created_at"),
     sb.from("circle_members").select("person_name, occasion_type, occasion_date, recurring_yearly, customer:customers(full_name)"),
     sb.from("whatsapp_reminders_due").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    sb.from("notifications").select("message, priority, created_at").order("created_at", { ascending: false }).limit(8),
+    sb.from("notifications").select("type, message, priority, created_at, action_url").order("created_at", { ascending: false }).limit(100),
   ]);
 
   const orders = ordersRes.data ?? [];
@@ -41,6 +42,6 @@ export async function GET() {
   return NextResponse.json({
     counts: { activeOrders, enquiriesToday, occasions: occ7, orders: activeOrders, whatsapp: waRes.count ?? 0, occ30 },
     week,
-    recent: notesRes.data ?? [],
+    recent: (notesRes.data ?? []).filter(isMeaningfulActivity).slice(0, 8),
   });
 }

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import StatCard from "@/components/StatCard";
+import ActivityFeed from "@/components/ActivityFeed";
 import { prettyDate } from "@/lib/occasions";
 
 function greeting() {
@@ -14,7 +15,7 @@ function greeting() {
 interface Stats {
   counts: { activeOrders: number; enquiriesToday: number; occ30: number; whatsapp: number };
   week: { person_name: string; occasion_type: string; customer: string; d: number; next: string }[];
-  recent: { message: string; priority: string; created_at: string }[];
+  recent: { type: string; message: string; priority: string; created_at: string; action_url: string | null }[];
 }
 
 export default function Overview() {
@@ -70,18 +71,7 @@ export default function Overview() {
           </ul>
         </section>
 
-        <section className="surface-card p-5 md:p-6">
-          <p className="eyebrow mb-2">Live feed</p><h2>Recent activity</h2>
-          {recent.length === 0 && <p className="text-muted text-sm">No activity yet.</p>}
-          <ul className="space-y-3">
-            {recent.map((n, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${n.priority === "high" ? "bg-rose" : "bg-gold"}`} />
-                <p className="text-sm text-creamSoft leading-snug">{n.message}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <ActivityFeed notes={recent} />
       </div>
 
       <section className="mt-8">

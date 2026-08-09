@@ -23,6 +23,11 @@ export interface SendEmailInput {
 }
 export interface SendResult { status: "sent" | "failed" | "skipped"; error?: string | null; }
 
+function deliveryIssue(error: string | null): string {
+  if (/401|api key is invalid/i.test(error ?? "")) return "Resend rejected the request. Check the email delivery key.";
+  return "Check the email delivery settings.";
+}
+
 function sastYear(): number {
   return new Date(Date.now() + 2 * 3600 * 1000).getUTCFullYear();
 }
@@ -94,7 +99,7 @@ export async function sendEmail(supabase: SupabaseClient, input: SendEmailInput)
   if (status === "sent") {
     await notify(supabase, "reminder_sent", `Email '${template_name}' sent to ${customer.full_name}`);
   } else {
-    await notify(supabase, "reminder_failed", `Email '${template_name}' to ${customer.full_name} FAILED: ${errorMessage}`, "high");
+    await notify(supabase, "reminder_failed", `Could not send the ${template_name.replaceAll("_", " ")} email to ${customer.full_name}. ${deliveryIssue(errorMessage)}`, "high");
   }
   return { status, error: errorMessage };
 }
