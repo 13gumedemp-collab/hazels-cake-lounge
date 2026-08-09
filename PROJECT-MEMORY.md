@@ -848,6 +848,23 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   misleading consent control or raw legacy inspiration-storage paths require a change.
   Verified locally only. No deployment was performed.
 
+### 09/08/2026 — Both projects confirmed live *(Claude Code)*
+
+- **Public site: already current, no deploy spent.** Verified by building at `HEAD` and
+  comparing the hashed asset names against the live page: `main-mzOXfran.css`,
+  `main-CE7C-0Ii.js` and `account-DzKgjwMF.js` all matched, so the running build was
+  already `HEAD`. Worth reusing — comparing hashes is a cheap, exact way to answer "is
+  production current?" without deploying to find out.
+- **Admin deployed** at commit `3f8f32e`, Ready. Root answers `307` to `/login` and the
+  sign-in page answers `200`. All 12 public pages answer `200` through the `www.` redirect.
+- **The admin occasion colour fix had never shipped.** Codex's §5 entry describes updating
+  `admin/lib/occasions.ts` for the `0014` casing change, and the edit was real, but it was
+  sitting **uncommitted** in the working tree, so `Baby shower` and `Just because` were
+  still falling through to the default colour in production. Their own note said "Verified
+  locally only. No deployment was performed." Committed as `3f8f32e` and deployed.
+  **The lesson: a §5 entry describes intent, not necessarily what is in `HEAD`.** Check
+  `git show HEAD:<file>` rather than trusting either the file on disk or the write-up.
+
 ---
 
 ## 6. Open threads
