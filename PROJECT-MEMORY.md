@@ -829,6 +829,10 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   already applied. The release still needs the `account-login-activity` edge function and
   each edge function that imports the changed shared email helper deployed alongside the
   public and admin Vercel projects.
+- Released as commit `9e4fcfa` on 09/08/2026. All nine affected Supabase Edge Functions
+  are deployed, including `account-login-activity`. Both Vercel production builds passed,
+  and the public site is live through the `hazelscakelounge.co.za` to `www.` redirect while
+  the admin redirects unauthenticated visitors to its live sign-in page.
 
 ---
 
