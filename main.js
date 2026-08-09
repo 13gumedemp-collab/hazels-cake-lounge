@@ -1,6 +1,11 @@
 /* ============================================================
    Hazel's Cake Lounge / interaction & motion
    ============================================================ */
+import {
+  OCCASIONS, RELATIONSHIPS, OCCASION_OTHER, optionsHtml, repeatsByDefault,
+  escapeHtml, occasionBlockHtml,
+} from './occasions.js';
+
 (() => {
   'use strict';
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -72,8 +77,10 @@
 
       let started = false;
       let failSafe;
+      let introLimit;
       const finishIntro = () => {
         clearTimeout(failSafe);
+        clearTimeout(introLimit);
         reveal();
       };
       const rememberIntro = () => {
@@ -95,10 +102,16 @@
         clearTimeout(failSafe);
         intro.classList.add('is-playing');
         rememberIntro();
+        introLimit = setTimeout(finishIntro, 5000);
       }, { once: true });
       intro.addEventListener('ended', finishIntro, { once: true });
       intro.addEventListener('error', fallback, { once: true });
-      intro.addEventListener('loadedmetadata', startIntro, { once: true });
+      intro.addEventListener('loadedmetadata', () => {
+        if (Number.isFinite(intro.duration) && intro.duration > 5) {
+          intro.playbackRate = intro.duration / 5;
+        }
+        startIntro();
+      }, { once: true });
       intro.addEventListener('loadeddata', startIntro, { once: true });
       intro.addEventListener('canplay', startIntro, { once: true });
       // Armed only now: `fallback` is a const, so scheduling it any earlier
@@ -357,7 +370,13 @@
   /* Cinematic dropdown: replace native <select> with an animated custom menu
      that stays synced to the hidden select (so form value + pre-select still work) */
   const enhanceSelect = (sel) => {
-    if (sel.dataset.enhanced || sel.dataset.nativeSelect === 'true') return; sel.dataset.enhanced = '1';
+    if (sel.dataset.enhanced || sel.dataset.nativeSelect === 'true') return;
+    // A select with no options yet is filled by script later. Enhancing it now
+    // builds an empty menu labelled "Select" and marks it done, so the later
+    // hclEnhanceSelects call is a no-op and the dropdown stays permanently
+    // empty. Leave it alone and let that later call do the work.
+    if (!sel.options.length) return;
+    sel.dataset.enhanced = '1';
     const phOpt = [...sel.options].find((o) => o.disabled) || sel.options[0];
     const placeholder = phOpt ? phOpt.text : 'Select';
     const wrap = document.createElement('div'); wrap.className = 'cselect';
@@ -568,9 +587,9 @@
     const minDate = () => { const d = new Date(); d.setDate(d.getDate() + LEAD_DAYS); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-    const REL_OPTS = ['My child', 'My partner or spouse', 'My parent', 'My sibling', 'My friend', 'My colleague', 'Myself', 'Other'];
-    const OCC_OPTS = ['Birthday', 'Wedding', 'Anniversary', 'Baby Shower', 'Graduation', 'Just Because', 'Other'];
-    const opt = (list) => '<option value="" disabled selected>Choose one</option>' + list.map((o) => `<option>${o}</option>`).join('');
+    const REL_OPTS = RELATIONSHIPS;
+    const OCC_OPTS = OCCASIONS;
+    const opt = (list) => optionsHtml(list);
 
     const markup = `
       <div class="enq__scrim" data-enq-close></div>
@@ -755,9 +774,23 @@
 
     /* ---- open / close ---- */
     const exitPanel = $('#enqExit', overlay);
-    function openOverlay() {
+    // prefill lets another screen open the enquiry already knowing the occasion.
+    // The account calendar uses it for "Order a cake for this", so a date the
+    // customer saved months ago does not have to be typed out again.
+    function openOverlay(product, prefill) {
       if (open) return;
       open = true;
+      if (prefill && !submitted) {
+        Object.entries(prefill).forEach(([name, value]) => {
+          if (!value) return;
+          const el = $('[name="' + name + '"]', overlay);
+          if (!el) return;
+          // A select only accepts a value it actually offers.
+          if (el.tagName === 'SELECT' && ![...el.options].some((o) => o.value === value || o.text === value)) return;
+          el.value = value;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      }
       document.documentElement.classList.add('enq-open');
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
@@ -935,7 +968,13 @@
       // Let the liquid fill flood fully before the overlay covers the button (touch has no hover).
       if (t.classList.contains('btn')) t.classList.add('btn--fill');
       const delay = touch && t.classList.contains('btn') ? 460 : 0;
-      setTimeout(() => openOverlay(t.dataset.product || ''), delay);
+      const trigger = t;
+      setTimeout(() => openOverlay(trigger.dataset.product || '', {
+        occasion_type: trigger.dataset.occasionType || '',
+        occasion_for: trigger.dataset.occasionFor || '',
+        occasion_date: trigger.dataset.occasionDate || '',
+        relationship: trigger.dataset.relationship || '',
+      }), delay);
     }, true);
 
     /* ---- My Work: filter the gallery by category ---- */
@@ -961,8 +1000,26 @@
     if (addForm) {
       const addStatus = $('#addOccasionStatus');
       const blocks = $('#occBlocks');
-      const tpl = document.getElementById('occBlockTpl');
       const addBtn = $('#addAnother');
+
+      // A signed-in customer should never be asked for their own name and email
+      // again, and "Your name" sitting next to "First name" read as a trick
+      // question. Cached by the account page on sign in.
+      let me = null;
+      try { me = JSON.parse(localStorage.getItem('hcl.me') || 'null'); } catch { me = null; }
+      const nameEl = addForm.elements.full_name;
+      const mailEl = addForm.elements.email;
+      if (me?.full_name && me?.email && nameEl && mailEl) {
+        nameEl.value = me.full_name;
+        mailEl.value = me.email;
+        const row = nameEl.closest('.form__row') || nameEl.closest('.field');
+        if (row) row.hidden = true;
+        const who = document.createElement('p');
+        who.className = 'occ-signedin';
+        who.innerHTML = `Saving as <b>${esc(me.full_name)}</b> (${esc(me.email)}). `
+          + '<a href="account.html">Not you?</a>';
+        addForm.prepend(who);
+      }
       const blockComplete = (b) => {
         if (!b) return false;
         const type = $('.occ-type', b)?.value || '';
@@ -980,29 +1037,58 @@
         all.forEach((b) => { const r = $('.occ-remove', b); if (r) r.hidden = all.length <= 1; });
         updateAdd();
       };
-      const ONE_OFF_TYPES = ['Wedding', 'Graduation', 'Baby Shower'];
+      // Built from the shared string in occasions.js, not from a <template> in
+      // the page, so the Occasion Book and the focused save-date page can never
+      // drift apart the way the three occasion lists did.
+      const blockFrom = (html) => {
+        const holder = document.createElement('div');
+        holder.innerHTML = html.trim();
+        return holder.firstElementChild;
+      };
       const addBlock = () => {
-        const node = tpl.content.firstElementChild.cloneNode(true);
+        const node = blockFrom(occasionBlockHtml());
         node._inspirationUrls = [];
         node._uploading = 0;
         blocks.appendChild(node);
+        // Options come from the shared list, and must exist before the select is
+        // enhanced or the branded menu is built empty.
+        const rel = $('.occ-rel', node); if (rel) rel.innerHTML = optionsHtml(RELATIONSHIPS);
+        const typ = $('.occ-type', node); if (typ) typ.innerHTML = optionsHtml(OCCASIONS);
         $$('select', node).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
-        const d = $('.occ-date', node); if (d) d.min = minDate();
+        const d = $('.occ-date', node);
+        if (d) {
+          d.min = minDate();
+          // Arriving from the account calendar's "use the full form" link, with
+          // the day they tapped already carried across.
+          const wanted = new URLSearchParams(location.search).get('date');
+          if (wanted && !$$('.occ-block', blocks).slice(0, -1).length && wanted >= d.min) d.value = wanted;
+        }
         $('.occ-remove', node).addEventListener('click', () => { node.remove(); updateRemoves(); });
         // Show the free-text field for "Other" and a note for one off occasions.
         const typeSel = $('.occ-type', node);
         const otherField = $('.occ-other', node);
         const hint = $('.occ-hint', node);
+        const repeatBox = $('.occ-recurring', node);
+        // The occasion sets a sensible default (a birthday repeats, a wedding
+        // does not) but the customer decides. Once they touch the box, stop
+        // moving it for them.
+        let repeatTouched = false;
+        const sayHint = () => {
+          if (!hint) return;
+          const t = typeSel.value;
+          if (!t) { hint.hidden = true; return; }
+          hint.textContent = repeatBox && repeatBox.checked
+            ? 'I will remind you a month, two weeks and a week before, every year.'
+            : 'I will save this for the date you enter only. It will not repeat, and it does not get the reminder sequence.';
+          hint.hidden = false;
+        };
         const onType = () => {
           const t = typeSel.value;
-          if (otherField) otherField.hidden = t !== 'Other';
-          if (hint) {
-            if (ONE_OFF_TYPES.includes(t)) {
-              hint.textContent = 'I will save this event only for the date you enter. It will not repeat every year.';
-              hint.hidden = false;
-            } else { hint.hidden = true; }
-          }
+          if (otherField) otherField.hidden = t !== OCCASION_OTHER;
+          if (repeatBox && t && !repeatTouched) repeatBox.checked = repeatsByDefault(t);
+          sayHint();
         };
+        if (repeatBox) repeatBox.addEventListener('change', () => { repeatTouched = true; sayHint(); });
         typeSel.addEventListener('change', () => { onType(); updateAdd(); });
         $('.occ-date', node).addEventListener('change', updateAdd);
         $('.occ-other-input', node).addEventListener('input', updateAdd);
@@ -1086,36 +1172,63 @@
           return;
         }
         const items = $$('.occ-block', blocks).map((b) => ({
-          person_name: $('.occ-person', b).value.trim(),
+          // One person_name column, but always asked for as two fields so a
+          // reminder can say "Natalia Mokoena" rather than just "Natalia".
+          person_name: [$('.occ-person', b).value.trim(), $('.occ-surname', b)?.value.trim()].filter(Boolean).join(' '),
           relationship: $('.occ-rel', b).value,
           occasion_type: $('.occ-type', b).value,
+          recurring_yearly: !!$('.occ-recurring', b)?.checked,
           occasion_other: ($('.occ-other-input', b) ? $('.occ-other-input', b).value.trim() : ''),
           occasion_date: $('.occ-date', b).value,
           notes: $('.occ-notes', b).value.trim(),
           inspiration_photo_urls: b._inspirationUrls.slice(),
         })).filter((it) => it.occasion_type && it.occasion_date);
+
+        // A date saved with less than four full days' notice cannot get this
+        // year's reminder run, so a *repeating* occasion is rolled forward to
+        // its next occurrence. A one-time occasion is never moved: a wedding
+        // happens on the day it happens, and shifting it a year would put a
+        // real event in the wrong year. Those are saved as entered, with no
+        // reminders, and the customer is told so below.
+        const rolled = [];
+        items.forEach((it) => {
+          if (!it.recurring_yearly || it.occasion_date >= minDate()) return;
+          const d = new Date(it.occasion_date + 'T00:00:00');
+          // Keep stepping a year until it clears the lead time, so a date left
+          // over from a previous year lands on the next real occurrence.
+          while (`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` < minDate()) {
+            d.setFullYear(d.getFullYear() + 1);
+          }
+          const moved = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          rolled.push({ from: it.occasion_date, to: moved, who: it.person_name, what: it.occasion_type });
+          it.occasion_date = moved;
+        });
         if (!items.length) {
           addStatus.textContent = 'Please add at least one occasion: the type and the date.';
           return;
         }
-        if (items.some((it) => it.occasion_date < minDate())) {
-          addStatus.textContent = "Please choose dates at least 4 days from today so I have time to bake.";
+        if (items.some((it) => !it.person_name)) {
+          addStatus.textContent = 'Please add a first name and a surname for each occasion.';
           return;
         }
+        // No lead-time check here. The Occasion Book is a free reminder, not an
+        // order, so any date may be saved. The four day rule is a baking lead
+        // time and lives on the enquiry and reorder paths instead.
         const btn = addForm.querySelector('button[type="submit"]');
         const label = btn ? btn.textContent : '';
         if (btn) { btn.disabled = true; btn.textContent = 'Adding...'; }
         let added = 0, failed = false;
         for (const it of items) {
           try {
-            const picturePaths = it.inspiration_photo_urls.map((path) => 'inspiration-photos/' + path);
-            const savedNotes = [it.notes, picturePaths.length ? 'Inspiration pictures:\n' + picturePaths.join('\n') : ''].filter(Boolean).join('\n\n');
+            // Pictures go in photo_paths now, not appended to the notes text.
+            const savedNotes = it.notes || '';
             const res = await fetch(SB_URL + '/functions/v1/add-circle-member', {
               method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
               body: JSON.stringify({
                 email: String(f.email).trim().toLowerCase(), full_name: String(f.full_name).trim(),
                 person_name: it.person_name, relationship_to_customer: it.relationship,
                 occasion_type: it.occasion_type, occasion_other: it.occasion_other, occasion_date: it.occasion_date,
+                recurring_yearly: it.recurring_yearly,
                 notes: savedNotes, inspiration_photo_urls: it.inspiration_photo_urls,
               }),
             });
@@ -1124,7 +1237,21 @@
           } catch (err) { failed = true; }
         }
         if (added) {
-          addForm.innerHTML = '<div class="form-success"><h3>Your date is saved.</h3><p>I have saved ' + added + ' occasion' + (added > 1 ? 's' : '') + ' for you. I will email you before each date. You can decide then whether you would like to order a cake.</p></div>';
+          // Never move someone's date silently. Say which one moved and why.
+          const prettyDay = (s) => new Date(s + 'T00:00:00').toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
+          const rolledNote = rolled.length
+            ? '<p class="form-success__moved">' + rolled.map((r) => (
+              'There was not enough time left to remind you about '
+              + esc([r.who, r.what].filter(Boolean).join(' '))
+              + ' on ' + esc(prettyDay(r.from))
+              + ', so I have saved it for ' + esc(prettyDay(r.to)) + ' and your reminders start then.'
+            )).join(' ') + '</p>'
+            : '';
+          addForm.innerHTML = '<div class="form-success"><h3>Your date is saved.</h3><p>I have saved '
+            + added + ' occasion' + (added > 1 ? 's' : '')
+            + ' for you. I will email you before each date. You can decide then whether you would like to order a cake.</p>'
+            + rolledNote
+            + '<p><a class="btn" href="account.html?tab=dates">See your Occasion Book</a></p></div>';
         } else {
           if (btn) { btn.disabled = false; btn.textContent = label; }
           addStatus.textContent = 'Something went wrong. Please try again, or email hello@hazelscakelounge.co.za.';

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a08" />
+  <title>Save a date | Hazel's Cake Lounge</title>
+  <meta name="description" content="Save a date to your Occasion Book. Free, nothing booked, and Hazel reminds you in good time." />
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__inner"><span class="loader__name">Hazel's</span><span class="loader__sub">Cake Lounge</span></div>
+    <div class="loader__count"><span id="loaderCount">00</span></div>
+  </div>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+  <header class="nav nav--solid scrolled" id="nav">
+    <a href="index.html" class="nav__brand" data-cursor="link"><span>Hazel's</span><em>Cake Lounge</em></a>
+    <nav class="nav__links" id="navLinks">
+      <a href="menu.html" data-cursor="link">Menu</a>
+      <a href="work.html" data-cursor="link">My Work</a>
+      <a href="occasion-book.html" data-cursor="link">The Occasion Book</a>
+      <a href="reviews.html" data-cursor="link">Community</a>
+      <a href="contact.html" data-cursor="link">Contact</a>
+      <a href="account.html" data-cursor="link">Your Account</a>
+    </nav>
+    <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
+  </header>
+
+  <!-- Deliberately spare. This is the page someone lands on having already
+       decided to save a date, so it carries the form and nothing else. The
+       Occasion Book page keeps the explaining. -->
+  <main class="savedate" id="top">
+    <section class="savedate__inner">
+      <a class="savedate__back" href="account.html?tab=calendar" data-cursor="link">&#8249; Back to your calendar</a>
+      <p class="page-hero__eyebrow">The Occasion Book</p>
+      <h1>Save a date.</h1>
+      <p class="savedate__lede" id="saveDateLede">Tell me whose day it is and when. I will remind you in good time, free, with nothing booked and nothing owed.</p>
+
+      <div class="formwrap">
+        <form class="form" id="addOccasionForm" novalidate>
+          <div class="form__row">
+            <label class="field">
+              <span>Your name</span>
+              <input type="text" name="full_name" autocomplete="name" placeholder="Your full name" required />
+            </label>
+            <label class="field">
+              <span>Your email address</span>
+              <input type="email" name="email" autocomplete="email" placeholder="Where I can reach you" required />
+            </label>
+          </div>
+
+          <div id="occBlocks"></div>
+
+          <button type="button" class="enq__add" id="addAnother" data-cursor="link" disabled>+ Add another occasion</button>
+          <button type="submit" class="btn btn--solid" data-cursor="link">Save this date</button>
+          <p class="form__status" id="addOccasionStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__base">
+      <span>&copy; <span id="year"></span> Hazel's Cake Lounge</span>
+      <nav class="footer__legal">
+        <a href="terms.html" data-cursor="link">Terms &amp; conditions</a>
+        <a href="privacy.html" data-cursor="link">Privacy policy</a>
+        <a href="messaging-terms.html" data-cursor="link">Messaging terms</a>
+      </nav>
+    </div>
+  </footer>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

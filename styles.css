@@ -895,6 +895,121 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .account-section-head h2 { font-size:clamp(2rem,5vw,3.5rem); }
 .account-list,.account-calendar { display:grid; gap:1rem; }
 
+/* ---- Overview -------------------------------------------------------------
+   The landing tab. One thing that matters, four numbers, three ways out. */
+/* --accent is set per occasion in JS. Only the left hairline, the small dot and
+   a barely-there wash pick it up, so a wedding reads differently from a
+   birthday without the page turning colourful. */
+.ovnext { display:flex; align-items:center; gap:1.4rem; padding:1.5rem 1.6rem; margin-bottom:1.6rem;
+  border:1px solid var(--line); border-left:3px solid var(--accent, var(--gold)); border-radius:12px;
+  background:rgba(212,175,55,.04); }
+@supports (background: color-mix(in srgb, red 10%, transparent)) {
+  .ovnext { background:color-mix(in srgb, var(--accent, #d4af37) 9%, transparent); }
+}
+.ovnext .ovnext__eyebrow { color:var(--accent, var(--gold)); }
+.ovnext__dot { display:inline-block; width:8px; height:8px; margin-right:.55rem; border-radius:50%;
+  background:var(--accent, var(--gold)); vertical-align:middle;
+  box-shadow:0 0 9px 1px var(--accent, var(--gold)); }
+.ovnext--empty { border-left-style:dashed; background:none; }
+.ovnext__body { min-width:0; }
+.ovnext__eyebrow { color:var(--gold); font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; }
+.ovnext__body h3 { margin:.4rem 0 .3rem; font-size:clamp(1.4rem,3.4vw,2rem); color:var(--cream); }
+.ovnext__body p { color:var(--cream-soft); font-size:.9rem; }
+
+.ovgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+.ovcard { display:flex; flex-direction:column; gap:.4rem; align-items:flex-start; text-align:left;
+  padding:1.2rem 1.25rem; border:1px solid var(--line-soft); border-radius:12px; background:none;
+  color:inherit; font:inherit; cursor:pointer;
+  transition:border-color .35s var(--ease), background .35s var(--ease), transform .35s var(--ease); }
+.ovcard:hover, .ovcard:focus-visible { border-color:var(--gold); background:rgba(212,175,55,.05); transform:translateY(-2px); }
+.ovcard b { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(1.5rem,3vw,2.1rem);
+  color:var(--gold); line-height:1; }
+.ovcard span { color:var(--muted); font-size:.76rem; letter-spacing:.06em; }
+/* Three ways out of the Overview. A bare label made the reader guess what each
+   one did, so each states its own outcome. */
+.ovactions { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:2rem; }
+.ovaction { display:flex; flex-direction:column; gap:.45rem; align-items:flex-start; text-align:left;
+  padding:1.25rem 1.3rem; border:1px solid var(--line); border-radius:12px; background:none;
+  color:inherit; font:inherit; cursor:pointer;
+  transition:border-color .35s var(--ease), background .35s var(--ease), transform .35s var(--ease); }
+.ovaction:hover, .ovaction:focus-visible { border-color:var(--gold); background:rgba(212,175,55,.05);
+  transform:translateY(-2px); }
+.ovaction b { font-family:'Fraunces',serif; font-weight:400; font-size:1.15rem; color:var(--gold); }
+.ovaction span { color:var(--muted); font-size:.82rem; line-height:1.55; }
+@media (max-width:900px) { .ovactions { grid-template-columns:1fr; } }
+@media (prefers-reduced-motion: reduce) { .ovaction { transition:none; } .ovaction:hover { transform:none; } }
+
+/* ---- Sub-headings inside a panel (Orders split, Payments) ---------------- */
+.subhead { display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+  padding-bottom:.7rem; margin-bottom:1.1rem; border-bottom:1px solid var(--line-soft); }
+.subhead--spaced { margin-top:3rem; }
+.subhead h3 { font-family:'Fraunces',serif; font-weight:400; font-size:1.3rem; color:var(--cream); }
+.subhead span { color:var(--muted); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; }
+.subhead__note { margin:-.4rem 0 1.1rem; color:var(--muted); font-size:.84rem; }
+
+/* ---- Payments ----------------------------------------------------------- */
+.paytotal { display:grid; gap:.35rem; padding:1.5rem 1.6rem; margin-bottom:1.6rem;
+  border:1px solid var(--line-soft); border-radius:12px; }
+.paytotal--due { border-color:var(--line); border-left:2px solid var(--gold);
+  background:linear-gradient(120deg, rgba(212,175,55,.09), rgba(212,175,55,.02)); }
+.paytotal span { color:var(--gold); font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; }
+.paytotal b { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(1.8rem,4.5vw,2.8rem);
+  color:var(--cream); line-height:1.1; }
+.paytotal em { color:var(--muted); font-style:normal; font-size:.84rem; }
+
+/* ---- Sent log ------------------------------------------------------------ */
+.sentlog { display:grid; }
+.sentrow { display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:.9rem 0; border-bottom:1px solid var(--line-soft); }
+.sentrow:last-child { border-bottom:0; }
+.sentrow__main { display:grid; gap:.2rem; min-width:0; }
+.sentrow__main strong { color:var(--cream); font-weight:400; font-size:.94rem; }
+.sentrow__main span { color:var(--muted); font-size:.78rem; }
+.chip--muted { border-color:var(--line-soft); color:var(--muted); }
+.chip--fail { border-color:rgba(231,161,122,.5); color:#e7a17a; }
+
+/* ---- Sessions ------------------------------------------------------------ */
+.sessinfo { display:grid; gap:.7rem; margin-bottom:1.5rem; max-width:520px; }
+.sessinfo > div { display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+  padding-bottom:.7rem; border-bottom:1px solid var(--line-soft); }
+.sessinfo dt { color:var(--muted); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; }
+.sessinfo dd { color:var(--cream-soft); font-size:.88rem; text-align:right; }
+
+/* ---- Danger zone --------------------------------------------------------
+   Set apart and warm-red rather than gold, so it can never be mistaken for one
+   of the ordinary save buttons above it. */
+.danger { max-width:520px; margin-top:3.5rem; padding:1.5rem 1.6rem;
+  border:1px solid rgba(231,161,122,.32); border-radius:12px; background:rgba(231,161,122,.03); }
+.danger__title { font-family:'Fraunces',serif; font-weight:400; font-size:1.25rem; color:#e7a17a; }
+.danger__body { margin:.6rem 0 1.2rem; color:var(--cream-soft); font-size:.86rem; line-height:1.6; }
+.danger__body strong { color:#e7a17a; }
+.btn--danger { --liquid-button-background-color:#e7a17a; --liquid-button-color:#0b0a08;
+  color:#e7a17a; border-color:rgba(231,161,122,.55); }
+.btn--danger::before { background:#e7a17a; }
+.btn--danger:hover { border-color:#e7a17a; }
+.danger__confirm { display:grid; gap:1rem; margin-top:1.2rem; padding-top:1.2rem;
+  border-top:1px solid rgba(231,161,122,.25); }
+.danger__actions { display:flex; flex-wrap:wrap; gap:.8rem; }
+
+.account-gone { display:grid; gap:1rem; place-content:center; min-height:60vh; padding:3rem 1rem;
+  text-align:center; }
+.account-gone h1 { font-size:clamp(2rem,6vw,3rem); }
+.account-gone p { color:var(--cream-soft); }
+.account-gone a { color:var(--gold); text-decoration:underline; text-underline-offset:3px; }
+
+@media (max-width:900px) { .ovgrid { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px) {
+  .ovnext { flex-direction:column; align-items:flex-start; gap:1rem; padding:1.25rem; }
+  .ovgrid { gap:.7rem; }
+  .ovcard { padding:1rem; }
+  .ovactions .btn { width:100%; justify-content:center; }
+  .sentrow { flex-direction:column; align-items:flex-start; gap:.5rem; }
+  .sessinfo > div { flex-direction:column; gap:.2rem; }
+  .sessinfo dd { text-align:left; }
+  .danger { padding:1.25rem; }
+  .danger__actions .btn { width:100%; justify-content:center; }
+}
+
 /* Month calendar */
 /* Deliberately small. The cells are square, so without a cap each one grows to
    a sixth of the dashboard width. */
@@ -911,20 +1026,40 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
   background:none; border:1px solid transparent; border-radius:50%; color:var(--cream-soft);
   font-size:.8rem; transition:border-color .3s var(--ease), color .3s var(--ease); }
 .cal__day:hover { border-color:rgba(212,175,55,.35); color:var(--cream); }
-.cal__day.is-today { color:var(--gold); }
+/* Today is a ring, not gold text. Gold text made today look exactly like a day
+   with a cake order on it, so the 8th read as an order when nothing was on it.
+   Gold is now reserved for an order and nothing else. */
+.cal__day.is-today { color:var(--cream); border-color:rgba(244,236,221,.45); }
 .cal__day.is-selected { border-color:var(--gold); color:var(--cream); }
-/* A saved occasion shows as a slow gold heartbeat under the date. */
-.cal__day.is-marked::after { content:''; position:absolute; bottom:13%; width:5px; height:5px; border-radius:50%;
-  background:var(--gold); animation:calHeartbeat 2.8s ease-in-out infinite; }
+/* There is deliberately no ::after marker on a marked day any more.
+   It painted a gold blooming dot on EVERY marked day whatever was on it, and
+   sat on top of the .cal__pips below, which are the ones that carry the real
+   colour. So a saved date showed a gold bloom exactly like a cake order and the
+   legend was describing something the grid was not doing. One dot per item,
+   from .cal__pips, and nothing else. */
 @keyframes calHeartbeat {
   0%,100% { opacity:.4; transform:scale(.9); box-shadow:0 0 0 rgba(212,175,55,0); }
   50%     { opacity:1; transform:scale(1.15); box-shadow:0 0 9px rgba(212,175,55,.55); }
 }
 .cal__detail { display:grid; gap:1rem; margin-top:1.4rem; max-width:760px; }
 .cal__pips { position:absolute; bottom:11%; display:flex; gap:2px; }
-.cal__pip { width:5px; height:5px; border-radius:50%; display:inline-block; animation:calHeartbeat 2.8s ease-in-out infinite; }
-.cal__pip--order { background:var(--gold); }
-.cal__pip--date { background:var(--cream); animation-delay:.6s; }
+/* Motion carries the meaning here, not just colour.
+   A cake ORDER is live work in the kitchen, so it luminates and blooms.
+   A SAVED DATE is only a note to self, so it sits still.
+   Both pips used to bloom, and in the same gold, which made a free reminder
+   look exactly as urgent as a cake Hazel is actually baking. */
+.cal__pip { width:5px; height:5px; border-radius:50%; display:inline-block; }
+.cal__pip--order { background:var(--gold); animation:calBloom 2.8s ease-in-out infinite; }
+.cal__pip--date { background:var(--cream-soft); opacity:.75; animation:none; }
+@keyframes calBloom {
+  0%,100% { opacity:.5; transform:scale(.9);  box-shadow:0 0 0 0 rgba(212,175,55,0); }
+  50%     { opacity:1;  transform:scale(1.2); box-shadow:0 0 10px 2px rgba(212,175,55,.6); }
+}
+/* Without motion the order pip must still read as the louder of the two, so it
+   keeps full opacity and a steady halo while the saved date stays quiet. */
+@media (prefers-reduced-motion: reduce) {
+  .cal__pip--order { animation:none; opacity:1; box-shadow:0 0 7px 1px rgba(212,175,55,.5); }
+}
 
 /* Month and year jump */
 .calpick { position:absolute; top:calc(100% + .5rem); left:50%; transform:translateX(-50%); z-index:30; width:min(280px,88vw);
@@ -948,13 +1083,36 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .calside__stats { display:flex; gap:2.2rem; margin:1.8rem 0; }
 .calside__stats dt { color:var(--muted); font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; }
 .calside__stats dd { font-family:'Fraunces',serif; font-size:2rem; color:var(--gold); line-height:1.1; }
-.calside__next { display:grid; gap:.2rem; padding:1rem 1.1rem; border:1px solid var(--line); border-radius:10px; background:rgba(212,175,55,.05); }
-.calside__next span { color:var(--muted); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; }
+/* Themed per occasion. --accent is set in JS from the occasion type. Four quiet
+   carriers: the left edge, the label, a lit dot, and a wash that fades out
+   before it reaches the middle of the card. A first attempt used only a 2px
+   edge and a 6px dot in near-cream colours, which was invisible.
+   The plain background is declared first as the fallback for browsers without
+   color-mix, so the card is never left transparent. */
+.calside__next { display:grid; gap:.25rem; padding:1rem 1.1rem;
+  border:1px solid var(--line); border-left:3px solid var(--accent, var(--gold));
+  border-radius:10px; background:rgba(212,175,55,.04); }
+/* A flat, even tint. A diagonal gradient was tried first and read as a smudge
+   in the top left corner rather than as a theme: uneven colour looks like a
+   rendering fault, not a decision. */
+@supports (background: color-mix(in srgb, red 10%, transparent)) {
+  .calside__next { background:color-mix(in srgb, var(--accent, #d4af37) 9%, transparent); }
+}
+.calside__next span { display:flex; align-items:center; color:var(--accent, var(--gold));
+  font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; }
+.calside__dot { flex:none; width:8px; height:8px; margin-right:.55rem; border-radius:50%;
+  background:var(--accent, var(--gold));
+  box-shadow:0 0 9px 1px var(--accent, var(--gold)); }
+.calside__when { font-style:normal; color:var(--cream-soft); font-size:.82rem; }
 .calside__next b { font-family:'Fraunces',serif; font-size:1.15rem; font-weight:400; }
 .calside__next i { font-style:normal; color:var(--cream-soft); font-size:.82rem; }
 .callegend { list-style:none; display:grid; gap:.5rem; margin:1.6rem 0 1rem; }
 .callegend li { display:flex; align-items:center; gap:.6rem; color:var(--cream-soft); font-size:.82rem; }
-.callegend .cal__pip { animation:none; flex:none; }
+/* The legend keeps the bloom. A still dot next to a blooming one on the grid
+   made the legend look like a different thing from what it is describing. */
+.callegend .cal__pip { flex:none; }
+.callegend__today { flex:none; width:11px; height:11px; border-radius:50%;
+  border:1px solid rgba(244,236,221,.45); }
 .calside__hint { color:var(--muted); font-size:.78rem; line-height:1.6; }
 @media (max-width: 900px) { .calwrap { grid-template-columns:1fr; } .calside { order:-1; max-width:none; } }
 
@@ -969,32 +1127,275 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .odetail__foot { color:var(--muted); font-size:.78rem; margin-top:1.1rem; }
 .oreorder p { color:var(--cream-soft); font-size:.88rem; margin-bottom:1rem; }
 
-/* Consent disclosure */
-.prefs { border:1px solid var(--line); border-radius:10px; background:rgba(212,175,55,.03); }
-.prefs summary { display:flex; align-items:center; gap:.8rem; padding:.95rem 1.1rem; cursor:pointer; list-style:none; }
-.prefs summary::-webkit-details-marker { display:none; }
-.prefs__title { color:var(--gold); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; }
-.prefs__now { color:var(--cream-soft); font-size:.85rem; margin-left:auto; }
-.prefs__chev { color:var(--gold); display:flex; transition:transform .4s var(--ease); }
-.prefs[open] .prefs__chev { transform:rotate(180deg); }
-.prefs__body { padding:0 1.1rem 1.2rem; display:grid; gap:1.1rem; }
+/* Consent boxes on sign up, still a plain stack of ticks */
 .prefs__boxes { display:grid; gap:1rem; }
 
-/* Bottom sheet */
-.sheet { position:fixed; inset:0; z-index:2000; display:flex; align-items:flex-end; justify-content:center;
-  background:rgba(4,3,2,.62); opacity:0; transition:opacity .32s var(--ease); }
+/* Notifications tab. Each consent is a card rather than a line of small print,
+   because this is the one screen where a customer decides what lands on their
+   phone and they should be able to read what they are agreeing to. */
+.prefs-form { display:grid; gap:1.6rem; max-width:760px; }
+.prefs-state { padding:.9rem 1.1rem; border-left:2px solid var(--gold); background:rgba(212,175,55,.05);
+  color:var(--cream-soft); font-size:.9rem; }
+.prefs-grid { display:grid; gap:1rem; }
+.pref--card { align-items:flex-start; gap:1rem; padding:1.15rem 1.25rem; border:1px solid var(--line-soft);
+  border-radius:12px; background:rgba(212,175,55,.02);
+  transition:border-color .35s var(--ease), background .35s var(--ease); }
+.pref--card:hover { border-color:var(--line); background:rgba(212,175,55,.05); }
+.pref--card .pref__box { margin-top:.15rem; }
+.pref--card:has(input:checked) { border-color:var(--gold); background:rgba(212,175,55,.07); }
+.pref__copy { display:grid; gap:.3rem; }
+.pref__copy strong { color:var(--cream); font-weight:400; font-size:1rem; letter-spacing:.01em; }
+.pref__copy em { color:var(--muted); font-style:normal; font-size:.84rem; line-height:1.55; }
+.pref__copy em b { color:var(--cream-soft); font-weight:400; }
+.pref__copy a { color:var(--gold); text-decoration:underline; text-underline-offset:2px; }
+.prefs-note { padding:.8rem 1rem; border:1px solid rgba(231,161,122,.4); border-radius:8px;
+  color:#e7a17a; font-size:.84rem; }
+.linkish { background:none; border:0; padding:0; font:inherit; color:var(--gold);
+  text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+.prefs-form .btn--solid { justify-self:start; }
+
+/* A date that was rolled to next year. Never a quiet change. */
+.form-success__moved { margin-top:1rem; padding:.85rem 1rem; border-radius:8px;
+  border:1px solid rgba(212,175,55,.35); background:rgba(212,175,55,.06);
+  color:var(--cream-soft); font-size:.86rem; line-height:1.6; }
+
+/* Save a date, or order a cake. Asked before sending them anywhere. */
+.choices { display:grid; gap:.9rem; margin:.4rem 0 .3rem; }
+.choice { display:flex; flex-direction:column; gap:.4rem; align-items:flex-start; text-align:left;
+  padding:1.15rem 1.25rem; border:1px solid var(--line); border-radius:12px; background:none;
+  color:inherit; font:inherit; cursor:pointer;
+  transition:border-color .35s var(--ease), background .35s var(--ease), transform .35s var(--ease); }
+.choice:hover:not(:disabled), .choice:focus-visible { border-color:var(--gold);
+  background:rgba(212,175,55,.06); transform:translateY(-2px); }
+.choice b { font-family:'Fraunces',serif; font-weight:400; font-size:1.15rem; color:var(--gold); }
+.choice span { color:var(--muted); font-size:.83rem; line-height:1.55; }
+/* Too soon to bake. Shown and explained rather than hidden, so the four day
+   rule is understood instead of just being an option that is not there. */
+.choice--off { opacity:.55; cursor:not-allowed; border-style:dashed; }
+.choice--off b { color:var(--muted); }
+.choice--off span { color:#e7a17a; }
+@media (prefers-reduced-motion: reduce) { .choice { transition:none; } .choice:hover { transform:none; } }
+
+/* Current and history inside the Orders tab. Quieter than the main account
+   tabs so the two levels do not compete. */
+.subtabs { display:flex; gap:1.4rem; margin:-.4rem 0 1.6rem; padding-bottom:.7rem;
+  border-bottom:1px solid var(--line-soft); }
+.subtabs button { background:none; border:0; padding:0 0 .2rem; color:var(--muted);
+  font-family:'Jost',sans-serif; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+  cursor:pointer; border-bottom:1px solid transparent; transition:color .3s var(--ease), border-color .3s var(--ease); }
+.subtabs button:hover { color:var(--cream-soft); }
+.subtabs button.is-active { color:var(--gold); border-bottom-color:var(--gold); }
+.subtabs button span { opacity:.6; }
+.subtabs button span:empty { display:none; }
+
+/* ---- Order rows ----------------------------------------------------------
+   Orders used the same card as the Occasion Book, so a cake being baked looked
+   exactly like a free reminder. An order is a journey through a kitchen, so it
+   gets a progress rail and money. A saved date gets neither.
+
+   Kept deliberately spare: a hairline rule between entries, no filled card, no
+   heavy border. The first pass was a boxed card with a gold edge and six
+   labelled stages across the width, which was far too much furniture for what
+   is really a short status line. */
+.ocard { display:grid; gap:.75rem; padding:1.5rem 0; border-bottom:1px solid var(--line-soft); }
+.ocard:last-child { border-bottom:0; }
+.ocard__top { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; }
+.ocard__for { color:var(--muted); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; }
+.ocard__head h3 { margin-top:.2rem; font-size:1.05rem; }
+.ocard__status { flex:none; font-style:normal; font-size:.58rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); }
+
+/* Six dots and one line of text. Done is filled gold, the current one glows,
+   the rest are quiet outlines. */
+.ostage { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
+.ostage__dots { list-style:none; display:flex; align-items:center; gap:.4rem; margin:0; padding:0; }
+.ostage__dots li { width:6px; height:6px; border-radius:50%; border:1px solid var(--line-soft); }
+.ostage__dots li.is-done { background:var(--gold); border-color:var(--gold); opacity:.55; }
+.ostage__dots li.is-now { background:var(--gold); border-color:var(--gold);
+  box-shadow:0 0 8px 1px rgba(212,175,55,.5); }
+.ostage__now { color:var(--gold); font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; }
+.ostage__now em { font-style:normal; color:var(--muted); letter-spacing:.08em; }
+
+.ocard__money-note { color:var(--cream-soft); font-size:.82rem; }
+.ocard__cancelled { color:#e7a17a; font-size:.82rem; }
+.ocard__acts { display:flex; flex-wrap:wrap; gap:1.1rem; }
+.ocard__acts button { background:none; border:0; padding:0; color:var(--muted);
+  font-family:'Jost',sans-serif; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+  cursor:pointer; transition:color .3s var(--ease); }
+.ocard__acts button:hover, .ocard__acts button:focus-visible { color:var(--gold); }
+
+@media (max-width:600px) {
+  .ocard__top { flex-direction:column; gap:.3rem; }
+  .ocard__acts { gap:.9rem; }
+  .ocard__acts button { min-height:36px; }
+}
+
+/* The Occasion Book editor is a form, so it spans the grid rather than sitting
+   in one card-width column. */
+.occ-editor { grid-column:1 / -1; display:block; }
+.occ-editor .ecard__edit { display:grid; gap:.9rem; }
+
+/* ---- Occasion Book cards -------------------------------------------------
+   Was a stack of full-width rows: date box left, buttons far right, one row per
+   occasion, in raw date order. It read like a spreadsheet, and because the
+   order was raw, dates that had already gone sat above the next one coming up.
+   Now a card grid, sorted by what happens next, with the ones already gone
+   pushed below their own heading. */
+.occgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:1rem; }
+.occgrid .ecard--editing { grid-column:1 / -1; }
+
+.occ-card { display:grid; grid-template-columns:auto 1fr; gap:1.1rem; padding:1.35rem;
+  border:1px solid var(--line-soft); border-radius:14px;
+  background:linear-gradient(150deg, rgba(212,175,55,.05), rgba(212,175,55,.008));
+  transition:border-color .4s var(--ease), transform .4s var(--ease), box-shadow .4s var(--ease); }
+.occ-card:hover { border-color:var(--line); transform:translateY(-3px);
+  box-shadow:0 22px 44px -30px rgba(0,0,0,.95); }
+/* Within a month, so it earns the gold edge. */
+.occ-card--soon { border-color:rgba(212,175,55,.42); }
+.occ-card--past { opacity:.5; background:none; }
+.occ-card--past:hover { opacity:.8; transform:none; }
+
+.occ-card__when { display:grid; place-items:center; align-content:center; gap:.1rem;
+  width:66px; height:66px; border:1px solid var(--line); border-radius:12px; }
+.occ-card__when b { font-family:'Fraunces',serif; font-size:1.6rem; font-weight:400;
+  color:var(--gold); line-height:1; }
+.occ-card__when span { font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--cream-soft); }
+.occ-card__when i { font-style:normal; font-size:.54rem; color:var(--muted); }
+
+.occ-card__body { min-width:0; }
+.occ-card__count { display:inline-block; padding:.22rem .6rem; margin-bottom:.55rem; border-radius:100px;
+  border:1px solid var(--line-soft); color:var(--muted);
+  font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; }
+.occ-card--soon .occ-card__count { border-color:rgba(212,175,55,.5); color:var(--gold); }
+.occ-card__body h3 { font-size:1.2rem; margin-bottom:.15rem; overflow-wrap:anywhere; }
+.occ-card__what { color:var(--cream-soft); font-size:.84rem; }
+.occ-card__note { margin-top:.5rem; color:var(--muted); font-size:.76rem; line-height:1.5; }
+
+.occ-card__acts { grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:.5rem;
+  padding-top:1rem; border-top:1px solid var(--line-soft); }
+.occ-card__acts button { background:none; border:1px solid var(--line-soft); border-radius:100px;
+  padding:.42rem .85rem; color:var(--cream-soft); font-family:'Jost',sans-serif;
+  font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; cursor:pointer;
+  transition:border-color .3s var(--ease), color .3s var(--ease), background .3s var(--ease); }
+.occ-card__acts button:hover, .occ-card__acts button:focus-visible { border-color:var(--gold); color:var(--gold); }
+.occ-card__acts .occ-card__go { border-color:rgba(212,175,55,.5); color:var(--gold); }
+.occ-card__acts .occ-card__go:hover { background:rgba(212,175,55,.12); }
+
+@media (max-width:560px) {
+  .occgrid { grid-template-columns:1fr; }
+  .occ-card { padding:1.15rem; gap:.9rem; }
+  .occ-card__acts button { min-height:40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .occ-card { transition:none; }
+  .occ-card:hover { transform:none; }
+}
+
+/* Editing pictures on a saved date. Removing one unlinks it; the file itself is
+   left in storage so a misclick cannot destroy their only copy. */
+/* A consent card that is not a choice. Looks like the others so the list reads
+   as one thing, but has no tick box to press and no hover lift. */
+.pref--fixed { cursor:default; }
+.pref--fixed:hover { border-color:var(--line-soft); background:rgba(212,175,55,.02); }
+.pref__box--fixed { position:relative; border-color:rgba(212,175,55,.45); background:var(--gold-grad); }
+.pref__box--fixed::after { content:''; position:absolute; left:6.5px; top:2.5px; width:4px; height:9px;
+  border:2px solid #0b0a08; border-top:0; border-left:0; transform:rotate(45deg); }
+.pref__always { display:inline-block; margin-left:.5rem; padding:.12rem .45rem; border-radius:100px;
+  border:1px solid rgba(212,175,55,.45); color:var(--gold); font-style:normal;
+  font-size:.54rem; letter-spacing:.14em; text-transform:uppercase; }
+
+.occ-pics { display:grid; gap:.6rem; }
+.occ-pics .enq__thumb.is-loading img { opacity:0; }
+.occ-pics .enq__thumb.is-missing { border-style:dashed; }
+.occ-pics .enq__thumb.is-missing::after { content:'Not available'; position:absolute; inset:0;
+  display:grid; place-items:center; padding:.4rem; color:var(--muted); font-size:.6rem;
+  letter-spacing:.08em; text-transform:uppercase; text-align:center; }
+.occ-pics__thumbs:empty { display:none; }
+.occ-pics__drop[hidden] { display:none; }
+.occ-pics__status:empty { display:none; }
+
+/* Locked because a cake for this date is already being made. */
+.occ-card__locked { color:#e7a17a; font-size:.74rem; line-height:1.5; }
+.ocard__locked { color:#e7a17a; font-size:.76rem; line-height:1.5; }
+
+/* Plain questions instead of one long run of fields. */
+.occ-block__head { margin:1.6rem 0 .2rem; color:var(--cream); font-family:'Fraunces',serif;
+  font-size:1.05rem; font-weight:400; }
+.occ-block__head:first-of-type { margin-top:.4rem; }
+.occ-repeat { margin:.3rem 0 .2rem; }
+.occ-signedin { margin-bottom:1.8rem; padding:.8rem 1rem; border-left:2px solid var(--gold);
+  background:rgba(212,175,55,.05); color:var(--cream-soft); font-size:.86rem; }
+.occ-signedin b { color:var(--cream); font-weight:400; }
+.occ-signedin a { color:var(--gold); text-decoration:underline; text-underline-offset:2px; }
+
+/* Shown while the session is being resolved, so the sign-in form never flashes
+   on screen for someone who is already signed in. */
+.account-checking { padding:calc(120px + var(--safe-top)) 1.5rem 6rem; text-align:center; }
+.account-checking__line { margin-top:.8rem; color:var(--muted); }
+
+/* Focused save-a-date page: form only, no marketing to read through. */
+.savedate { padding:calc(90px + var(--safe-top)) 0 5rem; }
+.savedate__inner { width:min(640px, calc(100% - 3rem)); margin:0 auto; }
+.savedate__back { display:inline-block; margin-bottom:2rem; color:var(--muted); font-size:.8rem;
+  letter-spacing:.1em; text-transform:uppercase; transition:color .3s var(--ease); }
+.savedate__back:hover { color:var(--gold); }
+.savedate h1 { font-size:clamp(2.4rem,7vw,4rem); margin:.4rem 0 1rem; }
+.savedate__lede { color:var(--cream-soft); max-width:52ch; margin-bottom:2.5rem; }
+@media (max-width:600px) { .savedate { padding-top:calc(80px + var(--safe-top)); } }
+
+/* Save-a-date sheet.
+   A centred modal on a laptop, a bottom sheet on a phone. It used to be a
+   bottom sheet everywhere, which on desktop welded a square-cornered panel to
+   the bottom edge, half over the calendar, and read as stuck rather than as a
+   dialog. The scroll lives on the backdrop, not on the card: the card holds a
+   branded dropdown whose panel is absolutely positioned, and an overflow on the
+   card would clip it. Same trap as .ecard--editing further up. */
+.sheet { position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center;
+  padding:clamp(1rem,4vh,3rem) 1rem; overflow-y:auto; overscroll-behavior:contain;
+  background:rgba(4,3,2,.72); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px);
+  opacity:0; transition:opacity .32s var(--ease); }
 .sheet.is-open { opacity:1; }
-.sheet__inner { position:relative; width:min(440px,calc(100% - 2rem)); max-height:76vh; overflow-y:auto; display:grid; gap:.8rem;
-  background:var(--bg-2); border:1px solid var(--line); border-bottom:0; border-radius:16px 16px 0 0;
-  padding:1.35rem clamp(1.1rem,4vw,1.6rem) 1.45rem; transform:translateY(100%); transition:transform .42s var(--ease); }
-.sheet.is-open .sheet__inner { transform:translateY(0); }
+.sheet__inner { position:relative; width:min(460px,100%); margin:auto; display:grid; gap:.9rem;
+  background:var(--bg-2); border:1px solid var(--line); border-radius:16px;
+  box-shadow:0 40px 90px rgba(0,0,0,.6);
+  padding:1.5rem clamp(1.2rem,4vw,1.75rem) 1.6rem;
+  opacity:0; transform:translateY(14px) scale(.985);
+  transition:opacity .4s var(--ease), transform .42s var(--ease); }
+.sheet.is-open .sheet__inner { opacity:1; transform:none; }
 .sheet__eyebrow { color:var(--gold); font-size:.68rem; letter-spacing:.17em; text-transform:uppercase; }
-.sheet__inner h3 { font-family:'Fraunces',serif; font-size:1.35rem; font-weight:400; }
-.sheet__close { position:absolute; top:.9rem; right:1.1rem; background:none; border:0; color:var(--muted); font-size:1.5rem; line-height:1; }
-.sheet__close:hover { color:var(--gold); }
-.sheet__fields { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
-.sheet__actions { display:flex; flex-wrap:wrap; gap:.7rem; margin-top:.1rem; }
-@media (max-width: 560px) { .sheet__fields { grid-template-columns:1fr; } .sheet__actions .btn { width:100%; } }
+.sheet__inner h3 { font-family:'Fraunces',serif; font-size:1.5rem; font-weight:400; padding-right:2rem; }
+.sheet__close { position:absolute; top:.6rem; right:.7rem; display:flex; align-items:center; justify-content:center;
+  width:44px; height:44px; background:none; border:0; color:var(--muted); font-size:1.5rem; line-height:1;
+  transition:color .3s var(--ease); }
+.sheet__close:hover, .sheet__close:focus-visible { color:var(--gold); }
+.sheet__fields { display:grid; grid-template-columns:1fr 1fr; gap:.85rem 1.1rem; }
+.sheet__actions { display:flex; flex-wrap:wrap; gap:.7rem; margin-top:.3rem; }
+/* Not a soft note. Unticking "repeat every year" means no reminders at all, so
+   it is warm red like the other things that stop something happening. */
+.sheet__warn { padding:.75rem .9rem; border-radius:8px; border:1px solid rgba(231,161,122,.35);
+  background:rgba(231,161,122,.06); color:#e7a17a; font-size:.82rem; line-height:1.55; }
+.sheet__more { color:var(--muted); font-size:.8rem; line-height:1.55; }
+.sheet__more a { color:var(--gold); text-decoration:underline; text-underline-offset:2px; }
+.sheet__donebody { color:var(--cream-soft); font-size:.9rem; line-height:1.6; }
+.sheet__done .sheet__actions .btn { flex:1 1 auto; justify-content:center; }
+
+/* Drag a saved date to another day (pointer only). */
+.cal__day[data-drag-date] { cursor:grab; }
+.cal__day.is-dragging { opacity:.4; }
+.cal__day.is-dragover { border-color:var(--gold); background:rgba(212,175,55,.16); }
+
+@media (max-width: 560px) {
+  .sheet { align-items:flex-end; padding:0; }
+  .sheet__inner { width:100%; margin:0; border-bottom:0; border-radius:16px 16px 0 0;
+    padding-bottom:calc(1.6rem + var(--safe-bottom));
+    opacity:1; transform:translateY(100%); }
+  .sheet.is-open .sheet__inner { transform:translateY(0); }
+  .sheet__fields { grid-template-columns:1fr; }
+  .sheet__actions .btn { width:100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet__inner { transition:none; opacity:1; transform:none; }
+}
 
 /* Yearly reminder dialog */
 .modal { position:fixed; inset:0; z-index:2100; display:flex; align-items:center; justify-content:center;
@@ -1013,7 +1414,6 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
   .sheet, .sheet__inner, .modal__sheet { transition:none; animation:none; }
 }
 .account-intro { color:var(--cream-soft); max-width:62ch; margin:-0.6rem 0 1.6rem; font-size:.92rem; }
-@media (prefers-reduced-motion: reduce) { .cal__day.is-marked::after { animation:none; opacity:.85; } }
 .account-card,.account-event { display:flex; align-items:center; justify-content:space-between; gap:1.2rem; padding:1.3rem; border:1px solid var(--line); background:var(--bg-2); border-radius:6px; }
 .account-card h3,.account-event h3 { font-size:1.25rem; margin:.2rem 0; }.account-card p,.account-event p { color:var(--cream-soft); font-size:.88rem; }
 /* Cards: raised surface, date plate, gold sheen on hover. */
@@ -1048,10 +1448,44 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .ecard__edit { display:grid; gap:1rem; width:100%; }
 .ecard__repeat { align-self:end; padding-bottom:.6rem; }
 .ecard__actions--edit { justify-content:flex-start; }
-.account-security { margin-top:3.5rem; padding-top:2.5rem; border-top:1px solid var(--line); }
+/* Sign in and security tab */
 .account-security__form { display:grid; gap:1rem; max-width:520px; margin-bottom:1.6rem; }
 .account-security__form .btn { justify-self:start; }
 .account-signout { margin-top:1rem; }
+.secblock { max-width:520px; padding-top:2rem; margin-top:2rem; border-top:1px solid var(--line-soft); }
+.secblock:first-of-type { padding-top:0; margin-top:0; border-top:0; }
+.secblock__title { font-family:'Fraunces',serif; font-size:1.35rem; font-weight:400; color:var(--cream); }
+.secblock__hint { margin:.5rem 0 1.4rem; color:var(--muted); font-size:.86rem; line-height:1.6; max-width:52ch; }
+.secblock__hint:empty { display:none; }
+
+/* Show/hide sits over the field's own underline, so the label stays a label and
+   the button stays outside it. A button inside a <label> would toggle the input. */
+.pwfield { position:relative; }
+.pwfield input { padding-right:4rem; } /* keep the value clear of the toggle */
+.pwfield__eye { position:absolute; right:0; bottom:0; display:flex; align-items:center; min-height:44px;
+  padding:0 .1rem; background:none; border:0; color:var(--muted); font-family:'Jost',sans-serif;
+  font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; cursor:pointer;
+  transition:color .3s var(--ease); }
+.pwfield__eye:hover, .pwfield__eye:focus-visible { color:var(--gold); }
+
+/* Four segments rather than a percentage: a customer reads "weak" faster than 38%. */
+.pwmeter { display:flex; align-items:center; gap:.8rem; margin-top:-.4rem; }
+.pwmeter__bar { display:flex; gap:.3rem; flex:1; }
+.pwmeter__bar i { flex:1; height:3px; border-radius:2px; background:rgba(244,236,221,.14);
+  transition:background .4s var(--ease); }
+.pwmeter__word { color:var(--muted); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase;
+  min-width:8ch; text-align:right; }
+.pwmeter[data-score="1"] .pwmeter__bar i:nth-child(-n+1),
+.pwmeter[data-score="2"] .pwmeter__bar i:nth-child(-n+2) { background:#e7a17a; }
+.pwmeter[data-score="3"] .pwmeter__bar i:nth-child(-n+3) { background:var(--gold); }
+.pwmeter[data-score="4"] .pwmeter__bar i { background:var(--gold-bright); }
+.pwmeter[data-score="1"] .pwmeter__word,
+.pwmeter[data-score="2"] .pwmeter__word { color:#e7a17a; }
+.pwmeter[data-score="3"] .pwmeter__word,
+.pwmeter[data-score="4"] .pwmeter__word { color:var(--gold); }
+@media (prefers-reduced-motion: reduce) {
+  .pwmeter__bar i, .pref--card { transition:none; }
+}
 @media (max-width: 720px) {
   .ecard { grid-template-columns:auto 1fr; gap:1rem; }
   .ecard__actions { grid-column:1 / -1; justify-content:flex-start; }
@@ -1077,8 +1511,9 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 /* A saved date is only a reminder: dashed edge, no money, a quiet pulse. */
 .account-card--date { border-left:2px dashed rgba(212,175,55,.45); }
 .account-card--date span { display:inline-flex; align-items:center; gap:.45rem; }
-.pip { width:5px; height:5px; border-radius:50%; background:var(--gold); animation:calHeartbeat 2.8s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .pip { animation:none; } }
+/* Sits on a saved-date card, so it stays still like the saved-date pip on the
+   grid. Only a cake order earns the bloom. */
+.pip { width:5px; height:5px; border-radius:50%; background:var(--cream-soft); opacity:.75; }
 .account-event time { min-width:130px; color:var(--cream); }.account-event>a { color:var(--gold); font-size:.78rem; }
 .account-card__actions { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:flex-end; }
 /* Same liquid fill as the site buttons, at card scale. */
@@ -1452,4 +1887,63 @@ html.enq-open, body.enq-open { overflow: hidden; }
   .account-preferences { padding: 1rem; gap: 1rem; }
   .pref { align-items: flex-start; }
   .pref__box { margin-top: .15rem; }
+}
+
+/* ============================================================
+   Browser autofill  —  keep this LAST in the file
+   ============================================================
+   Chrome and Safari paint an opaque pale blue box with near black text over any
+   field the browser fills, which on a black page reads as a broken form.
+
+   Two separate fights, and they are won in different ways.
+
+   1. The BACKGROUND comes from a user agent `!important` rule. The cascade puts
+      user agent `!important` above author `!important`, so no ordinary override
+      reaches it. Transitions are the one thing ranked higher still, so a
+      duration long enough never to finish means the new background is never
+      painted. This is the only lever that works.
+
+   2. The TEXT is easier: the user agent sets `color` but not
+      `-webkit-text-fill-color`, and the fill colour wins when both are present.
+
+   This block failed once by being placed near the top of the file.
+   `input:-webkit-autofill` and `.field input` have the SAME specificity (0,1,1),
+   so `.field input`, sitting several hundred lines later with its own
+   `transition: border-color …`, replaced the long transition outright and the
+   blue background snapped straight back. Hence two defences: this block stays at
+   the end of the file, and the pseudo-class is repeated to lift specificity to
+   (0,2,1) so a later equal-weight rule cannot quietly undo it again.
+
+   Repeated for hover, focus and active because the browser re-applies the
+   autofill state on each. The border-color transition is carried through so the
+   gold focus underline still animates. */
+input:-webkit-autofill:-webkit-autofill,
+input:-webkit-autofill:-webkit-autofill:hover,
+input:-webkit-autofill:-webkit-autofill:focus,
+input:-webkit-autofill:-webkit-autofill:active,
+textarea:-webkit-autofill:-webkit-autofill,
+textarea:-webkit-autofill:-webkit-autofill:hover,
+textarea:-webkit-autofill:-webkit-autofill:focus,
+textarea:-webkit-autofill:-webkit-autofill:active,
+select:-webkit-autofill:-webkit-autofill,
+select:-webkit-autofill:-webkit-autofill:hover,
+select:-webkit-autofill:-webkit-autofill:focus,
+select:-webkit-autofill:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--cream) !important;
+  caret-color: var(--gold);
+  border-radius: 0;
+  transition: border-color 0.4s var(--ease),
+              background-color 600000s 0s,
+              color 600000s 0s,
+              -webkit-text-fill-color 600000s 0s !important;
+}
+
+/* Firefox ignores the -webkit- pseudo-class and tints the field instead. Kept
+   in its own rule: one unknown selector would void the whole list above. */
+input:autofill,
+textarea:autofill,
+select:autofill {
+  filter: none;
+  -webkit-text-fill-color: var(--cream);
+  caret-color: var(--gold);
 }

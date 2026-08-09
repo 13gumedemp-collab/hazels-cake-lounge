@@ -25,7 +25,14 @@
   </header>
 
   <main class="account-page" id="top">
-    <section class="account-auth" id="accountAuth">
+    <!-- Both panels start hidden. Resolving the session is asynchronous, so
+         showing the sign-in form by default made it flash on screen for a
+         moment on every page load for someone already signed in. -->
+    <section class="account-checking" id="accountChecking">
+      <p class="page-hero__eyebrow">Your Cake Calendar</p>
+      <p class="account-checking__line">Getting everything ready for you.</p>
+    </section>
+    <section class="account-auth" id="accountAuth" hidden>
       <p class="page-hero__eyebrow">Your Cake Calendar</p>
       <h1>Everything you are<br /><em class="gold">celebrating.</em></h1>
       <p>Sign in to see your saved dates, confirmed cakes, payments and reminders.</p>
@@ -66,12 +73,12 @@
           <button type="button" class="account-link" id="signUpBack">Back</button>
         </div>
         <div class="account-step-panel" data-signup-step="3" hidden>
-          <p class="account-fineprint account-fineprint--left">Last thing. How may I contact you? Ticking a box is your consent, and you can change it any time from your account. Leave them unticked and I will only email you about a cake you have actually ordered. See the <a href="privacy.html">privacy policy</a>, and for WhatsApp the <a href="messaging-terms.html">messaging terms</a>.</p>
+          <p class="account-fineprint account-fineprint--left">Last thing. How would you like your reminders? Ticking a box is your consent, and you can change it any time from your account. Leave them unticked and I will only email you about a cake you have actually ordered. See the <a href="privacy.html">privacy policy</a>, and for WhatsApp the <a href="messaging-terms.html">messaging terms</a>.</p>
           <div class="prefs__boxes">
             <label class="pref"><input type="checkbox" name="email_consent" checked /><span class="pref__box" aria-hidden="true"></span><span>Email me my occasion reminders</span></label>
             <label class="pref"><input type="checkbox" name="whatsapp_consent" /><span class="pref__box" aria-hidden="true"></span><span>Message me on WhatsApp</span></label>
-            <label class="pref"><input type="checkbox" name="phone_call_consent" /><span class="pref__box" aria-hidden="true"></span><span>Hazel may phone me before a big date</span></label>
           </div>
+          <p class="account-fineprint account-fineprint--left">Hazel will phone you about a cake you have ordered or a date you have asked her to remember. That is part of the service rather than marketing, so it is not on this list.</p>
           <button class="btn" type="submit">Create account</button>
           <button type="button" class="account-link" id="signUpBack2">Back</button>
         </div>
@@ -97,14 +104,38 @@
         <div><p class="page-hero__eyebrow">Your Cake Calendar</p><h1>Welcome, <span id="accountName">there</span>.</h1></div>
       </div>
       <nav class="account-tabs" aria-label="Account sections">
-        <button class="is-active" data-account-tab="calendar">Calendar</button>
+        <button class="is-active" data-account-tab="overview">Overview</button>
+        <button data-account-tab="calendar">Calendar</button>
         <button data-account-tab="orders">Orders</button>
+        <button data-account-tab="payments">Payments</button>
         <button data-account-tab="dates">Occasion Book</button>
         <button data-account-tab="profile">Your details</button>
+        <button data-account-tab="notifications">Notifications</button>
+        <button data-account-tab="security">Sign in</button>
       </nav>
 
-      <div class="account-panel is-active" data-account-panel="calendar">
-        <div class="account-section-head"><div><span>Coming up</span><h2>Your calendar</h2></div></div>
+      <div class="account-panel is-active" data-account-panel="overview">
+        <div class="account-section-head"><div><span>At a glance</span><h2>Overview</h2></div></div>
+        <div id="overviewNext"></div>
+        <div class="ovgrid" id="overviewStats"></div>
+        <div class="ovactions">
+          <button class="ovaction" type="button" data-enquire>
+            <b>Order a cake</b>
+            <span>Tell me what you need and when. I will phone you to talk it through, then send a quote.</span>
+          </button>
+          <a class="ovaction" href="save-date.html">
+            <b>Save a date</b>
+            <span>A birthday or anniversary you would rather not forget. Free, nothing booked, and I remind you in good time.</span>
+          </a>
+          <button class="ovaction" type="button" data-goto-tab="payments">
+            <b>Your payments</b>
+            <span>What each cake costs, what you have paid, and your invoices and receipts.</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="account-panel" data-account-panel="calendar">
+        <div class="account-section-head"><div><span>Dates and cakes</span><h2>Your calendar</h2></div></div>
         <div class="calwrap">
           <div class="account-calendar" id="accountCalendar"></div>
           <aside class="calside" id="calSide"></aside>
@@ -113,10 +144,21 @@
       <div class="account-panel" data-account-panel="orders">
         <div class="account-section-head"><div><span>Cakes</span><h2>Your orders</h2></div></div>
         <p class="account-intro">Cakes you have asked me to make. Each one shows where it is up to in my kitchen and what is still to pay. Once a cake is done you can order it again in one tap.</p>
+        <nav class="subtabs" aria-label="Which orders to show">
+          <button class="is-active" type="button" data-order-tab="current">Current <span id="currentCount"></span></button>
+          <button type="button" data-order-tab="history">History <span id="historyCount"></span></button>
+        </nav>
         <div class="account-list" id="accountOrders"></div>
       </div>
+
+      <div class="account-panel" data-account-panel="payments">
+        <div class="account-section-head"><div><span>Money</span><h2>Payments</h2></div></div>
+        <p class="account-intro">What each cake costs, what you have paid and where your balance stands. We agree payment on the phone when we talk your cake through, so nothing here is a demand and nothing is ever charged through this site. Your invoices and receipts are here too.</p>
+        <div id="paymentsSummary"></div>
+        <div class="account-list" id="paymentsList"></div>
+      </div>
       <div class="account-panel" data-account-panel="dates">
-        <div class="account-section-head"><div><span>Reminders</span><h2>Your Occasion Book</h2></div><a class="btn" href="occasion-book.html">Add a date</a></div>
+        <div class="account-section-head"><div><span>Reminders</span><h2>Your Occasion Book</h2></div><a class="btn" href="save-date.html">Add a date</a></div>
         <p class="account-intro">Occasions you have asked me to remember. Nothing is booked and nothing is owed. I will email you before each one, in good time to order a cake if you want one.</p>
         <div class="account-list" id="accountDates"></div>
       </div>
@@ -137,29 +179,68 @@
             <label class="field"><span>Postal code</span><input name="postal_code" inputmode="numeric" /></label>
           </div>
           <p class="account-fineprint account-fineprint--left">Your address is used to deliver your cake, and your number to reach you about an order. Nothing is shared or sold. See the <a href="privacy.html">privacy policy</a>.</p>
-          <details class="prefs">
-            <summary>
-              <span class="prefs__title">What you agreed to</span>
-              <span class="prefs__now" id="prefsSummary">Email only</span>
-              <i class="prefs__chev" aria-hidden="true"><svg viewBox="0 0 14 8" width="14" height="8" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 1l6 6 6-6"/></svg></i>
-            </summary>
-            <div class="prefs__body">
-              <p class="account-fineprint account-fineprint--left">Ticking a box is your consent to be contacted that way about your saved dates and orders. Leave them all unticked and I will only ever email you about a cake you have actually ordered. You can change this whenever you like, and every reminder has an unsubscribe link. This is covered by the <a href="privacy.html">privacy policy</a>, and WhatsApp messages by the <a href="messaging-terms.html">messaging terms</a>.</p>
-              <div class="prefs__boxes">
-                <label class="pref"><input type="checkbox" name="email_consent" /><span class="pref__box" aria-hidden="true"></span><span>Email me my occasion reminders</span></label>
-                <label class="pref"><input type="checkbox" name="whatsapp_consent" /><span class="pref__box" aria-hidden="true"></span><span>Message me on WhatsApp</span></label>
-                <label class="pref"><input type="checkbox" name="phone_call_consent" /><span class="pref__box" aria-hidden="true"></span><span>Hazel may phone me before a big date</span></label>
-              </div>
-              <p class="account-fineprint account-fineprint--left" id="prefsAgreed"></p>
-            </div>
-          </details>
           <button class="btn btn--solid" type="submit">Save details</button><p class="form__status" id="profileStatus"></p>
         </form>
+      </div>
 
-        <section class="account-security">
-          <div class="account-section-head"><div><span>Sign in</span><h2>Email and password</h2></div></div>
-          <p class="account-intro">Change what you sign in with. A new email address has to be confirmed with a code before it takes over, so you never get locked out.</p>
+      <div class="account-panel" data-account-panel="notifications">
+        <div class="account-section-head"><div><span>How I reach you</span><h2>Notifications</h2></div></div>
+        <p class="account-intro">Every way I might contact you, in one place. Ticking a box is your consent to be contacted that way about your saved dates and your orders. Leave them all unticked and I will only ever email you about a cake you have actually ordered.</p>
 
+        <form class="prefs-form" id="accountPrefs">
+          <p class="prefs-state" id="prefsAgreed"></p>
+
+          <div class="prefs-grid">
+            <label class="pref pref--card">
+              <input type="checkbox" name="email_consent" />
+              <span class="pref__box" aria-hidden="true"></span>
+              <span class="pref__copy">
+                <strong>Email reminders</strong>
+                <em>One month, two weeks and one week before every date in your Occasion Book, sent to <b id="prefsEmail">your email address</b>. Every one has an unsubscribe link.</em>
+              </span>
+            </label>
+
+            <label class="pref pref--card">
+              <input type="checkbox" name="whatsapp_consent" />
+              <span class="pref__box" aria-hidden="true"></span>
+              <span class="pref__copy">
+                <strong>WhatsApp messages</strong>
+                <em>The same reminders on WhatsApp, to the number saved in Your details. Covered by the <a href="messaging-terms.html">messaging terms</a>.</em>
+              </span>
+            </label>
+
+            <div class="pref pref--card pref--fixed">
+              <span class="pref__box pref__box--fixed" aria-hidden="true"></span>
+              <span class="pref__copy">
+                <strong>A phone call <em class="pref__always">always on</em></strong>
+                <em>I will phone you about a cake you have ordered or a date you have asked me to remember, to confirm a detail or agree a time. This is part of making your cake rather than something I market to you, so it is not a choice you can switch off. I will not phone you about anything else.</em>
+              </span>
+            </div>
+          </div>
+
+          <p class="prefs-note" id="prefsNeedsNumber" hidden>WhatsApp and phone calls need a number. Add one under <button type="button" class="linkish" data-goto-tab="profile">Your details</button> and save it.</p>
+
+          <p class="account-fineprint account-fineprint--left">Whatever you decide here, I will always email you about a cake you have actually ordered. That one is not marketing, it is your order. You can change any of this whenever you like. It is covered by the <a href="privacy.html">privacy policy</a>.</p>
+
+          <button class="btn btn--solid" type="submit">Save notifications</button>
+          <p class="form__status" id="prefsStatus" role="status"></p>
+        </form>
+
+        <div class="secblock">
+          <h3 class="secblock__title">What I have sent you</h3>
+          <p class="secblock__hint">Every reminder, confirmation and invoice I have sent to your account, newest first. If you were expecting something and it is not here, it was never sent and you should tell me.</p>
+          <div class="sentlog" id="sentLog"></div>
+          <button class="btn btn--ghost" type="button" id="sentLogMore" hidden>Show more</button>
+        </div>
+      </div>
+
+      <div class="account-panel" data-account-panel="security">
+        <div class="account-section-head"><div><span>Sign in</span><h2>Sign in and security</h2></div></div>
+        <p class="account-intro">What you use to get into your account. A new email address has to be confirmed with a code before it takes over, so you never get locked out.</p>
+
+        <div class="secblock">
+          <h3 class="secblock__title">Email address</h3>
+          <p class="secblock__hint" id="signInMethod"></p>
           <form id="emailChangeForm" class="account-security__form">
             <label class="field"><span>Email address</span><input type="email" name="new_email" autocomplete="email" required /></label>
             <button class="btn" type="submit">Change email</button>
@@ -169,52 +250,81 @@
             <label class="field"><span>Code sent to <strong id="emailChangeTarget"></strong></span><input type="text" name="token" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required class="account-code" placeholder="12345678" /></label>
             <button class="btn" type="submit">Confirm new email</button>
           </form>
+        </div>
 
+        <div class="secblock">
+          <h3 class="secblock__title" id="passwordTitle">Password</h3>
+          <p class="secblock__hint" id="passwordHint">Choose something you do not use anywhere else. Eight characters at the very least.</p>
           <form id="passwordChangeForm" class="account-security__form">
-            <label class="field"><span>New password <em class="field__opt">(8 or more characters)</em></span><input type="password" name="password" autocomplete="new-password" minlength="8" required /></label>
-            <label class="field"><span>Confirm password</span><input type="password" name="confirm_password" autocomplete="new-password" minlength="8" required /></label>
-            <button class="btn" type="submit">Update password</button>
+            <div class="pwfield" id="currentPasswordField">
+              <label class="field"><span>Current password</span><input type="password" name="current_password" id="pwCurrent" autocomplete="current-password" /></label>
+              <button type="button" class="pwfield__eye" data-reveal="pwCurrent" aria-pressed="false">Show</button>
+            </div>
+            <div class="pwfield">
+              <label class="field"><span>New password <em class="field__opt">(8 or more characters)</em></span><input type="password" name="password" id="pwNew" autocomplete="new-password" minlength="8" required /></label>
+              <button type="button" class="pwfield__eye" data-reveal="pwNew" aria-pressed="false">Show</button>
+            </div>
+            <div class="pwmeter" id="pwMeter" hidden>
+              <span class="pwmeter__bar"><i></i><i></i><i></i><i></i></span>
+              <span class="pwmeter__word" id="pwWord"></span>
+            </div>
+            <div class="pwfield">
+              <label class="field"><span>Confirm new password</span><input type="password" name="confirm_password" id="pwConfirm" autocomplete="new-password" minlength="8" required /></label>
+              <button type="button" class="pwfield__eye" data-reveal="pwConfirm" aria-pressed="false">Show</button>
+            </div>
+            <button class="btn" type="submit" id="passwordSubmit">Update password</button>
           </form>
+        </div>
 
-          <p class="form__status" id="securityStatus" role="status"></p>
-          <button class="btn btn--ghost account-signout" id="signOut" type="button">Sign out</button>
-        </section>
+        <div class="secblock">
+          <h3 class="secblock__title">Where you are signed in</h3>
+          <p class="secblock__hint">Signing in on a phone, a laptop and a tablet leaves three sessions running, and each one stays signed in until it is ended. If you have used a shared or borrowed device, end them all.</p>
+          <dl class="sessinfo" id="sessionInfo"></dl>
+          <button class="btn" type="button" id="signOutEverywhere">Sign out everywhere</button>
+        </div>
+
+        <p class="form__status" id="securityStatus" role="status"></p>
+        <button class="btn btn--ghost account-signout" id="signOut" type="button">Sign out on this device</button>
+
+        <div class="danger">
+          <h3 class="danger__title">Delete your account</h3>
+          <p class="danger__body">This removes your account, your saved dates and your contact details, and it cannot be undone. Cakes you have already ordered stay on my books without your name on them, because I am required to keep sales records for five years. You will stop receiving everything, straight away.</p>
+          <button class="btn btn--danger" type="button" id="deleteAccountStart">Delete your account</button>
+
+          <form class="danger__confirm" id="deleteAccountForm" hidden>
+            <p class="danger__body">Type <strong>DELETE</strong> below to confirm. There is no undo and no recovery.</p>
+            <label class="field"><span>Confirm</span><input name="confirm" autocomplete="off" placeholder="DELETE" required /></label>
+            <div class="danger__actions">
+              <button class="btn btn--danger" type="submit">Yes, delete it for good</button>
+              <button class="btn btn--ghost" type="button" id="deleteAccountCancel">Cancel</button>
+            </div>
+            <p class="form__status" id="deleteStatus" role="status"></p>
+          </form>
+        </div>
       </div>
     </section>
   </main>
-  <div class="sheet" id="dateSheet" hidden>
-    <form class="sheet__inner" id="dateSheetForm">
-      <button type="button" class="sheet__close" data-sheet-close aria-label="Close">&#215;</button>
-      <p class="sheet__eyebrow">Save a date</p>
-      <h3><span id="sheetDate">This date</span></h3>
-      <div class="sheet__fields">
-        <label class="field"><span>Name</span><input name="person_name" required placeholder="Nomsa" /></label>
-        <label class="field"><span>Occasion</span><select name="occasion_type" required data-native-select="true"></select></label>
-      </div>
-      <label class="pref"><input type="checkbox" name="recurring_yearly" /><span class="pref__box" aria-hidden="true"></span><span>Repeat every year</span></label>
-      <p class="ecard__notice" data-reminder-notice></p>
-      <div class="sheet__actions">
-        <button class="btn" type="submit">Save date</button>
-        <button class="btn btn--ghost" type="button" data-sheet-close>Cancel</button>
-      </div>
-      <p class="form__status" id="sheetStatus" role="status"></p>
-    </form>
-  </div>
+  <!-- Tapping a day asks what they want to do with it before sending them anywhere. -->
+  <div class="sheet" id="dayChoice" hidden>
+    <div class="sheet__inner">
+      <button type="button" class="sheet__close" data-choice-close aria-label="Close">&#215;</button>
+      <p class="sheet__eyebrow">This date</p>
+      <h3 id="choiceDate">This date</h3>
+      <p class="sheet__donebody" id="choiceLede">What would you like to do with it?</p>
 
-  <div class="modal" id="yearlyModal" hidden>
-    <div class="modal__sheet" role="dialog" aria-modal="true" aria-labelledby="yearlyTitle">
-      <p class="page-hero__eyebrow">The Occasion Book</p>
-      <h3 id="yearlyTitle">Every year from now on</h3>
-      <p class="modal__for" id="yearlyFor" hidden></p>
-      <p>This date is now part of your year. I will write to you before it comes round, every year, until you tell me otherwise.</p>
-      <ul class="modal__points">
-        <li>Reminders a month, two weeks and a week before.</li>
-        <li>The Occasion Book is free. Nothing is booked and nothing is owed.</li>
-        <li>Switch it off whenever you like, from this page.</li>
-      </ul>
-      <div class="modal__actions">
-        <button class="btn" type="button" data-yearly="yes">Remind me every year</button>
-        <button class="btn btn--ghost" type="button" data-yearly="no">Just this year</button>
+      <div class="choices">
+        <button type="button" class="choice" id="choiceSave">
+          <b>Save the date</b>
+          <span>A free reminder in your Occasion Book. Nothing booked, nothing owed, and I remind you in good time.</span>
+        </button>
+        <button type="button" class="choice" id="choiceOrder">
+          <b>Order a cake</b>
+          <span id="choiceOrderNote">Start an enquiry for this date. I will phone you to talk it through, then send a quote.</span>
+        </button>
+      </div>
+
+      <div class="sheet__actions">
+        <button class="btn btn--ghost" type="button" data-choice-close>Cancel</button>
       </div>
     </div>
   </div>
