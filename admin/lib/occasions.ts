@@ -27,8 +27,8 @@ export const OCCASION_COLOURS: Record<string, string> = {
   Birthday: "#C9A84C",
   Wedding: "#F5F0E8",
   Anniversary: "#C9A484",
-  "Baby Shower": "#84A4C9",
+  "Baby shower": "#84A4C9",
   Graduation: "#84C9A4",
-  "Just Because": "#888888",
+  "Just because": "#888888",
   Other: "#888888",
 };
