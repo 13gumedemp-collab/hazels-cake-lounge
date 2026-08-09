@@ -12,6 +12,7 @@ export default defineConfig({
         reviews: 'reviews.html',
         contact: 'contact.html',
         occasionbook: 'occasion-book.html',
+        savedate: 'save-date.html',
         messagingterms: 'messaging-terms.html',
         terms: 'terms.html',
         privacy: 'privacy.html',

@@ -7,11 +7,24 @@
 import { adminClient, corsHeaders, firstName, json, notify } from "../_shared/client.ts";
 import { sendEmail } from "../_shared/email.ts";
 
-function occasionRules(type: string) {
+// The customer now answers "remind me every year" themselves on the form, so an
+// explicit choice always wins. The switch is only the fallback for older callers
+// that send no flag at all.
+//
+// Two things were wrong with deriving it and are fixed here:
+//   * the customer had no say, even though the answer is theirs to give;
+//   * the old `default` branch set BOTH flags false, so an engagement, baptism,
+//     retirement or "just because" got no reminder run (daily-occasion-checker
+//     skips anything not recurring_yearly) AND no anniversary notification
+//     either. Those occasions silently did nothing at all. A non-repeating
+//     occasion is now always marked is_one_time, so at least Hazel is told.
+function occasionRules(type: string, explicit?: unknown) {
+  if (typeof explicit === "boolean") {
+    return { recurring_yearly: explicit, is_one_time: !explicit };
+  }
   switch ((type || "").toLowerCase()) {
     case "birthday": case "anniversary": return { recurring_yearly: true, is_one_time: false };
-    case "wedding": case "graduation": case "baby shower": return { recurring_yearly: false, is_one_time: true };
-    default: return { recurring_yearly: false, is_one_time: false };
+    default: return { recurring_yearly: false, is_one_time: true };
   }
 }
 
@@ -73,7 +86,7 @@ Deno.serve(async (req) => {
   }
   if (!customer) return json({ status: "not_found" }, 200);
 
-  const rules = occasionRules(b.occasion_type);
+  const rules = occasionRules(b.occasion_type, b.recurring_yearly);
   const labels = buildLabels({
     name: (b.person_name || "").trim(),
     rel: b.relationship_to_customer || "",
@@ -91,6 +104,10 @@ Deno.serve(async (req) => {
       recurring_yearly: rules.recurring_yearly,
       is_one_time: rules.is_one_time,
       notes: b.notes || null,
+      // Pictures have their own column as of migration 0015. They used to be
+      // appended to `notes` as text, which made them impossible to edit without
+      // parsing free text and easy to delete by accident.
+      photo_paths: Array.isArray(b.inspiration_photo_urls) ? b.inspiration_photo_urls : [],
     })
     .select("id, person_name, occasion_type, occasion_date")
     .single();
