@@ -1046,3 +1046,31 @@ deprecation notice confirming this. The publish action is a Console-only, human 
 - Note that `localhost` must be an authorised JavaScript origin for that local test, or
   test against production instead.
 - Do **not** enable `iap.googleapis.com`; it is not needed and the API is dead.
+
+### 31/08/2026 Community QR review workflow (Codex)
+
+- Rebuilt the public Community page as a real review service. A customer can leave feedback
+  after ordering online, using the Occasion Book or finding Hazel by word of mouth. An account
+  is optional. When signed in, the review is connected privately to the matching customer
+  record without changing the guest experience.
+- Review names, cake details and up to three optional JPEG, PNG or WebP photos are accepted.
+  Photos are limited to 2 MB each, stored in the private `community-review-photos` bucket and
+  never exposed until Hazel approves a consented review. Public display uses only the optional
+  first name, otherwise it says `A happy customer`.
+- Reviews start pending in `community_reviews`. The new Command Centre Community workspace
+  lets Hazel approve and feature consented reviews, keep feedback private, or reject it. An
+  approval is technically blocked when public-sharing permission is absent. The page has a
+  short hashed rate limit of three submissions per ten minutes to reduce spam without retaining
+  a raw IP address.
+- Migration `0019_community_reviews.sql` is applied and the deployed public Edge Functions are
+  `submit-community-review` and `list-community-reviews`. Do not deploy `supabase/config.toml`.
+  It only documents the public functions and pushing it risks clearing the Google OAuth secret.
+- Verified with disposable records that a guest review stays hidden while pending, can be
+  approved through the actual local admin endpoint, then becomes publicly visible with a
+  short-lived signed photo URL. A signed-in disposable customer review linked to the correct
+  customer record and could be retained privately. All review, photo, notification, account
+  and customer test data was removed. Public Vite and full admin production builds pass.
+- The generic pamphlet QR destination is
+  `https://www.hazelscakelounge.co.za/reviews.html?source=pamphlet_qr`. The release remains
+  blocked at Vercel by its 402 fair-use restriction, so this source change is not public until
+  that account restriction is cleared and the user asks for the batched production deploy.

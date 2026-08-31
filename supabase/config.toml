@@ -19,6 +19,14 @@ otp_length = 8
 [functions.process-enquiry]
 verify_jwt = false
 
+# Public Community page functions. A guest may leave a review, while an optional
+# signed-in session is used only to connect their review to their account.
+[functions.submit-community-review]
+verify_jwt = false
+
+[functions.list-community-reviews]
+verify_jwt = false
+
 # Google customer sign-in. The client secret is injected only while deploying
 # this configuration and is never committed to the repository.
 [auth.external.google]

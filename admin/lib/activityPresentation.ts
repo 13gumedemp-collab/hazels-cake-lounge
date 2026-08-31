@@ -11,6 +11,7 @@ const labels: Record<string, string> = {
   account_created: "New account",
   customer_login: "Customer login",
   account_deleted: "Account closed",
+  community_review_submitted: "Community review",
   new_enquiry: "New enquiry",
   callback_requested: "Callback request",
   enquiry_overdue_reply: "Reply needed",

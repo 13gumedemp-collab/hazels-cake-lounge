@@ -46,7 +46,7 @@
         <span class="kinetic" data-split="words" data-stagger="0.06" data-distance="24">Every cake</span>
         <span class="kinetic gold" data-split="words" data-stagger="0.06" data-distance="24" data-delay="0.14">leaves a memory.</span>
       </h1>
-      <p class="page-hero__lede reveal-up">If I baked for your day, I would love to hear how it went. Rate your order and leave a few words below.</p>
+      <p class="page-hero__lede reveal-up">Whether I baked for your day through the website, the Occasion Book or by word of mouth, I would love to hear how it went. An account is optional.</p>
     </section>
 
     <!-- Cinematic rating stage -->
@@ -76,21 +76,37 @@
         <p class="rating__word" id="rateWord">Tap a star to begin</p>
 
         <div class="reviewform__fields" id="reviewFields">
+          <p class="reviewform__account" id="reviewAccountNote">You are welcome to share a review without an account. <a href="account.html" data-cursor="link">Sign in</a> if you would like me to connect it to your account.</p>
           <div class="form__row">
             <label class="field">
-              <span>Your name</span>
-              <input type="text" name="name" autocomplete="name" required />
+              <span>Your name <em class="field__opt">(optional)</em></span>
+              <input type="text" name="name" autocomplete="name" maxlength="80" />
             </label>
             <label class="field">
               <span>What did I bake for you?</span>
-              <input type="text" name="order" placeholder="Birthday cake, rusks, cupcakes" />
+              <input type="text" name="cake_or_bake" maxlength="100" placeholder="Birthday cake, rusks, cupcakes" />
             </label>
           </div>
           <label class="field">
             <span>Your words</span>
-            <textarea name="comment" rows="4" placeholder="Tell me how it looked, how it tasted, how the day went" required></textarea>
+            <textarea name="comment" rows="4" maxlength="2000" placeholder="Tell me how it looked, how it tasted, how the day went" required></textarea>
           </label>
-          <button type="submit" class="btn btn--solid" data-cursor="link">Share my review</button>
+          <label class="field reviewform__photos">
+            <span>Add photos <em class="field__opt">(optional)</em></span>
+            <input type="file" id="reviewPhotos" accept="image/jpeg,image/png,image/webp" multiple />
+            <small id="reviewPhotoNote">Up to three JPEG, PNG or WebP photos, 2 MB each.</small>
+          </label>
+          <div class="consent reviewform__consent">
+            <label class="consent__row">
+              <input type="checkbox" name="show_first_name" />
+              <span>Show my first name with this review.</span>
+            </label>
+            <label class="consent__row">
+              <input type="checkbox" name="public_consent" />
+              <span>Hazel may feature this review and any photos I add on the Community page.</span>
+            </label>
+          </div>
+          <button type="submit" class="btn btn--solid" data-cursor="link">Send my review to Hazel</button>
           <p class="form__status" id="reviewStatus" role="status" aria-live="polite"></p>
         </div>
       </form>
@@ -160,5 +176,6 @@
   </footer>
 
   <script type="module" src="main.js"></script>
+  <script type="module" src="reviews.js"></script>
 </body>
 </html>
