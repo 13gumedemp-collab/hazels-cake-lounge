@@ -585,7 +585,17 @@ section { position: relative; }
 .reviewform__fields .btn { margin-top: 0.4rem; }
 .reviewform__account { margin: 0 0 1.4rem; color: var(--cream-soft); font-size: 0.9rem; line-height: 1.6; }
 .reviewform__account a { color: var(--gold); text-decoration: underline; text-underline-offset: 0.18em; }
-.reviewform__photos input[type="file"] { padding-block: 0.55rem; font-size: 0.82rem; }
+.reviewform__upload { position: relative; width: fit-content; }
+.reviewform__upload input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 1; }
+.reviewform__photo-trigger { position: relative; display: inline-flex; align-items: baseline; gap: 0.55rem; min-height: 44px; padding: 0.2rem 0;
+  border: none; border-bottom: 1px solid rgba(212,175,55,0.4); color: var(--cream); background: none; cursor: none; text-align: left; }
+.reviewform__photo-trigger::after { content: ''; position: absolute; right: 0; bottom: -1px; left: 0; height: 1px; background: var(--gold);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.45s var(--ease); }
+.reviewform__upload:hover .reviewform__photo-trigger::after, .reviewform__upload:focus-within .reviewform__photo-trigger::after { transform: scaleX(1); }
+.reviewform__photo-trigger > span { color: var(--gold); font-family: 'Fraunces', serif; font-size: 1.55rem; font-weight: 300; line-height: 1; transition: transform 0.45s var(--ease), color 0.3s var(--ease); }
+.reviewform__upload:hover .reviewform__photo-trigger > span, .reviewform__upload:focus-within .reviewform__photo-trigger > span { color: var(--gold-bright); transform: rotate(90deg); }
+.reviewform__photo-trigger strong { color: var(--gold); font-family: 'Jost', sans-serif; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; }
+.reviewform__photo-trigger em { color: var(--cream-soft); font-family: 'Jost', sans-serif; font-size: 0.72rem; font-style: normal; letter-spacing: 0; }
 .reviewform__photos small { color: var(--cream-soft); font-size: 0.72rem; line-height: 1.45; }
 .reviewform__consent { margin: 0.1rem 0 1.5rem; }
 
@@ -599,6 +609,8 @@ section { position: relative; }
 .review__stars svg.off { fill: rgba(244,236,221,0.16); }
 .review__text { font-family: 'Fraunces', serif; font-size: 1.05rem; line-height: 1.5; color: var(--cream); }
 .review__meta { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.15rem; }
+.review__identity { display: flex; align-items: center; gap: 0.6rem; }
+.review__avatar { width: 34px; height: 34px; border: 1px solid rgba(212,175,55,0.55); border-radius: 50%; object-fit: cover; }
 .review__name { font-family: 'Jost', sans-serif; font-size: 0.84rem; letter-spacing: 0.04em; color: var(--cream); }
 .review__order { font-family: 'Jost', sans-serif; font-size: 0.66rem; letter-spacing: 0.2em;
   text-transform: uppercase; color: var(--gold); }
@@ -610,6 +622,7 @@ section { position: relative; }
   font-style: italic; font-size: 1.05rem; padding: 1rem 0; }
 @media (max-width: 880px) { .reviews__wall { columns: 2 220px; } }
 @media (max-width: 560px) { .reviews__wall { columns: 1; } }
+@media (max-width: 430px) { .reviewform__photo-trigger { align-items: center; flex-wrap: wrap; gap: 0.2rem 0.55rem; } .reviewform__photo-trigger em { flex-basis: 100%; margin-left: 1.8rem; } }
 
 /* ----------  Footer  ---------- */
 .footer { background: var(--bg); color: var(--cream); border-top: 1px solid var(--line);
@@ -1562,6 +1575,18 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 }
 .account-empty { color:var(--muted); padding:2rem; border:1px dashed var(--line); text-align:center; }
 .account-profile { display:grid; gap:1rem; max-width:760px; }
+.account-profile-photo { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:1rem; padding:1rem 0; border-bottom:1px solid var(--line-soft); }
+.account-profile-photo__avatar { display:grid; width:86px; height:86px; place-items:center; overflow:hidden; border:1px solid rgba(212,175,55,.58); border-radius:50%; color:var(--gold); background:radial-gradient(circle at 35% 25%, rgba(212,175,55,.15), rgba(11,10,8,.8)); font-family:'Fraunces',serif; font-size:1.45rem; }
+.account-profile-photo__avatar > * { grid-area:1 / 1; }
+.account-profile-photo__avatar img { width:100%; height:100%; object-fit:cover; }
+.account-profile-photo p { margin:.35rem 0 .75rem; color:var(--cream-soft); font-size:.8rem; line-height:1.55; }
+.account-profile-photo__choose { position:relative; display:inline-flex; min-height:38px; align-items:center; border-bottom:1px solid rgba(212,175,55,.42); color:var(--gold); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; cursor:none; }
+.account-profile-photo__choose::after { content:''; position:absolute; right:0; bottom:-1px; left:0; height:1px; background:var(--gold); transform:scaleX(0); transform-origin:left; transition:transform .4s var(--ease); }
+.account-profile-photo__choose:hover::after, .account-profile-photo__choose:focus-within::after { transform:scaleX(1); }
+.account-profile-photo__choose input { position:fixed; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
+.account-profile-photo__remove { min-height:38px; margin-left:1rem; border:none; color:var(--cream-soft); background:none; font-size:.74rem; text-decoration:underline; text-underline-offset:.2em; cursor:none; }
+.account-profile-photo__remove:hover { color:#e7a17a; }
+.account-profile-photo #profileImageStatus { margin:.65rem 0 0; }
 .account-preferences { border:1px solid var(--line); padding:1rem 1.2rem 1.2rem; display:flex; flex-wrap:wrap; gap:1.4rem; }
 .account-preferences legend { color:var(--gold); padding:0 .4rem; }
 .account-fineprint--left { text-align:left; max-width:62ch; }

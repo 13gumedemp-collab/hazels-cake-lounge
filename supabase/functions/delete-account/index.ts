@@ -37,11 +37,21 @@ Deno.serve(async (req) => {
   if (authError || !auth.user) return json({ error: "Unauthorized" }, 401);
 
   const { data: customer } = await supabase
-    .from("customers").select("id, full_name, email").eq("auth_user_id", auth.user.id).maybeSingle();
+    .from("customers")
+    .select("id, full_name, email, profile_image_path")
+    .eq("auth_user_id", auth.user.id)
+    .maybeSingle();
 
   if (customer) {
     const { error: rowError } = await supabase.from("customers").delete().eq("id", customer.id);
     if (rowError) return json({ error: "Could not delete your details" }, 500);
+
+    // Profile photos are private customer data, not business records. Remove
+    // the storage object alongside the customer row. A failed storage cleanup
+    // must not block the legal right to erase the account itself.
+    if (customer.profile_image_path) {
+      await supabase.storage.from("customer-profile-images").remove([customer.profile_image_path]);
+    }
   }
 
   // Last, because losing the auth user before the row would strand the row with

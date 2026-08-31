@@ -8,8 +8,15 @@ Deno.serve(async (req) => {
   const { data: auth, error: authError } = await supabase.auth.getUser(token);
   if (authError || !auth.user) return json({ error: "Unauthorized" }, 401);
   const body = await req.json().catch(() => ({}));
-  const { data: customer } = await supabase.from("customers").select("id").eq("auth_user_id", auth.user.id).maybeSingle();
+  const { data: customer } = await supabase.from("customers").select("id, profile_image_path").eq("auth_user_id", auth.user.id).maybeSingle();
   if (!customer) return json({ error: "Customer not found" }, 404);
+
+  if (body.kind === "profile") {
+    if (!customer.profile_image_path) return json({ error: "No profile photo" }, 404);
+    const { data, error } = await supabase.storage.from("customer-profile-images").createSignedUrl(customer.profile_image_path, 300);
+    if (error || !data?.signedUrl) return json({ error: "Could not open profile photo" }, 500);
+    return json({ url: data.signedUrl });
+  }
 
   // Inspiration pictures live in a private bucket, so the account page needs a
   // short-lived signed URL to show a thumbnail. The path is never trusted from

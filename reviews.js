@@ -66,10 +66,21 @@ function reviewCard(review) {
 
   const meta = document.createElement('div');
   meta.className = 'review__meta';
+  const identity = document.createElement('div');
+  identity.className = 'review__identity';
+  if (text(review.profile_image_url)) {
+    const avatar = document.createElement('img');
+    avatar.className = 'review__avatar';
+    avatar.src = review.profile_image_url;
+    avatar.alt = `${text(review.display_name) || 'Reviewer'}'s profile photo`;
+    avatar.loading = 'lazy';
+    identity.appendChild(avatar);
+  }
   const name = document.createElement('span');
   name.className = 'review__name';
   name.textContent = text(review.display_name) || 'A happy customer';
-  meta.appendChild(name);
+  identity.appendChild(name);
+  meta.appendChild(identity);
   if (text(review.cake_or_bake)) {
     const bake = document.createElement('span');
     bake.className = 'review__order';
@@ -123,16 +134,21 @@ async function renderPublishedReviews() {
 
 async function setAccountNote() {
   const note = $('#reviewAccountNote');
+  const profileOption = $('#reviewProfileImageOption');
   if (!note) return { token: null };
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) return { token: null };
+  if (!session?.user) {
+    if (profileOption) profileOption.hidden = true;
+    return { token: null };
+  }
   const { data: customer } = await supabase
     .from('customers')
-    .select('first_name, full_name')
+    .select('first_name, full_name, profile_image_path')
     .eq('auth_user_id', session.user.id)
     .maybeSingle();
   const name = text(customer?.first_name) || text(customer?.full_name).split(/\s+/)[0] || 'there';
   note.textContent = `You are signed in as ${name}. I will connect this review to your account, but it will still wait for Hazel’s approval.`;
+  if (profileOption) profileOption.hidden = !customer?.profile_image_path;
   return { token: session.access_token };
 }
 
@@ -148,6 +164,7 @@ async function initialise() {
   const fields = $('#reviewFields');
   const status = $('#reviewStatus');
   const photosInput = $('#reviewPhotos');
+  const photoTriggerLabel = $('#reviewPhotoTriggerLabel');
   const photoNote = $('#reviewPhotoNote');
   let selected = 0;
   let session = await setAccountNote();
@@ -186,8 +203,10 @@ async function initialise() {
     if (files.length > MAX_PHOTOS || files.some((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > MAX_IMAGE_BYTES)) {
       photosInput.value = '';
       if (photoNote) photoNote.textContent = 'Choose up to three JPEG, PNG or WebP photos, 2 MB each.';
+      if (photoTriggerLabel) photoTriggerLabel.textContent = 'Add cake photos';
       return;
     }
+    if (photoTriggerLabel) photoTriggerLabel.textContent = files.length ? `${files.length} ${files.length === 1 ? 'cake photo' : 'cake photos'} selected` : 'Add cake photos';
     if (photoNote) photoNote.textContent = files.length ? `${files.length} ${files.length === 1 ? 'photo is' : 'photos are'} ready to send.` : 'Up to three JPEG, PNG or WebP photos, 2 MB each.';
   });
 
@@ -224,7 +243,8 @@ async function initialise() {
           name: text(data.get('name')),
           cake_or_bake: text(data.get('cake_or_bake')),
           comment,
-          show_first_name: data.get('show_first_name') === 'on',
+          show_name: data.get('show_name') === 'on',
+          show_profile_image: data.get('show_profile_image') === 'on',
           public_consent: consent,
           source,
           photos,
@@ -240,6 +260,7 @@ async function initialise() {
       fields?.classList.remove('open');
       if (prompt) prompt.textContent = 'How was it?';
       if (photoNote) photoNote.textContent = 'Up to three JPEG, PNG or WebP photos, 2 MB each.';
+      if (photoTriggerLabel) photoTriggerLabel.textContent = 'Add cake photos';
       if (status) status.textContent = 'Thank you. Hazel will review your words and permission before anything is shared.';
     } catch (error) {
       if (status) status.textContent = error instanceof Error ? error.message : 'I could not send your review just yet.';

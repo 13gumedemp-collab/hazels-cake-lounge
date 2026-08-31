@@ -16,17 +16,15 @@ interface Payload {
   cake_or_bake?: string;
   comment?: string;
   public_consent?: boolean;
+  show_name?: boolean;
   show_first_name?: boolean;
+  show_profile_image?: boolean;
   source?: string;
   photos?: PhotoPayload[];
 }
 
 function clean(value: unknown, max: number): string {
   return String(value || "").trim().replace(/\s+/g, " ").slice(0, max);
-}
-
-function firstName(value: string): string {
-  return value.split(/\s+/)[0] || "A happy customer";
 }
 
 function extensionFor(mime: string): string | null {
@@ -80,16 +78,16 @@ async function withinRateLimit(supabase: ReturnType<typeof adminClient>, fingerp
   return !updateError;
 }
 
-async function linkedCustomerId(supabase: ReturnType<typeof adminClient>, token: string | null): Promise<string | null> {
+async function linkedCustomer(supabase: ReturnType<typeof adminClient>, token: string | null): Promise<{ id: string; profile_image_path: string | null } | null> {
   if (!token) return null;
   const { data: auth } = await supabase.auth.getUser(token);
   if (!auth.user) return null;
   const { data: customer } = await supabase
     .from("customers")
-    .select("id")
+    .select("id, profile_image_path")
     .eq("auth_user_id", auth.user.id)
     .maybeSingle();
-  return customer?.id ?? null;
+  return customer || null;
 }
 
 Deno.serve(async (req) => {
@@ -119,19 +117,21 @@ Deno.serve(async (req) => {
   }
 
   const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || null;
-  const customerId = await linkedCustomerId(supabase, bearer);
-  const displayName = payload.show_first_name && name ? firstName(name) : "A happy customer";
+  const customer = await linkedCustomer(supabase, bearer);
+  const showName = payload.show_name ?? payload.show_first_name ?? false;
+  const displayName = showName && name ? name : "A happy customer";
   const source = payload.source === "pamphlet_qr" ? "pamphlet_qr" : "community_page";
   const { data: review, error: reviewError } = await supabase
     .from("community_reviews")
     .insert({
-      customer_id: customerId,
+      customer_id: customer?.id ?? null,
       rating,
       reviewer_name: name || null,
       display_name: displayName,
       cake_or_bake: cakeOrBake || null,
       comment,
       public_consent: payload.public_consent === true,
+      show_profile_image: payload.show_profile_image === true && Boolean(customer?.profile_image_path),
       source,
     })
     .select("id")

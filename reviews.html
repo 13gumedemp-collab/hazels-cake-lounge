@@ -91,15 +91,24 @@
             <span>Your words</span>
             <textarea name="comment" rows="4" maxlength="2000" placeholder="Tell me how it looked, how it tasted, how the day went" required></textarea>
           </label>
-          <label class="field reviewform__photos">
+          <div class="field reviewform__photos">
             <span>Add photos <em class="field__opt">(optional)</em></span>
-            <input type="file" id="reviewPhotos" accept="image/jpeg,image/png,image/webp" multiple />
+            <div class="reviewform__upload">
+              <input type="file" id="reviewPhotos" accept="image/jpeg,image/png,image/webp" multiple />
+              <label class="reviewform__photo-trigger" for="reviewPhotos" data-cursor="link" aria-describedby="reviewPhotoNote">
+                <span aria-hidden="true">+</span><strong id="reviewPhotoTriggerLabel">Add cake photos</strong><em>Optional, up to three</em>
+              </label>
+            </div>
             <small id="reviewPhotoNote">Up to three JPEG, PNG or WebP photos, 2 MB each.</small>
-          </label>
+          </div>
           <div class="consent reviewform__consent">
             <label class="consent__row">
-              <input type="checkbox" name="show_first_name" />
-              <span>Show my first name with this review.</span>
+              <input type="checkbox" name="show_name" />
+              <span>Show my name with this review.</span>
+            </label>
+            <label class="consent__row" id="reviewProfileImageOption" hidden>
+              <input type="checkbox" name="show_profile_image" />
+              <span>Show my profile image with this review.</span>
             </label>
             <label class="consent__row">
               <input type="checkbox" name="public_consent" />

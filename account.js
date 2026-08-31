@@ -1208,7 +1208,70 @@ function fillProfile() {
   if (emailField) emailField.value = customer.email || '';
   const prefsEmail = $('#prefsEmail');
   if (prefsEmail) prefsEmail.textContent = customer.email || 'your email address';
+  void renderProfileImage();
   syncPrefsSummary();
+}
+
+function profileInitials() {
+  return [customer?.first_name, customer?.last_name].filter(Boolean).map((part) => String(part).trim()[0]).join('').slice(0, 2).toUpperCase()
+    || String(customer?.full_name || '?').trim()[0]?.toUpperCase() || '?';
+}
+
+async function renderProfileImage(url = '') {
+  const image = $('#profileImage');
+  const initials = $('#profileImageInitials');
+  const remove = $('#removeProfileImage');
+  if (!image || !initials || !remove) return;
+  initials.textContent = profileInitials();
+  remove.hidden = !customer?.profile_image_path;
+  if (!customer?.profile_image_path) { image.hidden = true; image.removeAttribute('src'); initials.hidden = false; return; }
+  if (!url) {
+    const { data } = await supabase.functions.invoke('customer-file', { body: { kind: 'profile' } });
+    url = data?.url || '';
+  }
+  if (!url) { image.hidden = true; initials.hidden = false; return; }
+  image.src = url;
+  image.hidden = false;
+  initials.hidden = true;
+}
+
+function imageDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read that photo.'));
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function changeProfileImage(file) {
+  const status = $('#profileImageStatus');
+  if (!file) return;
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 2 * 1024 * 1024) {
+    status.textContent = 'Choose a JPEG, PNG or WebP photo no larger than 2 MB.';
+    return;
+  }
+  status.textContent = 'Uploading your profile photo...';
+  try {
+    const dataUrl = await imageDataUrl(file);
+    const { data, error } = await supabase.functions.invoke('update-profile-image', { body: { data_url: dataUrl } });
+    if (error || !data?.profile_image_path) throw new Error(data?.error || error?.message || 'I could not upload that photo.');
+    customer.profile_image_path = data.profile_image_path;
+    await renderProfileImage(data.url || '');
+    status.textContent = 'Your profile photo is saved.';
+  } catch (error) {
+    status.textContent = error instanceof Error ? error.message : 'I could not upload that photo.';
+  }
+}
+
+async function removeProfileImage() {
+  const status = $('#profileImageStatus');
+  status.textContent = 'Removing your profile photo...';
+  const { data, error } = await supabase.functions.invoke('update-profile-image', { body: { remove: true } });
+  if (error || data?.profile_image_path) { status.textContent = data?.error || error?.message || 'I could not remove that photo.'; return; }
+  customer.profile_image_path = null;
+  await renderProfileImage();
+  status.textContent = 'Your profile photo is removed.';
 }
 
 // Says in one line what they are signed up to, so the tab answers its own
@@ -1628,6 +1691,8 @@ $('#newPasswordForm').addEventListener('submit', setNewPassword);
 $('#forgotPassword').addEventListener('click', forgotPassword);
 $('#resendCode').addEventListener('click', resendCode);
 $('#accountProfile').addEventListener('submit', saveProfile);
+$('#profileImageInput').addEventListener('change', (e) => { void changeProfileImage(e.currentTarget.files?.[0]); });
+$('#removeProfileImage').addEventListener('click', () => { void removeProfileImage(); });
 $('#accountPrefs').addEventListener('submit', savePrefs);
 $('#accountPrefs').addEventListener('change', syncPrefsSummary);
 // Show/hide, one handler for all three password fields.

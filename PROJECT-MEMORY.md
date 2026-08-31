@@ -1074,3 +1074,24 @@ deprecation notice confirming this. The publish action is a Console-only, human 
   `https://www.hazelscakelounge.co.za/reviews.html?source=pamphlet_qr`. The release remains
   blocked at Vercel by its 402 fair-use restriction, so this source change is not public until
   that account restriction is cleared and the user asks for the batched production deploy.
+
+### 31/08/2026 Community profile photos and refined uploads (Codex)
+
+- Customer account details now include an optional profile photo. The image is limited to a
+  2 MB JPEG, PNG or WebP file, stored in the new private `customer-profile-images` bucket and
+  retrieved only through a short-lived owner URL. Replacing or removing a photo removes the
+  previous stored object.
+- A signed-in reviewer can choose to show that profile photo alongside an approved Community
+  review. The option appears only once the customer has uploaded a profile photo. It remains
+  private unless both the review is approved and that review has opted in to display it.
+- The review-photo picker is now a compact animated text control with a transparent, full-size
+  native file input above it. This keeps the interface minimal while preserving a real,
+  accessible file chooser hit area.
+- Migration `0020_customer_profile_images.sql` is applied. The deployed functions
+  `update-profile-image`, `customer-file`, `submit-community-review`, `list-community-reviews`
+  and `delete-account` support the feature. Account deletion now removes the private profile
+  photo as well as the customer record.
+- An isolated live test confirmed private owner preview, signed image access on an approved
+  opted-in review, and complete test-data cleanup. Public Vite production build and JavaScript
+  syntax checks pass. A real Beke review has not been submitted: get explicit confirmation
+  immediately before creating the genuine pending review and admin notification.

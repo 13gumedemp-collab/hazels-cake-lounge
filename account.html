@@ -165,6 +165,16 @@
       <div class="account-panel" data-account-panel="profile">
         <div class="account-section-head"><div><span>South Africa</span><h2>Your details</h2></div></div>
         <form class="account-profile" id="accountProfile">
+          <section class="account-profile-photo" aria-labelledby="profilePhotoTitle">
+            <div class="account-profile-photo__avatar" id="profileImagePreview"><span id="profileImageInitials" aria-hidden="true"></span><img id="profileImage" alt="Your profile photo" hidden /></div>
+            <div>
+              <span class="field__label" id="profilePhotoTitle">Profile photo <em class="field__opt">(optional)</em></span>
+              <p>Kept private on your account. You decide separately when it appears with a Community review.</p>
+              <label class="account-profile-photo__choose" for="profileImageInput" data-cursor="link"><input type="file" id="profileImageInput" accept="image/jpeg,image/png,image/webp" />Choose a profile photo</label>
+              <button type="button" class="account-profile-photo__remove" id="removeProfileImage" hidden>Remove photo</button>
+              <p class="form__status" id="profileImageStatus" role="status"></p>
+            </div>
+          </section>
           <div class="form__row"><label class="field"><span>First name</span><input name="first_name" autocomplete="given-name" required /></label><label class="field"><span>Surname</span><input name="last_name" autocomplete="family-name" /></label></div>
           <label class="field"><span>Phone number</span><input name="whatsapp_number" inputmode="tel" placeholder="+27" /></label>
           <label class="field"><span>Address</span><input name="address_line_1" placeholder="Street address" /></label>
