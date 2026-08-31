@@ -1377,10 +1377,6 @@ async function confirmEmailChange(e) {
   if (data.session) beginAccountLoad(data.session);
 }
 
-// True when the account was created with an email and password. A Google-only
-// account has no password to confirm, so it is setting one for the first time
-// rather than changing one, and the wording and the fields both have to follow.
-let hasPassword = true;
 // The address Supabase actually authenticates against. Not read from the
 // customers row, which a completed email change does not currently write back.
 let authEmail = '';
@@ -1396,7 +1392,6 @@ async function setUpSecurity(user) {
   authEmail = user?.email || authEmail;
   renderSessionInfo(user);
   const providers = (user?.identities || []).map((i) => i.provider);
-  hasPassword = providers.length === 0 || providers.includes('email');
   const social = providers.filter((p) => p !== 'email');
 
   const method = $('#signInMethod');
@@ -1407,22 +1402,6 @@ async function setUpSecurity(user) {
   }
   const currentEmail = $('#currentEmailAddress');
   if (currentEmail) currentEmail.textContent = authEmail ? `Currently signed in with ${authEmail}.` : '';
-  const field = $('#currentPasswordField');
-  const current = $('#pwCurrent');
-  if (field) field.hidden = hasPassword ? false : true;
-  if (current) current.disabled = !hasPassword;
-  const title = $('#passwordTitle');
-  const hint = $('#passwordHint');
-  const submit = $('#passwordSubmit');
-  if (hasPassword) {
-    if (title) title.textContent = 'Password';
-    if (hint) hint.textContent = 'Choose something you do not use anywhere else. Eight characters at the very least.';
-    if (submit) submit.textContent = 'Update password';
-  } else {
-    if (title) title.textContent = 'Add a password';
-    if (hint) hint.textContent = 'You sign in with Google at the moment. Set a password and you will be able to sign in with your email address as well, which is useful on a device where you are not signed in to Google.';
-    if (submit) submit.textContent = 'Set password';
-  }
 }
 
 const titleCase = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -1446,10 +1425,46 @@ function renderSessionInfo(user) {
   box.innerHTML = rows.map(([k, v]) => `<div><dt>${safe(k)}</dt><dd>${safe(v)}</dd></div>`).join('');
 }
 
-async function signOutEverywhere() {
+let pendingSignOutScope = null;
+let signOutConfirmCloseTimer = null;
+
+function openSignOutConfirm(scope) {
+  const box = $('#signOutConfirm');
+  if (!box) return;
+  if (signOutConfirmCloseTimer) clearTimeout(signOutConfirmCloseTimer);
+  signOutConfirmCloseTimer = null;
+  const isGlobal = scope === 'global';
+  pendingSignOutScope = isGlobal ? 'global' : 'local';
+  $('#signOutConfirmEyebrow').textContent = isGlobal ? 'Every device' : 'This device';
+  $('#signOutConfirmTitle').textContent = isGlobal ? 'Sign out everywhere?' : 'Sign out on this device?';
+  $('#signOutConfirmBody').textContent = isGlobal
+    ? 'This will sign you out on every device where you use Hazel’s Cake Lounge. You can sign back in with email, Google, or an emailed password reset link.'
+    : 'This will only sign you out on this device. Your other signed-in devices will stay active. You can use an emailed password reset link if you cannot remember your password.';
+  $('#signOutConfirmAccept').textContent = isGlobal ? 'Yes, sign out everywhere' : 'Yes, sign me out';
+  box.hidden = false;
+  requestAnimationFrame(() => box.classList.add('is-open'));
+  $('#signOutConfirmAccept').focus();
+}
+
+function closeSignOutConfirm() {
+  const box = $('#signOutConfirm');
+  if (!box) return;
+  box.classList.remove('is-open');
+  pendingSignOutScope = null;
+  if (signOutConfirmCloseTimer) clearTimeout(signOutConfirmCloseTimer);
+  signOutConfirmCloseTimer = setTimeout(() => {
+    box.hidden = true;
+    signOutConfirmCloseTimer = null;
+  }, 320);
+}
+
+async function completeSignOut() {
+  const scope = pendingSignOutScope;
+  if (!scope) return;
+  closeSignOutConfirm();
   const status = securityStatus();
-  status.textContent = 'Ending every session...';
-  const { error } = await supabase.auth.signOut({ scope: 'global' });
+  status.textContent = scope === 'global' ? 'Ending every session...' : 'Signing out on this device...';
+  const { error } = await supabase.auth.signOut({ scope });
   if (error) { status.textContent = friendly(error); return; }
   setNavName('');
   forgetMe();
@@ -1470,7 +1485,7 @@ async function requestPasswordReset() {
 }
 
 // Deleting is destructive and irreversible, so it is deliberately two steps and
-// needs the word typed out. No modal: a modal invites a reflexive click.
+// needs the word typed out. The feedback is optional and never blocks deletion.
 function startDelete() {
   $('#deleteAccountForm').hidden = false;
   $('#deleteAccountStart').hidden = true;
@@ -1488,10 +1503,16 @@ function cancelDelete() {
 async function deleteAccount(e) {
   e.preventDefault();
   const status = $('#deleteStatus');
-  const typed = String(new FormData(e.currentTarget).get('confirm') || '').trim();
+  const form = new FormData(e.currentTarget);
+  const typed = String(form.get('confirm') || '').trim();
   if (typed.toUpperCase() !== 'DELETE') { status.textContent = 'Please type DELETE to confirm.'; return; }
   status.textContent = 'Deleting your account...';
-  const { data, error } = await supabase.functions.invoke('delete-account');
+  const { data, error } = await supabase.functions.invoke('delete-account', {
+    body: {
+      reason: String(form.get('delete_reason') || '').trim(),
+      feedback: String(form.get('delete_feedback') || '').trim(),
+    },
+  });
   if (error || !data?.deleted) {
     status.textContent = 'I could not delete your account just now. Please email hello@hazelscakelounge.co.za and I will do it by hand.';
     return;
@@ -1511,67 +1532,6 @@ async function deleteAccount(e) {
   } else {
     location.href = '/';
   }
-}
-
-// Four bands, judged on length first because length is what actually matters,
-// then on variety. Deliberately simple: it is a nudge, not a gate.
-function passwordScore(pw) {
-  if (!pw) return 0;
-  let score = 0;
-  if (pw.length >= 8) score += 1;
-  if (pw.length >= 12) score += 1;
-  if (pw.length >= 16) score += 1;
-  const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter((r) => r.test(pw)).length;
-  if (classes >= 3) score += 1;
-  if (pw.length < 8) score = Math.min(score, 1);
-  return Math.min(score, 4);
-}
-
-const SCORE_WORDS = ['', 'Weak', 'Fair', 'Good', 'Strong'];
-
-function syncPasswordMeter() {
-  const input = $('#pwNew');
-  const meter = $('#pwMeter');
-  if (!input || !meter) return;
-  const value = input.value;
-  meter.hidden = !value;
-  const score = passwordScore(value);
-  meter.dataset.score = String(score);
-  $('#pwWord').textContent = SCORE_WORDS[score] || '';
-}
-
-async function changePassword(e) {
-  e.preventDefault();
-  const form = e.currentTarget;
-  const f = new FormData(form);
-  const password = String(f.get('password') || '');
-  const currentPassword = String(f.get('current_password') || '');
-  if (hasPassword && !currentPassword) { securityStatus().textContent = 'Please enter your current password first.'; return; }
-  if (password.length < 8) { securityStatus().textContent = 'Please use at least 8 characters.'; return; }
-  if (password !== String(f.get('confirm_password') || '')) { securityStatus().textContent = 'Those two passwords do not match.'; return; }
-  if (hasPassword && password === currentPassword) { securityStatus().textContent = 'That is already your password. Please choose a different one.'; return; }
-
-  // Supabase will change a password on the strength of the session alone. That
-  // means an unattended, unlocked browser is enough to lock the owner out, so
-  // the current password is checked first by signing in with it. The sign in
-  // returns a session for the same user, so nothing is disturbed if it passes.
-  if (hasPassword) {
-    securityStatus().textContent = 'Checking your current password...';
-    const { error: wrong } = await supabase.auth.signInWithPassword({ email: authEmail, password: currentPassword });
-    if (wrong) { securityStatus().textContent = 'That is not your current password. Please try again.'; return; }
-  }
-
-  securityStatus().textContent = 'Saving your new password...';
-  const { error } = await supabase.auth.updateUser({ password });
-  if (error) { securityStatus().textContent = friendly(error); return; }
-  const wasChange = hasPassword; // setUpSecurity below flips this once one exists
-  form.reset();
-  syncPasswordMeter();
-  const { data } = await supabase.auth.getUser();
-  if (data?.user) setUpSecurity(data.user);
-  securityStatus().textContent = wasChange
-    ? 'Your password is updated. Use it next time you sign in.'
-    : 'Your password is set. You can now sign in with your email address as well as with Google.';
 }
 
 async function accountAction(e) {
@@ -1666,7 +1626,6 @@ $('#resendCode').addEventListener('click', resendCode);
 $('#accountProfile').addEventListener('submit', saveProfile);
 $('#accountPrefs').addEventListener('submit', savePrefs);
 $('#accountPrefs').addEventListener('change', syncPrefsSummary);
-$('#pwNew').addEventListener('input', syncPasswordMeter);
 // Show/hide, one handler for all three password fields.
 $$('.pwfield__eye').forEach((eye) => eye.addEventListener('click', () => {
   const input = document.getElementById(eye.dataset.reveal);
@@ -1699,13 +1658,19 @@ $('#dayChoice').addEventListener('click', (e) => {
   if (e.target.closest('[data-choice-close]') || e.target === e.currentTarget) closeDayChoice();
 });
 $('#sentLogMore').addEventListener('click', () => { sentLogAll = !sentLogAll; renderSentLog(); });
-$('#signOutEverywhere').addEventListener('click', signOutEverywhere);
+$('#signOutEverywhere').addEventListener('click', () => openSignOutConfirm('global'));
+$('#signOut').addEventListener('click', () => openSignOutConfirm('local'));
+$('#signOutConfirmClose').addEventListener('click', closeSignOutConfirm);
+$('#signOutConfirmCancel').addEventListener('click', closeSignOutConfirm);
+$('#signOutConfirmAccept').addEventListener('click', completeSignOut);
+$('#signOutConfirm').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeSignOutConfirm();
+});
 $('#deleteAccountStart').addEventListener('click', startDelete);
 $('#deleteAccountCancel').addEventListener('click', cancelDelete);
 $('#deleteAccountForm').addEventListener('submit', deleteAccount);
 $('#emailChangeForm').addEventListener('submit', changeEmail);
 $('#emailOtpForm').addEventListener('submit', confirmEmailChange);
-$('#passwordChangeForm').addEventListener('submit', changePassword);
 $('#passwordResetLink').addEventListener('click', requestPasswordReset);
 // Bound to the container, so it survives every re-render of the grid.
 $('#accountCalendar').addEventListener('click', (e) => {
@@ -1757,6 +1722,7 @@ dashboard.addEventListener('change', refreshNotice);
 dashboard.addEventListener('input', refreshNotice);
 addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !$('#dayChoice').hidden) closeDayChoice();
+  if (e.key === 'Escape' && !$('#signOutConfirm').hidden) closeSignOutConfirm();
 });
 
 // The editor is re-rendered constantly, so its picture controls are delegated.

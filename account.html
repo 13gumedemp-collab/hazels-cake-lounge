@@ -254,28 +254,9 @@
         </div>
 
         <div class="secblock">
-          <h3 class="secblock__title" id="passwordTitle">Password</h3>
-          <p class="secblock__hint" id="passwordHint">Choose something you do not use anywhere else. Eight characters at the very least.</p>
-          <form id="passwordChangeForm" class="account-security__form">
-            <div class="pwfield" id="currentPasswordField">
-              <label class="field"><span>Current password</span><input type="password" name="current_password" id="pwCurrent" autocomplete="current-password" /></label>
-              <button type="button" class="pwfield__eye" data-reveal="pwCurrent" aria-pressed="false">Show</button>
-            </div>
-            <div class="pwfield">
-              <label class="field"><span>New password <em class="field__opt">(8 or more characters)</em></span><input type="password" name="password" id="pwNew" autocomplete="new-password" minlength="8" required /></label>
-              <button type="button" class="pwfield__eye" data-reveal="pwNew" aria-pressed="false">Show</button>
-            </div>
-            <div class="pwmeter" id="pwMeter" hidden>
-              <span class="pwmeter__bar"><i></i><i></i><i></i><i></i></span>
-              <span class="pwmeter__word" id="pwWord"></span>
-            </div>
-            <div class="pwfield">
-              <label class="field"><span>Confirm new password</span><input type="password" name="confirm_password" id="pwConfirm" autocomplete="new-password" minlength="8" required /></label>
-              <button type="button" class="pwfield__eye" data-reveal="pwConfirm" aria-pressed="false">Show</button>
-            </div>
-            <button class="btn" type="submit" id="passwordSubmit">Update password</button>
-          </form>
-          <p class="account-fineprint account-fineprint--left">Forgot your password? I will email a secure link to this account&apos;s address so you can choose a new one.</p>
+          <h3 class="secblock__title">Reset password</h3>
+          <p class="secblock__hint">For your protection, passwords are changed only from a secure link sent to your email address.</p>
+          <p class="account-fineprint account-fineprint--left">I will email a secure link to this account&apos;s address so you can choose a new password.</p>
           <button class="btn btn--ghost" type="button" id="passwordResetLink">Email me a password reset link</button>
         </div>
 
@@ -295,6 +276,14 @@
           <button class="btn btn--danger" type="button" id="deleteAccountStart">Delete your account</button>
 
           <form class="danger__confirm" id="deleteAccountForm" hidden>
+            <fieldset class="delete-survey">
+              <legend>Before you go, would you like to tell me why? <em>(optional)</em></legend>
+              <label class="delete-survey__option"><input type="radio" name="delete_reason" value="I only needed an account for one order" /> I only needed an account for one order</label>
+              <label class="delete-survey__option"><input type="radio" name="delete_reason" value="I had a problem with the website" /> I had a problem with the website</label>
+              <label class="delete-survey__option"><input type="radio" name="delete_reason" value="I was receiving too many messages" /> I was receiving too many messages</label>
+              <label class="delete-survey__option"><input type="radio" name="delete_reason" value="Something else" /> Something else</label>
+              <label class="field delete-survey__message"><span>Anything else you would like Hazel to know? <em>(optional)</em></span><textarea name="delete_feedback" maxlength="2000" placeholder="Leave a message if you would like to."></textarea></label>
+            </fieldset>
             <p class="danger__body">Type <strong>DELETE</strong> below to confirm. There is no undo and no recovery.</p>
             <label class="field"><span>Confirm</span><input name="confirm" autocomplete="off" placeholder="DELETE" required /></label>
             <div class="danger__actions">
@@ -328,6 +317,18 @@
 
       <div class="sheet__actions">
         <button class="btn btn--ghost" type="button" data-choice-close>Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div class="sheet" id="signOutConfirm" hidden role="dialog" aria-modal="true" aria-labelledby="signOutConfirmTitle" aria-describedby="signOutConfirmBody">
+    <div class="sheet__inner">
+      <button type="button" class="sheet__close" id="signOutConfirmClose" aria-label="Close">&#215;</button>
+      <p class="sheet__eyebrow" id="signOutConfirmEyebrow">Sign out</p>
+      <h3 id="signOutConfirmTitle">Sign out on this device?</h3>
+      <p class="sheet__donebody" id="signOutConfirmBody"></p>
+      <div class="sheet__actions">
+        <button class="btn btn--ghost" type="button" id="signOutConfirmCancel">Keep me signed in</button>
+        <button class="btn" type="button" id="signOutConfirmAccept">Yes, sign me out</button>
       </div>
     </div>
   </div>

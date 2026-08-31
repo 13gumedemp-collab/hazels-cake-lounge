@@ -900,10 +900,10 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 
 ### 31/08/2026 Security, payments and release audit (Codex)
 
-- Added a visible **Email me a password reset link** action to the signed-in security page.
-  The direct password-update form still checks the current password when it is known, while
-  the reset link opens the existing password-recovery screen for anyone who has forgotten it.
-  The current sign-in email is now stated beside the change-email action.
+- The signed-in security page now supports password changes **only** through the visible
+  **Email me a password reset link** action. The current-password and direct-update form
+  were removed on 31/08/2026. The link opens the existing secure recovery screen, and the
+  current sign-in email is stated beside the change-email action.
 - Exercised isolated Supabase Auth sessions end to end. Recovery-email creation, pending
   email-change creation, completed Auth-to-`customers.email` synchronisation, local
   sign-out, and global sign-out refresh-token revocation all passed. The temporary Auth and
@@ -936,8 +936,28 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 - **Production deploy blocked externally.** On 31/08/2026 Vercel rejected the public
   production deployment before upload with HTTP 402, `resource_creation_blocked`: “Your Team
   exceeded our fair use limits and has been blocked.” No public or admin Vercel release was
-  created. The verified release should be deployed once the team account restriction is
-  cleared.
+  created. Hobby fair-use usage works over a rolling 30-day window and a blocked team needs
+  Vercel to unpause it after usage falls below the relevant threshold. The verified release
+  should be deployed once the team account restriction is cleared.
+
+### 31/08/2026 Account closure and session safeguards (Codex)
+
+- Removed the remaining direct password-change path. Customers now use the emailed secure
+  reset link, so no one needs to remember their current password to choose a new one.
+- Added an optional account-deletion survey with common reasons and a free-text response.
+  Responses are stored anonymously in `account_deletion_feedback`, with no link to an
+  account, email, order or customer record after erasure. Migration `0018` is applied and
+  the deployed `delete-account` function records it only after account deletion completes.
+- Added branded confirmation sheets for **Sign out on this device** and **Sign out
+  everywhere**. The local option keeps other devices active, and the global option revokes
+  every session. Both state that an emailed password-reset link remains available.
+- Removed the duplicate plain phone link from every public footer, preserving the single
+  **073 373 4234 · Phone / WhatsApp** entry. The contact page retains its separate contact
+  information row as intended.
+- Live isolated test passed after deployment: an account and customer profile were deleted,
+  its optional survey was recorded anonymously, and the matching admin notification was
+  created. All disposable test data, including the feedback and notification, was then
+  removed. Public Vite and admin Next production builds both passed.
 
 ---
 

@@ -995,6 +995,13 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .danger__confirm { display:grid; gap:1rem; margin-top:1.2rem; padding-top:1.2rem;
   border-top:1px solid rgba(231,161,122,.25); }
 .danger__actions { display:flex; flex-wrap:wrap; gap:.8rem; }
+.delete-survey { display:grid; gap:.65rem; margin:0; padding:1rem;
+  border:1px solid rgba(231,161,122,.25); border-radius:8px; }
+.delete-survey legend { padding:0 .2rem; color:var(--cream-soft); font-size:.88rem; line-height:1.5; }
+.delete-survey legend em, .delete-survey .field em { color:var(--muted); font-style:normal; }
+.delete-survey__option { display:flex; align-items:flex-start; gap:.65rem; color:var(--cream-soft); font-size:.84rem; line-height:1.45; cursor:pointer; }
+.delete-survey__option input { width:1rem; height:1rem; margin:.1rem 0 0; accent-color:#e7a17a; }
+.delete-survey__message { margin-top:.25rem; }
 
 .account-gone { display:grid; gap:1rem; place-content:center; min-height:60vh; padding:3rem 1rem;
   text-align:center; }

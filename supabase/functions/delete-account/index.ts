@@ -15,6 +15,18 @@ import { adminClient, corsHeaders, json, notify } from "../_shared/client.ts";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  let survey: { reason?: unknown; feedback?: unknown } = {};
+  try {
+    survey = await req.json();
+  } catch {
+    // The survey is optional, so an empty request has exactly the same effect.
+  }
+  const reason = typeof survey.reason === "string" ? survey.reason.trim() : "";
+  const feedback = typeof survey.feedback === "string" ? survey.feedback.trim() : "";
+  if (reason.length > 120 || feedback.length > 2000) {
+    return json({ error: "Feedback is too long" }, 400);
+  }
+
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
   if (!token) return json({ error: "Unauthorized" }, 401);
 
@@ -36,6 +48,13 @@ Deno.serve(async (req) => {
   // no way for its owner to reach it again.
   const { error: userError } = await supabase.auth.admin.deleteUser(auth.user.id);
   if (userError) return json({ error: "Could not close your sign in" }, 500);
+
+  // This is purposefully not linked to an identity. A person can help Hazel
+  // improve the service without their deletion survey becoming retained PII.
+  // It is optional, so a logging failure never prevents account deletion.
+  if (reason || feedback) {
+    await supabase.from("account_deletion_feedback").insert({ reason: reason || null, feedback: feedback || null });
+  }
 
   await notify(
     supabase,
