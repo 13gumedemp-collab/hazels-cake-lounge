@@ -1472,16 +1472,20 @@ async function completeSignOut() {
 }
 
 async function requestPasswordReset() {
-  const status = securityStatus();
-  if (!authEmail) {
+  // Keep the feedback beside the button. The shared security status is below
+  // the sessions panel, so a successful click used to look as if nothing had
+  // happened when the customer was partway down the page.
+  const status = $('#passwordResetStatus') || securityStatus();
+  const email = authEmail || customer?.email || '';
+  if (!email) {
     status.textContent = 'I could not find your sign-in email. Please sign out and sign in again.';
     return;
   }
   status.textContent = 'Sending your secure reset link...';
-  const { error } = await supabase.auth.resetPasswordForEmail(authEmail, { redirectTo: REDIRECT });
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: REDIRECT });
   status.textContent = error
     ? friendly(error)
-    : `I have emailed a secure password reset link to ${authEmail}.`;
+    : `I have emailed a secure password reset link to ${email}.`;
 }
 
 // Deleting is destructive and irreversible, so it is deliberately two steps and

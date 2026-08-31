@@ -959,6 +959,30 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   created. All disposable test data, including the feedback and notification, was then
   removed. Public Vite and admin Next production builds both passed.
 
+### 31/08/2026 Release recheck and password recovery (Codex)
+
+- The local admin host briefly showed a blank 500 page after a production build removed a
+  development chunk that its running Next process still expected. Restarting the exact local
+  admin process cleared the stale build state. A real admin login and all ten authenticated
+  routes now return 200.
+- The public client host was healthy throughout. Its thirteen public pages, including the
+  Terms and Conditions, Privacy Policy and Messaging Terms pages, all return 200. A fresh
+  Vite production build and JavaScript syntax check pass.
+- Password recovery was tested end to end with an isolated account: a secure recovery token
+  opened a recovery session, accepted a replacement password and then signed in successfully.
+  The signed-in reset button now gives its progress and success feedback directly beneath the
+  button and falls back safely to the customer email if the Auth user lookup is late.
+- Do not send a reset link to a guessed account. There are several customer rows with a Beke
+  first name, so the exact signed-in email needs to be identified before a real recovery email
+  can be sent. Browser policy also requires the customer to submit the final new password from
+  the emailed link themselves.
+- **Email inbox release blocker:** the present Message Centre is a delivery log and template
+  sender, not a real inbound mailbox. Replies still arrive in the configured business inbox
+  and are not inserted into the Command Centre. Bounce events are not yet received from
+  Resend, so the system cannot automatically suppress a hard-bounced address. Building the
+  requested inbox requires an inbound-email integration, Resend webhook verification and
+  suppression state before the email workflow can be described as production ready.
+
 ---
 
 ## 6. Open threads
