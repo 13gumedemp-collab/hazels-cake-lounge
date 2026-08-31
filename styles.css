@@ -963,6 +963,7 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 
 /* ---- Sent log ------------------------------------------------------------ */
 .sentlog { display:grid; }
+.sentlog__notice { margin:0; padding:.85rem 1rem; border:1px solid rgba(231,161,122,.35); color:var(--cream-soft); font-size:.84rem; line-height:1.55; }
 .sentrow { display:flex; align-items:center; justify-content:space-between; gap:1rem;
   padding:.9rem 0; border-bottom:1px solid var(--line-soft); }
 .sentrow:last-child { border-bottom:0; }

@@ -4,7 +4,8 @@
 //   30/14/7 days before -> reminder emails (+ WhatsApp tasks at 1mo & 1wk)
 //   +2 days after        -> post_celebration
 // Birthdays -> birthday_surprise. 1 Jan -> reset recurring dates + yearly_summary.
-// One-time circle_members -> anniversary notification to Hazel (no customer email).
+// One-time circle_members -> the same 30/14/7 customer sequence before the
+// exact saved date, then an anniversary notification to Hazel in later years.
 // Completion sweeps: post_celebration 2 days after an order completes;
 //   circle_followup 30 days after a customer's first completed order.
 // Dedupe is per circle_member + reminder_type + calendar year (reminder_log.year_sent).
@@ -38,6 +39,13 @@ Deno.serve(async (req) => {
   const biz = businessVars();
   let emails = 0, waTasks = 0, callTasks = 0, failures = 0, dupes = 0, anniversaries = 0, followups = 0, postCeleb = 0;
 
+  const { data: reminderSettingRow } = await supabase
+    .from("app_settings").select("value").eq("key", "reminders").maybeSingle();
+  const reminderSettings = (reminderSettingRow?.value ?? {}) as Record<string, boolean>;
+  const emailEnabled = reminderSettings.email_enabled !== false;
+  const whatsappEnabled = reminderSettings.whatsapp_enabled !== false;
+  const phoneEnabled = reminderSettings.phone_enabled !== false;
+
   const { data: logs } = await supabase
     .from("reminder_log").select("circle_member_id, reminder_type, customer_id, status, year_sent")
     .eq("year_sent", today.year);
@@ -65,21 +73,32 @@ Deno.serve(async (req) => {
     if (!c) continue;
     const { m: mm, d: dd, y: occY } = md(m.occasion_date);
 
-    // One-time: anniversary notification to Hazel in subsequent years.
-    if (m.is_one_time) {
-      if (mm === today.month && dd === today.day && today.year > occY && !annDone.has(m.id)) {
-        await notify(supabase, "anniversary_memory",
-          `Today is the anniversary of ${c.full_name}'s ${m.occasion_type} for ${m.person_name}. It has been ${today.year - occY} year(s).`, "standard", "/occasions");
-        await supabase.from("reminder_log").insert({ customer_id: c.id, circle_member_id: m.id, reminder_type: "anniversary_memory", channel: "internal", status: "sent", year_sent: today.year });
-        anniversaries++;
-      }
-      continue;
-    }
-    if (!m.recurring_yearly) continue;
+    let next: Date;
+    let last: Date;
 
-    const thisYear = new Date(Date.UTC(today.year, mm, dd));
-    const next = thisYear.getTime() >= today.date.getTime() ? thisYear : new Date(Date.UTC(today.year + 1, mm, dd));
-    const last = thisYear.getTime() <= today.date.getTime() ? thisYear : new Date(Date.UTC(today.year - 1, mm, dd));
+    // A one-time date gets its customer sequence before the exact saved year.
+    // Once it has passed, only Hazel receives the anniversary memory in later years.
+    if (m.is_one_time) {
+      const exact = new Date(Date.UTC(occY, mm, dd));
+      if (exact.getTime() >= today.date.getTime()) {
+        next = exact;
+        last = exact;
+      } else {
+        if (mm === today.month && dd === today.day && today.year > occY && !annDone.has(m.id)) {
+          await notify(supabase, "anniversary_memory",
+            `Today is the anniversary of ${c.full_name}'s ${m.occasion_type} for ${m.person_name}. It has been ${today.year - occY} year(s).`, "standard", "/occasions");
+          await supabase.from("reminder_log").insert({ customer_id: c.id, circle_member_id: m.id, reminder_type: "anniversary_memory", channel: "internal", status: "sent", year_sent: today.year });
+          anniversaries++;
+        }
+        continue;
+      }
+    } else {
+      if (!m.recurring_yearly) continue;
+      const thisYear = new Date(Date.UTC(today.year, mm, dd));
+      next = thisYear.getTime() >= today.date.getTime() ? thisYear : new Date(Date.UTC(today.year + 1, mm, dd));
+      last = thisYear.getTime() <= today.date.getTime() ? thisYear : new Date(Date.UTC(today.year - 1, mm, dd));
+    }
+
     const daysUntil = Math.round((next.getTime() - today.date.getTime()) / DAY);
     const daysSince = Math.round((today.date.getTime() - last.getTime()) / DAY);
 
@@ -87,7 +106,7 @@ Deno.serve(async (req) => {
     if (daysUntil === 30) type = "one_month";
     else if (daysUntil === 14) type = "two_weeks";
     else if (daysUntil === 7) type = "one_week";
-    else if (daysSince === 2) type = "post_celebration";
+    else if (!m.is_one_time && daysSince === 2) type = "post_celebration";
     if (!type) continue;
 
     const flavour = await flavourFor(m.id);
@@ -101,18 +120,18 @@ Deno.serve(async (req) => {
     if (done.has(`${m.id}|${type}`)) {
       await supabase.from("reminder_log").insert({ customer_id: c.id, circle_member_id: m.id, reminder_type: type, channel: "email", status: "duplicate_skipped", year_sent: today.year });
       dupes++;
-    } else if (c.email_consent !== false) {
+    } else if (emailEnabled && c.email_consent !== false) {
       const r = await sendEmail(supabase, { customer_id: c.id, template_name: EMAIL_TEMPLATE[type], reminder_type: type, circle_member_id: m.id, dynamic_variables: vars });
       if (r.status === "sent") emails++; else if (r.status === "failed") failures++;
       done.add(`${m.id}|${type}`);
     }
 
-    if ((type === "one_month" || type === "one_week") && c.whatsapp_consent && c.whatsapp_number && !waDone.has(`${m.id}|${type}`)) {
+    if (whatsappEnabled && (type === "one_month" || type === "one_week") && c.whatsapp_consent && c.whatsapp_number && !waDone.has(`${m.id}|${type}`)) {
       await supabase.from("whatsapp_reminders_due").insert({ customer_id: c.id, circle_member_id: m.id, reminder_type: type, whatsapp_number: c.whatsapp_number, message_copy: waCopy(type, vars), due_date: next.toISOString().slice(0, 10), status: "pending" });
       await notify(supabase, "whatsapp_due", `WhatsApp ${type.replace("_", " ")} reminder due for ${c.full_name} (${m.person_name}'s ${m.occasion_type})`, "standard", "/whatsapp");
       waTasks++; waDone.add(`${m.id}|${type}`);
     }
-    if (c.phone_call_consent && c.whatsapp_number && !callDone.has(`${m.id}|${type}`)) {
+    if (phoneEnabled && c.phone_call_consent && c.whatsapp_number && !callDone.has(`${m.id}|${type}`)) {
       await supabase.from("phone_call_reminders_due").insert({
         customer_id: c.id, circle_member_id: m.id, reminder_type: type,
         phone_number: c.whatsapp_number, due_date: today.date.toISOString().slice(0, 10), status: "pending",
@@ -126,7 +145,7 @@ Deno.serve(async (req) => {
   const { data: bdays } = await supabase.from("customers").select("id, full_name, email_consent, own_birthday").not("own_birthday", "is", null);
   for (const c of bdays ?? []) {
     const { m: bm, d: bd } = md(c.own_birthday as string);
-    if (bm !== today.month || bd !== today.day || bdayDone.has(c.id) || c.email_consent === false) continue;
+    if (!emailEnabled || bm !== today.month || bd !== today.day || bdayDone.has(c.id) || c.email_consent === false) continue;
     const r = await sendEmail(supabase, { customer_id: c.id, template_name: "birthday_surprise", reminder_type: "birthday_surprise", dynamic_variables: { ...biz, first_name: firstName(c.full_name) } });
     if (r.status === "sent") emails++; else if (r.status === "failed") failures++;
   }
@@ -141,7 +160,7 @@ Deno.serve(async (req) => {
   for (const o of completed ?? []) {
     const c = o.customer as { id: string; full_name: string; email_consent: boolean } | null;
     const cm = o.circle_member as { person_name: string; occasion_type: string; recurring_yearly: boolean } | null;
-    if (!c || !o.circle_member_id || done.has(`${o.circle_member_id}|post_celebration`) || c.email_consent === false) continue;
+    if (!emailEnabled || !c || !o.circle_member_id || done.has(`${o.circle_member_id}|post_celebration`) || c.email_consent === false) continue;
     const r = await sendEmail(supabase, {
       customer_id: c.id, template_name: "post_celebration", reminder_type: "post_celebration", circle_member_id: o.circle_member_id,
       dynamic_variables: { ...biz, first_name: firstName(c.full_name), person_name: cm?.person_name ?? "", occasion_type: cm?.occasion_type ?? "", occasion_book_opted_in: cm?.recurring_yearly ? "yes" : "" },
@@ -154,6 +173,7 @@ Deno.serve(async (req) => {
   const { data: followupCustomers } = await supabase
     .from("customers").select("id, full_name").eq("circle_followup_sent", false).not("first_order_completed_at", "is", null).lte("first_order_completed_at", thirtyAgo);
   for (const cust of followupCustomers ?? []) {
+    if (!emailEnabled) continue;
     const { data: ord } = await supabase.from("orders").select("circle_member:circle_members ( person_name, occasion_type )").eq("customer_id", cust.id).eq("status", "completed").order("created_at", { ascending: false }).limit(1).maybeSingle();
     const cm = ord?.circle_member as { person_name: string; occasion_type: string } | null;
     const r = await sendEmail(supabase, { customer_id: cust.id, template_name: "circle_followup", reminder_type: "circle_followup", dynamic_variables: { ...biz, first_name: firstName(cust.full_name), person_name: cm?.person_name ?? "them", occasion_type: cm?.occasion_type ?? "celebration" } });
@@ -172,7 +192,7 @@ Deno.serve(async (req) => {
     const summaryDone = new Set((logs ?? []).filter((l) => l.reminder_type === "yearly_summary" && l.status === "sent").map((l) => l.customer_id));
     const { data: customers } = await supabase.from("customers").select(`id, full_name, email_consent, circle_members ( person_name, occasion_type, occasion_date, recurring_yearly )`);
     for (const cust of customers ?? []) {
-      if (cust.email_consent === false || summaryDone.has(cust.id)) continue;
+      if (!emailEnabled || cust.email_consent === false || summaryDone.has(cust.id)) continue;
       const cms = ((cust.circle_members as { person_name: string; occasion_type: string; occasion_date: string; recurring_yearly: boolean }[] | null) ?? []).filter((x) => x.recurring_yearly).sort((a, b) => a.occasion_date.localeCompare(b.occasion_date));
       if (!cms.length) continue;
       const list = cms.map((o) => `<p style="margin:4px 0"><b>${o.person_name}'s ${o.occasion_type}</b> on ${pretty(ymd(today.year, md(o.occasion_date).m, md(o.occasion_date).d))}</p>`).join("");

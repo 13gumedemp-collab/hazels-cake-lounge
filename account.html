@@ -241,6 +241,7 @@
         <div class="secblock">
           <h3 class="secblock__title">Email address</h3>
           <p class="secblock__hint" id="signInMethod"></p>
+          <p class="secblock__hint" id="currentEmailAddress"></p>
           <form id="emailChangeForm" class="account-security__form">
             <label class="field"><span>Email address</span><input type="email" name="new_email" autocomplete="email" required /></label>
             <button class="btn" type="submit">Change email</button>
@@ -274,6 +275,8 @@
             </div>
             <button class="btn" type="submit" id="passwordSubmit">Update password</button>
           </form>
+          <p class="account-fineprint account-fineprint--left">Forgot your password? I will email a secure link to this account&apos;s address so you can choose a new one.</p>
+          <button class="btn btn--ghost" type="button" id="passwordResetLink">Email me a password reset link</button>
         </div>
 
         <div class="secblock">

@@ -16,6 +16,10 @@ const REPLY_TO = Deno.env.get("BUSINESS_EMAIL") || undefined;
 export interface SendEmailInput {
   customer_id: string;
   template_name: string;
+  // Invoices and other messages needed to provide a cake are operational,
+  // rather than marketing. They must still reach the customer when reminders
+  // are switched off.
+  essential?: boolean;
   dynamic_variables?: Record<string, unknown>;
   circle_member_id?: string | null;
   reminder_type?: string;
@@ -70,7 +74,7 @@ export async function sendEmail(supabase: SupabaseClient, input: SendEmailInput)
       status, error_message, year_sent: sastYear(),
     });
 
-  if (customer.email_consent === false || customer.email_unsubscribed === true) {
+  if (!input.essential && (customer.email_consent === false || customer.email_unsubscribed === true)) {
     await log("skipped", "email opted out");
     await notify(supabase, "reminder_skipped", `Email skipped for ${customer.full_name}: opted out`);
     return { status: "skipped" };

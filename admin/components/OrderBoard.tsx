@@ -81,6 +81,10 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
         body: JSON.stringify({ order_id: id, payment_status, total_amount_zar: totalRaw || null, amount_paid_zar: paidRaw || null }),
       });
       if (r.ok) router.refresh();
+      else {
+        const result = await r.json().catch(() => ({}));
+        window.alert(result.error || "The payment update could not be saved.");
+      }
     } finally { setBusy(null); }
   }
 

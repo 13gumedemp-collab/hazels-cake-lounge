@@ -4,7 +4,7 @@ project_id = "qgzpoyyijafblzfiyhoc"
 # explicit so config deployments do not substitute local development defaults.
 [auth]
 site_url = "https://hazelscakelounge.co.za"
-additional_redirect_urls = ["https://hazelscakelounge.co.za/account.html", "https://www.hazelscakelounge.co.za/account.html", "http://localhost:5173/account.html"]
+additional_redirect_urls = ["https://hazelscakelounge.co.za/account.html", "https://www.hazelscakelounge.co.za/account.html", "http://localhost:5173/account.html", "http://127.0.0.1:5173/account.html"]
 
 [auth.mfa.totp]
 enroll_enabled = true

@@ -27,9 +27,18 @@ const paymentLabel = (s) => ({ unpaid: 'Unpaid', deposit_paid: 'Deposit paid', p
 // show it all back to them.
 const ORDER_FIELDS = 'id,circle_member_id,status,payment_status,total_amount_zar,amount_paid_zar,occasion_date,order_date,cake_flavour,cake_description,colours_and_themes,number_of_people,delivery_or_collection,delivery_address,cake_photo_url,inspiration_photo_url,invoice_path,receipt_path,created_at,circle_member:circle_members(person_name,occasion_type,relationship_to_customer,notes)';
 
-const REDIRECT = location.origin + '/account.html';
+// Supabase recognises localhost as the local Auth return address. Vite can also
+// be opened through 127.0.0.1, but that hostname is a different redirect URL
+// and would otherwise fall back to the public home page after confirmation.
+const REDIRECT = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:5173/account.html'
+  : location.origin + '/account.html';
 const PROVIDERS = { google: 'Google' };
 let pendingEmail = '';
+// An email confirmation can arrive while this browser still has a previous
+// customer's session in storage. Keep only the newest auth result so an older
+// asynchronous customer lookup cannot paint over the confirmed account.
+let authLoadVersion = 0;
 // A recovery link signs the customer in, so the dashboard would otherwise open
 // behind the "choose a new password" step and win the race. Set this only from
 // Supabase's PASSWORD_RECOVERY event: an old recovery hash must never hijack a
@@ -170,8 +179,9 @@ const syncSignUpPrefs = () => {};
 async function createAccount(e) {
   e.preventDefault();
   // Enter part way through means "continue", not "create my account".
-  if ($('[data-signup-step="2"]').hidden) { nextSignUpStep(); return; }
-  if ($('[data-signup-step="3"]').hidden) { nextSignUpStep2(); return; }
+  const visibleStep = $('[data-signup-step]:not([hidden])', e.currentTarget)?.dataset.signupStep;
+  if (visibleStep === '1') { nextSignUpStep(); return; }
+  if (visibleStep === '2') { nextSignUpStep2(); return; }
   const f = new FormData(e.currentTarget);
   const first_name = String(f.get('first_name') || '').trim();
   const last_name = String(f.get('last_name') || '').trim();
@@ -244,7 +254,7 @@ async function setNewPassword(e) {
   clearRecoveryState();
   showPanel('signin');
   const { data } = await supabase.auth.getSession();
-  loadAccount(data.session);
+  beginAccountLoad(data.session);
 }
 
 // Names the account after the customer, with the right possessive apostrophe.
@@ -266,10 +276,17 @@ function cacheMe(c) {
 }
 const forgetMe = () => { try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ } };
 
-async function loadAccount(session) {
+function beginAccountLoad(session) {
+  const version = ++authLoadVersion;
+  void loadAccount(session, version);
+}
+
+async function loadAccount(session, version) {
+  if (version !== authLoadVersion) return;
   if (recoveryMode) { doneChecking(); authBox.hidden = false; dashboard.hidden = true; showPanel('recovery'); return; }
   if (!session) { doneChecking(); authBox.hidden = false; dashboard.hidden = true; setNavName(''); return; }
   const { data: rows, error } = await supabase.from('customers').select('*').eq('auth_user_id', session.user.id).limit(1);
+  if (version !== authLoadVersion) return;
   if (error || !rows?.length) {
     doneChecking(); authBox.hidden = false; dashboard.hidden = true;
     authStatus.textContent = error?.message || 'Your account is still being prepared. Please sign in again.';
@@ -290,6 +307,7 @@ async function loadAccount(session) {
     supabase.from('reminder_log').select('id,reminder_type,channel,status,sent_at,error_message')
       .eq('customer_id', customer.id).order('sent_at', { ascending: false }).limit(100),
   ]);
+  if (version !== authLoadVersion) return;
   sentLog = sentRes.data || [];
   occasions = datesRes.data || [];
   orders = ordersRes.data || [];
@@ -877,12 +895,16 @@ function renderSentLog() {
     return;
   }
   const shown = sentLogAll ? sentLog : sentLog.slice(0, SENT_PAGE);
-  box.innerHTML = shown.map((s) => {
+  const repairedProviderFailures = sentLog.some((s) => s.status === 'failed' && /api key is invalid|resend 401/i.test(s.error_message || ''));
+  const historicalNote = repairedProviderFailures
+    ? '<p class="sentlog__notice">A few earlier emails could not be delivered while the email service was being repaired. It is working now. Please contact Hazel if you think you missed something important.</p>'
+    : '';
+  box.innerHTML = historicalNote + shown.map((s) => {
     // A failed or skipped send is the whole point of showing this list, so it
     // is stated plainly rather than quietly left out.
     const state = s.status === 'sent' ? '' : s.status === 'skipped'
       ? '<em class="chip chip--muted">Not sent, you had opted out</em>'
-      : '<em class="chip chip--fail">Failed to send</em>';
+      : '<em class="chip chip--fail">Earlier delivery issue</em>';
     return `<div class="sentrow">
       <div class="sentrow__main">
         <strong>${safe(sentLabel(s.reminder_type))}</strong>
@@ -1352,7 +1374,7 @@ async function confirmEmailChange(e) {
   e.currentTarget.reset();
   securityStatus().textContent = 'Your email address is updated. Use it next time you sign in.';
   const { data } = await supabase.auth.getSession();
-  if (data.session) loadAccount(data.session);
+  if (data.session) beginAccountLoad(data.session);
 }
 
 // True when the account was created with an email and password. A Google-only
@@ -1383,6 +1405,8 @@ async function setUpSecurity(user) {
       ? `You signed in with ${social.map(titleCase).join(' and ')}. Changing your email address here changes the address I use to reach you.`
       : '';
   }
+  const currentEmail = $('#currentEmailAddress');
+  if (currentEmail) currentEmail.textContent = authEmail ? `Currently signed in with ${authEmail}.` : '';
   const field = $('#currentPasswordField');
   const current = $('#pwCurrent');
   if (field) field.hidden = hasPassword ? false : true;
@@ -1430,6 +1454,19 @@ async function signOutEverywhere() {
   setNavName('');
   forgetMe();
   location.reload();
+}
+
+async function requestPasswordReset() {
+  const status = securityStatus();
+  if (!authEmail) {
+    status.textContent = 'I could not find your sign-in email. Please sign out and sign in again.';
+    return;
+  }
+  status.textContent = 'Sending your secure reset link...';
+  const { error } = await supabase.auth.resetPasswordForEmail(authEmail, { redirectTo: REDIRECT });
+  status.textContent = error
+    ? friendly(error)
+    : `I have emailed a secure password reset link to ${authEmail}.`;
 }
 
 // Deleting is destructive and irreversible, so it is deliberately two steps and
@@ -1669,6 +1706,7 @@ $('#deleteAccountForm').addEventListener('submit', deleteAccount);
 $('#emailChangeForm').addEventListener('submit', changeEmail);
 $('#emailOtpForm').addEventListener('submit', confirmEmailChange);
 $('#passwordChangeForm').addEventListener('submit', changePassword);
+$('#passwordResetLink').addEventListener('click', requestPasswordReset);
 // Bound to the container, so it survives every re-render of the grid.
 $('#accountCalendar').addEventListener('click', (e) => {
   const step = e.target.closest('[data-cal-step]');
@@ -1758,12 +1796,19 @@ if (urlError) {
 
 supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'PASSWORD_RECOVERY') {
+    ++authLoadVersion;
     recoveryMode = true;
     doneChecking(); authBox.hidden = false; dashboard.hidden = true;
     showPanel('recovery');
     authStatus.textContent = 'Choose your new password.';
     return;
   }
-  loadAccount(session);
+  beginAccountLoad(session);
 });
-supabase.auth.getSession().then(({ data }) => loadAccount(data.session));
+const initialAuthLoadVersion = authLoadVersion;
+supabase.auth.getSession().then(({ data }) => {
+  // If a confirmation or sign-in event completed while this first session read
+  // was pending, that read describes the old browser session and must be ignored.
+  if (authLoadVersion !== initialAuthLoadVersion) return;
+  beginAccountLoad(data.session);
+});

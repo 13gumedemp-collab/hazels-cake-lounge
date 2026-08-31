@@ -100,7 +100,7 @@ export async function generateMemoryCard(
   if (upErr) return { status: "failed", error: `Storage: ${upErr.message}` };
 
   // Email it with the PDF attached
-  await sendEmail(supabase, {
+  const delivery = await sendEmail(supabase, {
     customer_id: customer.id,
     template_name: "memory_card_delivery",
     reminder_type: "memory_card",
@@ -112,11 +112,16 @@ export async function generateMemoryCard(
     attachments: [{ filename: "Cake-Memory-Card.pdf", content: toBase64(pdfBytes) }],
   });
 
-  await supabase.from("orders").update({ memory_card_sent: true }).eq("id", order_id);
-  await notify(supabase, "memory_card_sent",
-    `Memory card created and emailed for ${customer.full_name}`);
+  await supabase.from("orders").update({ memory_card_sent: delivery.status === "sent" }).eq("id", order_id);
+  if (delivery.status === "sent") {
+    await notify(supabase, "memory_card_sent", `Memory Card emailed to ${customer.full_name}.`);
+  } else if (delivery.status === "skipped") {
+    await notify(supabase, "memory_card_skipped", `Memory Card created for ${customer.full_name}, but their email reminders are switched off.`);
+  } else {
+    await notify(supabase, "memory_card_delivery_issue", `Memory Card created for ${customer.full_name}, but its email could not be sent.`, "high", "/orders");
+  }
 
-  return { status: "sent", url: path };
+  return { status: delivery.status, url: path, error: delivery.error ?? undefined };
 }
 
 // Accepts either a storage path ("file.png" or "cake-photos/file.png") or a URL.

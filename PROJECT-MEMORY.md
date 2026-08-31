@@ -6,7 +6,7 @@ other) reads this file before working and appends to it after working.
 **Never put secrets in this file.** No API keys, tokens, passwords or client secrets.
 Record that a credential exists and where it lives, never its value.
 
-Last updated: 08/08/2026
+Last updated: 31/08/2026
 
 ---
 
@@ -865,6 +865,80 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   **The lesson: a §5 entry describes intent, not necessarily what is in `HEAD`.** Check
   `git show HEAD:<file>` rather than trusting either the file on disk or the write-up.
 
+### 31/08/2026 Account, admin and reminder completion (Codex)
+
+- Replaced every remaining admin placeholder with working Customer Wall and customer
+  profiles, Occasion Book calendar, WhatsApp tasks, Message Centre, reminder pipeline,
+  analytics, and settings. Settings persist business and reminder configuration in the new
+  RLS protected `app_settings` table. It also has a scrypt protected admin-password change,
+  editable email templates, and a controlled test-email action.
+- Applied migration `0017_admin_settings_and_email_sync.sql`. The `auth.users` trigger now
+  mirrors a confirmed sign-in email change into `customers.email`, and creates new customer
+  rows with the operational phone-call setting enabled. This closes the stale customer-email
+  issue without exposing a client-side write path.
+- `daily-occasion-checker` is deployed with one-time date coverage. Future one-time dates
+  now receive their actual 30, 14 and 7 day sequence, while past one-time dates receive only
+  the annual internal anniversary prompt. Deployed the revised checker and the new
+  `send-test-email` Edge Function. The reminder channel settings are read by the checker.
+- Removed every public contact and footer placeholder, keeping the public phone and WhatsApp
+  route explicit. The client Vite build, admin TypeScript check, full admin production build,
+  authenticated admin route matrix, and public route matrix all passed locally.
+- Fixed account creation which returned from step 3 to step 2 by inspecting the visible step
+  rather than a hidden earlier panel. Confirmation redirects use the authorised local
+  `http://localhost:5173/account.html` return address when Vite is reached through either
+  localhost or `127.0.0.1`. `supabase/config.toml` now also records the `127.0.0.1` return
+  address, but do not run `supabase config push` because it can erase the configured Google
+  OAuth secret.
+- Real Auth confirmation testing created two isolated test accounts, confirmed each email,
+  verified the customer trigger, and called `account-created-alert` as an authenticated test
+  user. The endpoint returned `sent` and its delivery record is `sent`. Both temporary Auth
+  accounts and their customer records were then deleted. A browser that already had Beke's
+  session kept showing that older account after confirmation, so `account.js` now versions
+  auth loads and ignores a stale initial session. The client build passes with the correction.
+  The Computer Use native connection was unavailable, so a final clean-browser visual check
+  of that last session handoff remains outstanding.
+
+### 31/08/2026 Security, payments and release audit (Codex)
+
+- Added a visible **Email me a password reset link** action to the signed-in security page.
+  The direct password-update form still checks the current password when it is known, while
+  the reset link opens the existing password-recovery screen for anyone who has forgotten it.
+  The current sign-in email is now stated beside the change-email action.
+- Exercised isolated Supabase Auth sessions end to end. Recovery-email creation, pending
+  email-change creation, completed Auth-to-`customers.email` synchronisation, local
+  sign-out, and global sign-out refresh-token revocation all passed. The temporary Auth and
+  customer records were removed afterwards.
+- Customer notification failures dated from June and July and all hold the same historical
+  Resend 401 invalid-key response. A current live delivery test returned `sent`. The customer
+  notification list now labels those as an earlier delivery issue and explains that the email
+  service is repaired, instead of suggesting a current unresolved failure.
+- Found and fixed a real payment-state fault: setting **Deposit paid** in the admin left an
+  order at Enquiry, so the customer did not see their cake move to Confirmed. Payment now
+  routes the first recorded payment through `update-order-status`, aligns status and payment,
+  generates the invoice once, validates money values, and reports API errors in the admin.
+  The Edge Function is deployed.
+- Found and fixed two customer-document faults. Invoice PDFs are now saved to `invoice_path`,
+  making the Invoice button appear in the customer account. Operational invoices bypass
+  reminder preferences, because they are necessary to deliver the agreed service. Memory
+  cards continue to respect those preferences and now report sent, skipped and failed states
+  truthfully rather than claiming an opted-out customer received one. The revised
+  `update-order-status` Edge Function is deployed with these shared-email changes.
+- Full isolated lifecycle audit passed through the public Occasion Book endpoint, a customer
+  RLS session, the local admin login, local payment/status routes and the deployed order
+  engine: Enquiry, Quoted, Confirmed, Baking, Ready, Completed, customer invoice download,
+  locked then unlocked Occasion Book editing, first-order recording and customer reorder.
+  All test rows, notifications, reminder logs, and generated PDFs were deleted.
+- Public Vite build, admin TypeScript check, full Next production build and sequential local
+  route sweep all passed. Eight public routes and ten authenticated admin routes returned 200.
+  Google OAuth is already recorded as **In production** on 08/08/2026, so no test-user list
+  applies. Do not push `supabase/config.toml`; the config push can erase the existing Google
+  OAuth secret.
+- **Production deploy blocked externally.** On 31/08/2026 Vercel rejected the public
+  production deployment before upload with HTTP 402, `resource_creation_blocked`: “Your Team
+  exceeded our fair use limits and has been blocked.” No public or admin Vercel release was
+  created. The verified release should be deployed once the team account restriction is
+  cleared.
+
 ---
 
 ## 6. Open threads
@@ -872,13 +946,13 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | # | Item | Detail |
 |---|---|---|
 | 1 | Unshipped changes | `c26b088` responsive hardening, the recovery-state sign-up fix, and the activity-feed cleanup are local or on `main` but not deployed. Include the intended set in the next deploy the user asks for. |
-| 2 | One-time Occasion Book reminders | `daily-occasion-checker` sends customer reminders only for *recurring* events. One-time events are saved but skip the reminder sequence. Do not promise full coverage for one-time dates until this is fixed and deployed. |
+| 2 | ~~One-time Occasion Book reminders~~ | Closed 31/08/2026. `daily-occasion-checker` now sends the 30, 14 and 7 day customer sequence for future one-time dates and has been deployed. |
 | 3 | Test account cleanup | `hazelscakelounge+test@gmail.com`, auth user `fa766594-5264-4449-b5e7-a8bedab8d527`, created 29/07/2026 to verify the sign-up flow. Delete the auth user and its `customers` row once the user confirms. |
 | 4 | Unreferenced images | `work-ed-10`, `-17`, `-19`, `-22`, `-23` are no longer referenced but still ship in `public/images`. Delete only if the user confirms. |
 | 5 | Resend key hygiene | The rejected credential was replaced in both Edge Functions and Auth SMTP on 08/08/2026. The new sending key was also supplied in chat, so rotate it again directly from the correct Resend profile when practical and update the same two Supabase locations. Do not paste the replacement into chat. |
-| 6 | Email delivery unverified end to end | Sender-domain verification is now correct and a direct API send succeeded, but the full account-creation email path was never exercised against a real new account. |
+| 6 | Email confirmation session handoff | Narrow final check. Real account confirmation, redirect routing, customer creation and the new-account alert have all been exercised. The local browser kept an earlier Beke session after the confirmation redirect; a versioned auth-load correction is built locally, but still needs one clean-browser visual confirmation before release. |
 | 7 | Publish the Google OAuth consent screen | Completed on 08/08/2026. The app is In production; no Supabase change was needed. |
-| 8 | `customers.email` goes stale after an email change | Changing the sign-in email updates the auth user but nothing writes the new address back to the `customers` row, so reminders and invoices keep going to the old one. Found 08/08/2026 while building the Sign in tab; `account.js` now keeps a separate `authEmail` so password checks are not affected, but the write-back still needs doing (a trigger on `auth.users`, or an update alongside `verifyOtp`). |
+| 8 | ~~`customers.email` goes stale after an email change~~ | Closed 31/08/2026. Migration `0017` updates the linked customer email from `auth.users` on every sign-in-email change. |
 | 12 | ~~`add-circle-member` not deployed~~ | **Deployed 08/08/2026.** Closed. |
 | 11 | ~~Migrations `0012`, `0013`, `0014` not applied~~ | **Applied 08/08/2026** after Codex confirmed `0012` was final. Closed. |
 | 10 | ~~Two save-a-date forms, one column~~ Closed 08/08/2026 | The Occasion Book and the account calendar sheet write `circle_members.occasion_type` from different lists with different casing, and capture different fields. Unify the list into one shared constant, add the "Other" free-text follow-up to the sheet, and decide which fields are genuinely required. See the 08/08/2026 entry. |

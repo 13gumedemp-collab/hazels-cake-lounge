@@ -62,15 +62,21 @@ export async function generateInvoice(supabase: SupabaseClient, order_id: string
   page.drawText("Hazel", { x: 50, y, size: 12, font: bold, color: INK });
 
   const bytes = await pdf.save();
-  const { error: upErr } = await supabase.storage.from("invoices").upload(`${order_id}.pdf`, bytes, { contentType: "application/pdf", upsert: true });
+  const path = `${order_id}.pdf`;
+  const { error: upErr } = await supabase.storage.from("invoices").upload(path, bytes, { contentType: "application/pdf", upsert: true });
   if (upErr) return { status: "failed", error: `Storage: ${upErr.message}` };
 
-  await sendEmail(supabase, {
+  const delivery = await sendEmail(supabase, {
     customer_id: customer.id, template_name: "invoice", reminder_type: "invoice",
+    essential: true,
     dynamic_variables: { first_name: firstName(customer.full_name), person_name: cm?.person_name ?? "", occasion_type: cm?.occasion_type ?? "" },
     attachments: [{ filename: "Invoice.pdf", content: toBase64(bytes) }],
   });
-  await supabase.from("orders").update({ invoice_sent: true }).eq("id", order_id);
-  await notify(supabase, "invoice_sent", `Invoice sent to ${customer.full_name}.`);
-  return { status: "sent" };
+  await supabase.from("orders").update({ invoice_path: path, invoice_sent: delivery.status === "sent" }).eq("id", order_id);
+  if (delivery.status === "sent") {
+    await notify(supabase, "invoice_sent", `Invoice created and emailed to ${customer.full_name}.`);
+    return { status: "sent" };
+  }
+  await notify(supabase, "invoice_delivery_issue", `Invoice created for ${customer.full_name}, but its email could not be sent.`, "high", "/orders");
+  return { status: "failed", error: delivery.error ?? "Invoice email could not be sent" };
 }
