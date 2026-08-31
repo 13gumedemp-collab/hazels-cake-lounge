@@ -170,7 +170,7 @@ export function occasionBlockHtml() {
       <span class="field__label">Inspiration pictures <em class="field__opt">(optional)</em></span>
       <div class="enq__drop occ-upload" role="button" tabindex="0" aria-label="Add inspiration pictures">
         <input type="file" class="occ-file" accept="image/*" multiple hidden />
-        <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag pictures here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Up to 15 MB per picture</small></div>
+        <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag pictures here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Up to six pictures, 10 MB each</small></div>
       </div>
       <div class="enq__thumbs occ-thumbs"></div>
       <p class="enq__drop-status occ-upload-status" hidden></p>

@@ -477,7 +477,7 @@ function dateEditor(o) {
         <div class="enq__thumbs occ-pics__thumbs" data-edit-thumbs></div>
         <div class="enq__drop occ-pics__drop" role="button" tabindex="0" data-edit-drop aria-label="Add inspiration pictures">
           <input type="file" accept="image/*" multiple hidden data-edit-file />
-          <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag pictures here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Up to 15 MB per picture</small></div>
+          <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag pictures here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Up to six pictures, 10 MB each</small></div>
         </div>
         <p class="enq__drop-status occ-pics__status" data-edit-status hidden></p>
       </div>
@@ -1085,12 +1085,16 @@ async function paintEditThumbs() {
 
 async function uploadEditPhoto(file) {
   const status = $('[data-edit-status]');
-  if (editPhotos.length >= MAX_PICTURES) {
+  if (!file || !['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/gif', 'image/avif'].includes(String(file.type || '').toLowerCase())) {
+    if (status) { status.hidden = false; status.textContent = 'Choose a JPEG, PNG, WebP, HEIC, HEIF, GIF or AVIF picture.'; }
+    return;
+  }
+  if (editPhotos.length + editUploading >= MAX_PICTURES) {
     if (status) { status.hidden = false; status.textContent = `That is the most I can take, ${MAX_PICTURES} pictures.`; }
     return;
   }
-  if (file.size > 15 * 1024 * 1024) {
-    if (status) { status.hidden = false; status.textContent = `${file.name} is larger than 15 MB.`; }
+  if (file.size > 10 * 1024 * 1024) {
+    if (status) { status.hidden = false; status.textContent = `${file.name} is larger than 10 MB.`; }
     return;
   }
   editUploading += 1;
@@ -1819,8 +1823,6 @@ dashboard.addEventListener('submit', (e) => {
   if (e.target.matches('[data-save-date]')) saveDate(e);
   if (e.target.matches('[data-reorder-form]')) sendReorder(e);
 });
-$('#signOut').addEventListener('click', async () => { await supabase.auth.signOut(); setNavName(''); forgetMe(); location.reload(); });
-
 // A cancelled or expired social sign-in comes back as an error in the URL, not a session.
 const urlError = new URLSearchParams(location.hash.slice(1)).get('error_description')
   || new URLSearchParams(location.search).get('error_description');

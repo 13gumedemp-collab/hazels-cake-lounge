@@ -1694,6 +1694,7 @@ html.enq-open, body.enq-open { overflow: hidden; }
 .enq__drop.is-drag { border-color: var(--gold); background: rgba(212,175,55,0.06); }
 .enq__drop-empty p { font-family: 'Jost', sans-serif; color: var(--cream); font-size: 0.9rem; }
 .enq__drop-empty small { display: block; margin-top: 0.4rem; color: var(--muted); font-size: 0.74rem; }
+.bot-trap { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; }
 .upload-copy--mobile { display: none; }
 @media (max-width: 760px) {
   .upload-copy--desktop { display: none; }

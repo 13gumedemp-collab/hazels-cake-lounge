@@ -1,6 +1,6 @@
 // Public Community review intake. An account can enrich a review, but is never
 // required. Every submission starts in moderation and photos remain private.
-import { adminClient, corsHeaders, json, notify } from "../_shared/client.ts";
+import { adminClient, browserJson, browserPreflight, isAllowedBrowserOrigin, notify } from "../_shared/client.ts";
 
 const MAX_PHOTOS = 3;
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
@@ -91,29 +91,30 @@ async function linkedCustomer(supabase: ReturnType<typeof adminClient>, token: s
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return browserPreflight(req);
+  if (!isAllowedBrowserOrigin(req)) return browserJson(req, { error: "Forbidden" }, 403);
+  if (req.method !== "POST") return browserJson(req, { error: "Method not allowed" }, 405);
 
   let payload: Payload;
-  try { payload = await req.json(); } catch { return json({ error: "Please try again with a valid review." }, 400); }
+  try { payload = await req.json(); } catch { return browserJson(req, { error: "Please try again with a valid review." }, 400); }
 
   const rating = Number(payload.rating);
   const name = clean(payload.name, 80);
   const cakeOrBake = clean(payload.cake_or_bake, 100);
   const comment = clean(payload.comment, 2000);
   const photos = Array.isArray(payload.photos) ? payload.photos : [];
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5) return json({ error: "Please choose a rating out of five." }, 400);
-  if (comment.length < 5) return json({ error: "Please add a few words about your experience." }, 400);
-  if (photos.length > MAX_PHOTOS) return json({ error: "You can add up to three photos." }, 400);
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) return browserJson(req, { error: "Please choose a rating out of five." }, 400);
+  if (comment.length < 5) return browserJson(req, { error: "Please add a few words about your experience." }, 400);
+  if (photos.length > MAX_PHOTOS) return browserJson(req, { error: "You can add up to three photos." }, 400);
 
   const decodedPhotos = photos.map((photo) => decodePhoto(String(photo?.data_url || "")));
   if (decodedPhotos.some((photo) => !photo)) {
-    return json({ error: "Photos must be JPEG, PNG or WebP and no larger than 2 MB each." }, 400);
+    return browserJson(req, { error: "Photos must be JPEG, PNG or WebP and no larger than 2 MB each." }, 400);
   }
 
   const supabase = adminClient();
   if (!(await withinRateLimit(supabase, await fingerprintFor(req)))) {
-    return json({ error: "Please wait a few minutes before sending another review." }, 429);
+    return browserJson(req, { error: "Please wait a few minutes before sending another review." }, 429);
   }
 
   const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || null;
@@ -136,7 +137,7 @@ Deno.serve(async (req) => {
     })
     .select("id")
     .single();
-  if (reviewError || !review) return json({ error: "I could not save your review just yet. Please try again." }, 500);
+  if (reviewError || !review) return browserJson(req, { error: "I could not save your review just yet. Please try again." }, 500);
 
   const paths: string[] = [];
   try {
@@ -155,7 +156,7 @@ Deno.serve(async (req) => {
   } catch {
     if (paths.length) await supabase.storage.from("community-review-photos").remove(paths);
     await supabase.from("community_reviews").delete().eq("id", review.id);
-    return json({ error: "I could not add those photos. Please try again without them or choose smaller images." }, 500);
+    return browserJson(req, { error: "I could not add those photos. Please try again without them or choose smaller images." }, 500);
   }
 
   await notify(
@@ -165,5 +166,5 @@ Deno.serve(async (req) => {
     "standard",
     "/community",
   );
-  return json({ status: "pending", id: review.id });
+  return browserJson(req, { status: "pending", id: review.id });
 });

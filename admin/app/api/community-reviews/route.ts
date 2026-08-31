@@ -10,7 +10,7 @@ const ACTION_STATUS = {
 } as const;
 
 export async function POST(req: NextRequest) {
-  if (!(await verifySession(cookies().get(COOKIE)?.value))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await verifySession((await cookies()).get(COOKIE)?.value))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json().catch(() => ({}));
   const id = String(body.id || "");
   const action = String(body.action || "") as keyof typeof ACTION_STATUS;

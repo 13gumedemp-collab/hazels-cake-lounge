@@ -1109,3 +1109,39 @@ deprecation notice confirming this. The publish action is a Console-only, human 
 - The local Next development server retained a stale chunk after the public rebuild and then
   hung while recompiling. Replaced it with a verified production-mode local server on port
   3001. `GET /community` returns 200 and the signed-in browser view renders normally.
+
+### 31/08/2026 Launch security and legal hardening (Codex)
+
+- Applied and linked migration `0021_security_hardening.sql`: a private, hashed-fingerprint
+  request limiter; scoped limits for admin login, enquiries, callback requests and Occasion
+  Book writes; and restrictive private Storage rules. Only controlled guest `enq-` and `book-`
+  uploads or an authenticated owner\'s own customer folder are now accepted. The live checks
+  confirmed cross-origin writes and invalid Storage paths are blocked, while a permitted test
+  upload works and was removed immediately.
+- Hardened public Edge Functions with explicit allowed origins, honeypots, server-side input
+  validation, rate limits and generic error responses. Public review endpoints use the same
+  strict origin policy. Email template substitutions are now HTML-escaped. A guest cannot add
+  Occasion Book details to an existing customer merely by knowing their email address.
+- Locked down the Command Centre: production admin authentication uses a salted scrypt verifier
+  held server-side in `app_settings`, sessions are HTTP-only, Secure, SameSite=Strict and
+  high-priority, login writes have a persistent five-per-fifteen-minute limit, admin tokens
+  require the `admin` role, and all state-changing admin routes require the exact same origin.
+  The existing configured admin credential was migrated into the server-side scrypt verifier
+  without displaying or persisting its plaintext. It is shorter than the preferred 12+ character
+  replacement and should be changed by Hazel after launch.
+- Added production security headers and CSP in `vercel.json` and the admin configuration.
+  The custom local admin production server was rebuilt on Next 16.3.3, with the previous
+  high-severity dependency findings removed. Root and admin production dependency audits show
+  zero findings. The Vite build, admin production build, TypeScript check and JavaScript checks
+  all pass.
+- Updated the privacy policy, messaging terms and customer terms to disclose data handling,
+  third-party processors, international processing, public Community consent and retention,
+  customer rights, and consumer cancellation/refund protections. The app has no subscription,
+  free trial, AI chatbot or synthetic-review feature. Account deletion now removes the customer\'s
+  private and Community uploads, reviews and non-essential order detail before the auth record.
+- A historical service-role secret was detected only in the original tracked admin env example.
+  The current template now contains safe placeholders. Git history must be rewritten to remove
+  that file from all historical commits before the next push, then the safe template re-added.
+- Vercel remains externally blocked by its existing fair-use 402 restriction. Do not force a
+  deployment until the account restriction is lifted and Hazel explicitly requests it. Google
+  OAuth production publication remains a Console-only owner click as described above.

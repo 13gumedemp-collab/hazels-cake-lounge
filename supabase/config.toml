@@ -19,6 +19,14 @@ otp_length = 8
 [functions.process-enquiry]
 verify_jwt = false
 
+# Public website captures. Each endpoint validates its own payload, origin and
+# persistent rate limit, and does not rely on an anonymous browser token.
+[functions.request-callback]
+verify_jwt = false
+
+[functions.add-circle-member]
+verify_jwt = false
+
 # Public Community page functions. A guest may leave a review, while an optional
 # signed-in session is used only to connect their review to their account.
 [functions.submit-community-review]

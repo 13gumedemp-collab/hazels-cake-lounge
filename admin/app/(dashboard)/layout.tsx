@@ -25,7 +25,7 @@ async function getCounts() {
 }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  if (!(await verifySession(cookies().get(COOKIE)?.value))) redirect("/login");
+  if (!(await verifySession((await cookies()).get(COOKIE)?.value))) redirect("/login");
   const counts = await getCounts();
   return <Shell counts={counts}>{children}</Shell>;
 }

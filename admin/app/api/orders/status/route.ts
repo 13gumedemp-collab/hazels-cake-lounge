@@ -5,7 +5,7 @@ import { verifySession, COOKIE } from "@/lib/auth";
 // Moves an order through the pipeline by calling the update-order-status edge
 // function (which also fires invoices, memory cards and notifications).
 export async function POST(req: NextRequest) {
-  const token = cookies().get(COOKIE)?.value;
+  const token = (await cookies()).get(COOKIE)?.value;
   const session = await verifySession(token);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

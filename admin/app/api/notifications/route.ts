@@ -7,7 +7,7 @@ import { isMeaningfulActivity } from "@/lib/notifications";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  if (!(await verifySession(cookies().get(COOKIE)?.value))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await verifySession((await cookies()).get(COOKIE)?.value))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const sb = supabaseAdmin();
   const { data } = await sb
     .from("notifications")

@@ -1,6 +1,6 @@
 // Public Community wall. It exposes only reviews that Hazel has approved and
 // received permission to feature. Private storage photos receive short URLs.
-import { adminClient, corsHeaders, json } from "../_shared/client.ts";
+import { adminClient, browserJson, browserPreflight, isAllowedBrowserOrigin } from "../_shared/client.ts";
 
 interface ReviewRow {
   id: string;
@@ -15,8 +15,9 @@ interface ReviewRow {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return browserPreflight(req);
+  if (!isAllowedBrowserOrigin(req)) return browserJson(req, { error: "Forbidden" }, 403);
+  if (req.method !== "POST") return browserJson(req, { error: "Method not allowed" }, 405);
 
   const supabase = adminClient();
   const { data, error } = await supabase
@@ -26,7 +27,7 @@ Deno.serve(async (req) => {
     .eq("public_consent", true)
     .order("created_at", { ascending: false })
     .limit(60);
-  if (error) return json({ error: "Community reviews are unavailable just now." }, 500);
+  if (error) return browserJson(req, { error: "Community reviews are unavailable just now." }, 500);
 
   const reviews = await Promise.all(((data || []) as ReviewRow[]).map(async (review) => {
     const paths = Array.isArray(review.photo_paths) ? review.photo_paths : [];
@@ -50,5 +51,5 @@ Deno.serve(async (req) => {
     };
   }));
 
-  return json({ reviews });
+  return browserJson(req, { reviews });
 });

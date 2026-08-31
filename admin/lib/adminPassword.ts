@@ -26,5 +26,9 @@ export async function verifyAdminPassword(candidate: string) {
     ? String(data.value.password_hash || "")
     : "";
   if (stored) return verifyHash(candidate, stored);
+  // The environment-variable comparison is retained only for a fresh local
+  // checkout. A production administrator must use the salted scrypt value in
+  // app_settings, never a plaintext deployment variable.
+  if (process.env.NODE_ENV === "production") return false;
   return same(candidate, process.env.ADMIN_PASSWORD || "");
 }

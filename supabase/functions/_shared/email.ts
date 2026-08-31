@@ -48,7 +48,13 @@ export async function sendToAddress(
     const res = await fetch(RESEND_API, {
       method: "POST",
       headers: { "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, reply_to: REPLY_TO, to: [to], subject: fillTemplate(template.subject, merged), html: fillTemplate(template.body, merged) }),
+      body: JSON.stringify({
+        from: FROM,
+        reply_to: REPLY_TO,
+        to: [to],
+        subject: fillTemplate(template.subject, merged),
+        html: fillTemplate(template.body, merged, true),
+      }),
     });
     if (!res.ok) return { status: "failed", error: `Resend ${res.status}: ${await res.text()}` };
     return { status: "sent" };
@@ -86,7 +92,7 @@ export async function sendEmail(supabase: SupabaseClient, input: SendEmailInput)
 
   if (vars.first_name === undefined) vars.first_name = firstName(customer.full_name);
   const subject = fillTemplate(template.subject, vars);
-  const html = fillTemplate(template.body, vars);
+  const html = fillTemplate(template.body, vars, true);
 
   let status: SendResult["status"] = "sent";
   let errorMessage: string | null = null;

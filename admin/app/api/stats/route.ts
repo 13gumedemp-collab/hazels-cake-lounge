@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // Live dashboard figures, fetched client-side with a cache-busting query so no
 // service worker or router cache can ever serve a stale copy.
 export async function GET() {
-  if (!(await verifySession(cookies().get(COOKIE)?.value))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await verifySession((await cookies()).get(COOKIE)?.value))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const sb = supabaseAdmin();
   const todayIso = new Date(Date.now() + 2 * 3600 * 1000).toISOString().slice(0, 10);
 

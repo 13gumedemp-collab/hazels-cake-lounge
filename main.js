@@ -476,7 +476,7 @@ import {
 
   // Supabase project (anon key is public by design; data is protected by RLS).
   const SUPABASE_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnenBveXlpamFmYmx6Zml5aG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODk3MzIsImV4cCI6MjA5Nzk2NTczMn0.g-INXAO6kNGwN750J5rreKlroMFFro7Bl9uJXcr-vug';
+  const SUPABASE_ANON_KEY = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
 
   if (form) {
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
@@ -538,6 +538,7 @@ import {
         email_consent: true,
         whatsapp_consent: !!data.whatsapp_consent,
         occasion_book_opted_in: !!data.occasion_book,
+        website: String(data.website || ''),
       };
 
       const btn = form.querySelector('button[type="submit"]');
@@ -580,7 +581,16 @@ import {
      ============================================================ */
   (function enquiryOverlay() {
     const SB_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
-    const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnenBveXlpamFmYmx6Zml5aG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODk3MzIsImV4cCI6MjA5Nzk2NTczMn0.g-INXAO6kNGwN750J5rreKlroMFFro7Bl9uJXcr-vug';
+    const SB_ANON = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
+    const MAX_INSPIRATION_PHOTOS = 6;
+    const MAX_INSPIRATION_IMAGE_BYTES = 10 * 1024 * 1024;
+    const imageMime = (file) => {
+      const declared = String(file?.type || '').toLowerCase();
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/gif', 'image/avif'];
+      if (allowed.includes(declared)) return declared;
+      const extension = String(file?.name || '').split('.').pop().toLowerCase();
+      return ({ jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif', gif: 'image/gif', avif: 'image/avif' })[extension] || '';
+    };
     const ONE_OFF = ['Wedding', 'Graduation', 'Baby Shower'];
     // Hazel needs at least 4 full days' notice to bake.
     const LEAD_DAYS = 4;
@@ -594,6 +604,7 @@ import {
     const markup = `
       <div class="enq__scrim" data-enq-close></div>
       <div class="enq__panel" role="dialog" aria-modal="true" aria-label="Enquiry form">
+        <input class="bot-trap" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <div class="enq__progress"><span class="enq__progress-fill" id="enqFill"></span></div>
         <div class="enq__bar">
           <span class="enq__logo">Hazel's <em>Cake Lounge</em></span>
@@ -624,7 +635,7 @@ import {
             <div class="field"><span class="field__lbl">Show me cakes you love (optional)</span>
               <div class="enq__drop" id="enqDrop" data-cursor="link">
                 <input type="file" id="enqFile" accept="image/*" multiple hidden />
-                <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag images here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Add as many as you like. I will recreate the feeling of them.</small></div>
+                <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag images here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Up to six pictures, 10 MB each.</small></div>
               </div>
               <div class="enq__thumbs" id="enqThumbs"></div>
               <div class="enq__drop-status" hidden></div>
@@ -827,7 +838,7 @@ import {
       try {
         await fetch(SB_URL + '/functions/v1/request-callback', {
           method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
-          body: JSON.stringify({ phone: phone, name: val('full_name'), contact_method: method, contact_consent: true, occasion_for: val('occasion_for'), occasion_type: val('occasion_type'), occasion_date: val('occasion_date') }),
+          body: JSON.stringify({ phone: phone, name: val('full_name'), contact_method: method, contact_consent: true, occasion_for: val('occasion_for'), occasion_type: val('occasion_type'), occasion_date: val('occasion_date'), website: val('website') }),
         });
       } catch (e) { /* best effort */ }
       const how = method === 'whatsapp' ? 'send you a WhatsApp message' : 'give you a call';
@@ -850,14 +861,13 @@ import {
     const thumbs = $('#enqThumbs', overlay);
     const inspirationUrls = [];
     const setStatus = (msg) => { if (!dropStatus) return; if (msg) { dropStatus.hidden = false; dropStatus.textContent = msg; } else { dropStatus.hidden = true; dropStatus.textContent = ''; } };
-    function looksImage(file) {
-      return (file.type && file.type.indexOf('image/') === 0) || /\.(jpe?g|png|webp|heic|heif|gif|avif)$/i.test(file.name || '');
-    }
+    const looksImage = (file) => Boolean(imageMime(file));
     async function uploadOne(file) {
       if (!file) return;
       // Accept any image the device offers, including iPhone HEIC (empty MIME).
       if (!looksImage(file)) { setStatus('One of those was not an image, so I skipped it.'); return; }
-      if (file.size > 15 * 1024 * 1024) { setStatus(file.name + ' is over 15MB, try a smaller one.'); return; }
+      if (file.size > MAX_INSPIRATION_IMAGE_BYTES) { setStatus(file.name + ' is over 10 MB, try a smaller one.'); return; }
+      if (thumbs.children.length >= MAX_INSPIRATION_PHOTOS) { setStatus('You can add up to six pictures.'); return; }
       // Build a thumbnail with an uploading state straight away.
       const thumb = document.createElement('div');
       thumb.className = 'enq__thumb is-loading';
@@ -875,7 +885,7 @@ import {
         // Paths are random, so upsert is never needed anyway.
         const res = await fetch(SB_URL + '/storage/v1/object/inspiration-photos/' + encodeURIComponent(path), {
           method: 'POST',
-          headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': file.type || 'application/octet-stream' },
+          headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': imageMime(file) },
           body: file,
         });
         if (!res.ok) throw new Error(await res.text());
@@ -925,6 +935,7 @@ import {
         inspiration_photo_url: inspirationUrls[0] || '', inspiration_photo_urls: inspirationUrls.slice(),
         email_consent: true, whatsapp_consent: $('[name="whatsapp_consent"]', overlay).checked,
         occasion_book_opted_in: $('[name="occasion_book"]', overlay).checked,
+        website: val('website'),
       };
       try {
         const res = await fetch(SB_URL + '/functions/v1/process-enquiry', {
@@ -1101,10 +1112,11 @@ import {
           uploadStatus.hidden = !message;
           uploadStatus.textContent = message || '';
         };
-        const looksImage = (file) => (file.type && file.type.indexOf('image/') === 0) || /\.(jpe?g|png|webp|heic|heif|gif|avif)$/i.test(file.name || '');
+        const looksImage = (file) => Boolean(imageMime(file));
         const uploadOne = async (file) => {
           if (!looksImage(file)) { setUploadStatus('That file is not a picture.'); return; }
-          if (file.size > 15 * 1024 * 1024) { setUploadStatus(file.name + ' is over 15 MB.'); return; }
+          if (file.size > MAX_INSPIRATION_IMAGE_BYTES) { setUploadStatus(file.name + ' is over 10 MB.'); return; }
+          if (thumbs.children.length >= MAX_INSPIRATION_PHOTOS) { setUploadStatus('You can add up to six pictures per occasion.'); return; }
           const thumb = document.createElement('div');
           thumb.className = 'enq__thumb is-loading';
           const img = document.createElement('img'); img.alt = 'Your inspiration picture';
@@ -1118,7 +1130,7 @@ import {
           try {
             const res = await fetch(SB_URL + '/storage/v1/object/inspiration-photos/' + encodeURIComponent(path), {
               method: 'POST',
-              headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': file.type || 'application/octet-stream' },
+              headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': imageMime(file) },
               body: file,
             });
             if (!res.ok) throw new Error(await res.text());
@@ -1217,25 +1229,35 @@ import {
         const btn = addForm.querySelector('button[type="submit"]');
         const label = btn ? btn.textContent : '';
         if (btn) { btn.disabled = true; btn.textContent = 'Adding...'; }
-        let added = 0, failed = false;
-        for (const it of items) {
-          try {
-            // Pictures go in photo_paths now, not appended to the notes text.
-            const savedNotes = it.notes || '';
-            const res = await fetch(SB_URL + '/functions/v1/add-circle-member', {
-              method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
-              body: JSON.stringify({
-                email: String(f.email).trim().toLowerCase(), full_name: String(f.full_name).trim(),
-                person_name: it.person_name, relationship_to_customer: it.relationship,
-                occasion_type: it.occasion_type, occasion_other: it.occasion_other, occasion_date: it.occasion_date,
+        let added = 0;
+        try {
+          const res = await fetch(SB_URL + '/functions/v1/add-circle-member', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
+            body: JSON.stringify({
+              email: String(f.email).trim().toLowerCase(),
+              full_name: String(f.full_name).trim(),
+              website: String(f.website || ''),
+              items: items.map((it) => ({
+                person_name: it.person_name,
+                relationship_to_customer: it.relationship,
+                occasion_type: it.occasion_type,
+                occasion_other: it.occasion_other,
+                occasion_date: it.occasion_date,
                 recurring_yearly: it.recurring_yearly,
-                notes: savedNotes, inspiration_photo_urls: it.inspiration_photo_urls,
-              }),
-            });
-            const out = await res.json().catch(() => ({}));
-            if (out.status === 'success') added++; else failed = true;
-          } catch (err) { failed = true; }
-        }
+                notes: it.notes || '',
+                inspiration_photo_urls: it.inspiration_photo_urls,
+              })),
+            }),
+          });
+          const out = await res.json().catch(() => ({}));
+          if (res.ok && out.status === 'success') {
+            added = Number(out.count || items.length);
+          } else if (res.status === 409) {
+            if (btn) { btn.disabled = false; btn.textContent = label; }
+            addStatus.innerHTML = 'This email already has an account. <a href="account.html">Please sign in</a> before changing its Occasion Book.';
+            return;
+          }
+        } catch (err) { /* the recovery message below gives the customer a safe next step */ }
         if (added) {
           // Never move someone's date silently. Say which one moved and why.
           const prettyDay = (s) => new Date(s + 'T00:00:00').toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });

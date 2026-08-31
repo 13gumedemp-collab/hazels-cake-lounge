@@ -12,6 +12,14 @@
 // position and the customer is told it plainly in the account page copy.
 import { adminClient, corsHeaders, json, notify } from "../_shared/client.ts";
 
+function storagePaths(value: unknown): string[] {
+  const input = Array.isArray(value) ? value : [];
+  return input.map((path) => String(path || "")).filter((path) =>
+    /^(?:enq|book)-[a-z0-9]{8,}-[A-Za-z0-9._-]{1,100}$/.test(path) ||
+    /^[0-9a-f-]{36}\/[A-Za-z0-9._-]{1,140}$/.test(path)
+  );
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -43,6 +51,37 @@ Deno.serve(async (req) => {
     .maybeSingle();
 
   if (customer) {
+    // Gather every customer-owned upload before the cascading row delete. A
+    // storage object does not follow a database foreign key automatically.
+    const [{ data: dates }, { data: orders }, { data: reviews }] = await Promise.all([
+      supabase.from("circle_members").select("photo_paths").eq("customer_id", customer.id),
+      supabase.from("orders").select("inspiration_photo_url").eq("customer_id", customer.id),
+      supabase.from("community_reviews").select("id, photo_paths").eq("customer_id", customer.id),
+    ]);
+    const inspirationPaths = [
+      ...(dates || []).flatMap((date) => storagePaths(date.photo_paths)),
+      ...(orders || []).flatMap((order) => String(order.inspiration_photo_url || "").split(",").filter(Boolean)),
+    ].filter((path, index, all) => storagePaths([path]).length === 1 && all.indexOf(path) === index);
+    const reviewPaths = (reviews || []).flatMap((review) => storagePaths(review.photo_paths));
+
+    await Promise.allSettled([
+      inspirationPaths.length ? supabase.storage.from("inspiration-photos").remove(inspirationPaths) : Promise.resolve(),
+      reviewPaths.length ? supabase.storage.from("community-review-photos").remove(reviewPaths) : Promise.resolve(),
+      reviews?.length ? supabase.from("community_reviews").delete().eq("customer_id", customer.id) : Promise.resolve(),
+    ]);
+
+    // Keep the minimum tax and payment record, but remove delivery, cake and
+    // uploaded-content details that are not needed once the account is gone.
+    await supabase.from("orders").update({
+      cake_flavour: null,
+      cake_description: null,
+      cake_photo_url: null,
+      inspiration_photo_url: null,
+      number_of_people: null,
+      colours_and_themes: null,
+      delivery_address: null,
+    }).eq("customer_id", customer.id);
+
     const { error: rowError } = await supabase.from("customers").delete().eq("id", customer.id);
     if (rowError) return json({ error: "Could not delete your details" }, 500);
 
@@ -69,7 +108,7 @@ Deno.serve(async (req) => {
   await notify(
     supabase,
     "account_deleted",
-    `${customer?.full_name || auth.user.email || "A customer"} deleted their account. Their orders are kept without a name attached.`,
+    "A customer deleted their account. Their identifiable account data and uploads were removed; necessary tax records may remain.",
     "high",
   );
 

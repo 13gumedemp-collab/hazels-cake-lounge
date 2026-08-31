@@ -4,7 +4,7 @@ import { verifySession, COOKIE } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabaseServer";
 
 export async function POST(req: NextRequest) {
-  const token = cookies().get(COOKIE)?.value;
+  const token = (await cookies()).get(COOKIE)?.value;
   if (!(await verifySession(token))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json().catch(() => ({}));
   if (!body.order_id || !["unpaid", "deposit_paid", "paid_in_full"].includes(body.payment_status)) {
