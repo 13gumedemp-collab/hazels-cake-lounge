@@ -1095,3 +1095,17 @@ deprecation notice confirming this. The publish action is a Console-only, human 
   opted-in review, and complete test-data cleanup. Public Vite production build and JavaScript
   syntax checks pass. A real Beke review has not been submitted: get explicit confirmation
   immediately before creating the genuine pending review and admin notification.
+
+### 31/08/2026 Retained live Community review test (Codex)
+
+- With the user's explicit final approval, submitted the retained test review
+  `a360960d-7129-43b3-b8b8-d4998092e7e9`: five stars, Birthday cake, hidden public reviewer
+  name, public-display permission and one real cake photo. It is currently **pending** and must
+  not be approved, rejected, featured or deleted unless the user specifically asks.
+- Verified in the local Command Centre Community workspace: the review card, secure image,
+  one waiting item and the unread notification “A new 5-star Community review from A happy
+  customer is waiting for approval” all appear correctly. Left that page open as a browser
+  deliverable for the user.
+- The local Next development server retained a stale chunk after the public rebuild and then
+  hung while recompiling. Replaced it with a verified production-mode local server on port
+  3001. `GET /community` returns 200 and the signed-in browser view renders normally.
