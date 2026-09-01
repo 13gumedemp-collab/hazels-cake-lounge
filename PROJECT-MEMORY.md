@@ -6,7 +6,7 @@ other) reads this file before working and appends to it after working.
 **Never put secrets in this file.** No API keys, tokens, passwords or client secrets.
 Record that a credential exists and where it lives, never its value.
 
-Last updated: 31/08/2026
+Last updated: 01/09/2026
 
 ---
 
@@ -1021,13 +1021,38 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   deployed Supabase hardening is live, while both web projects remain on their earlier releases
   until Vercel lifts the team restriction and the same two batched deployments are retried.
 
+### 01/09/2026 Atlas Vercel migration and production launch (Codex)
+
+- Transferred `hazels-cake-lounge` and `hazels-command-centre` from the blocked
+  `13gumedemp-collabs-projects` team to the `Atlas Projects` Pro team
+  (`ofentses-projects-66d84f30`). Both project IDs stayed unchanged. The supported Vercel
+  transfer preserved their deployments, configuration, domains and seven existing Command
+  Centre environment variables without customer-facing downtime.
+- Removed the stale, non-resolving `hazelcakelounge.co.za` singular project-domain mapping
+  before transfer. It is a third-party domain and must not be used. The correct plural apex,
+  `www` site and `admin` subdomain are verified under Atlas Projects. The plural apex still
+  redirects permanently to `www`.
+- Live verification found that `AUTH_SECRET` existed in the untracked local admin environment
+  but had never been configured in Vercel. Production correctly refused to mint a session
+  without it. Added the intended value as a sensitive production environment variable without
+  logging it, then redeployed the Command Centre.
+- Production deployments `dpl_6tHfEhS26cnBWwUpJWD6Hd5t7BtV` for the public site and
+  `dpl_5hgC2URD71VZ8Gdq4mFuG2xDasrg` for the Command Centre are Ready and aliased to
+  `https://www.hazelscakelounge.co.za` and `https://admin.hazelscakelounge.co.za`.
+- Post-launch checks pass. All 12 public pages return 200, the apex returns a 308 redirect,
+  security headers including CSP are live, the home page renders correctly and its browser
+  console is clear. A real production admin login returns 200; all 11 authenticated screens
+  and both read APIs return 200; the session cookie is Secure, HttpOnly, SameSite=Strict and
+  Priority=High; anonymous dashboard and API access return 307 and 401 respectively; and a
+  cross-origin write returns 403.
+
 ---
 
 ## 6. Open threads
 
 | # | Item | Detail |
 |---|---|---|
-| 1 | Unshipped Vercel release | Commit `45a794c` and the earlier batched public/admin work are pushed to `origin/main`. Supabase migrations and changed Edge Functions are live, but the public and Command Centre Vercel releases are blocked at team level by the fair-use restriction. Retry both production deployments after Vercel lifts it. |
+| 1 | ~~Unshipped Vercel release~~ | Closed 01/09/2026. Both projects were transferred to Atlas Projects Pro and the secured production builds are live on the correct public and admin domains. |
 | 2 | ~~One-time Occasion Book reminders~~ | Closed 31/08/2026. `daily-occasion-checker` now sends the 30, 14 and 7 day customer sequence for future one-time dates and has been deployed. |
 | 3 | Test account cleanup | `hazelscakelounge+test@gmail.com`, auth user `fa766594-5264-4449-b5e7-a8bedab8d527`, created 29/07/2026 to verify the sign-up flow. Delete the auth user and its `customers` row once the user confirms. |
 | 4 | Unreferenced images | `work-ed-10`, `-17`, `-19`, `-22`, `-23` are no longer referenced but still ship in `public/images`. Delete only if the user confirms. |
