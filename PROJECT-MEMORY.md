@@ -1015,7 +1015,11 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 - The public GitHub repository and current tracked tree contain no service-role or Resend secret.
   Historical JWT candidates are public anon keys only. The safe `admin/.env.example` is the only
   tracked env example in reachable history, so the earlier history-rewrite warning is resolved.
-- Vercel production publication is still to be attempted after this verified source is committed.
+- Commit `45a794c` is pushed to `origin/main`. Both authorised Vercel production attempts were
+  rejected before upload: `hazels-cake-lounge` and `hazels-command-centre` each returned “Your
+  Team exceeded our fair use limits and has been blocked.” No Vercel release was created. The
+  deployed Supabase hardening is live, while both web projects remain on their earlier releases
+  until Vercel lifts the team restriction and the same two batched deployments are retried.
 
 ---
 
@@ -1023,7 +1027,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 
 | # | Item | Detail |
 |---|---|---|
-| 1 | Unshipped changes | `c26b088` responsive hardening, the recovery-state sign-up fix, and the activity-feed cleanup are local or on `main` but not deployed. Include the intended set in the next deploy the user asks for. |
+| 1 | Unshipped Vercel release | Commit `45a794c` and the earlier batched public/admin work are pushed to `origin/main`. Supabase migrations and changed Edge Functions are live, but the public and Command Centre Vercel releases are blocked at team level by the fair-use restriction. Retry both production deployments after Vercel lifts it. |
 | 2 | ~~One-time Occasion Book reminders~~ | Closed 31/08/2026. `daily-occasion-checker` now sends the 30, 14 and 7 day customer sequence for future one-time dates and has been deployed. |
 | 3 | Test account cleanup | `hazelscakelounge+test@gmail.com`, auth user `fa766594-5264-4449-b5e7-a8bedab8d527`, created 29/07/2026 to verify the sign-up flow. Delete the auth user and its `customers` row once the user confirms. |
 | 4 | Unreferenced images | `work-ed-10`, `-17`, `-19`, `-22`, `-23` are no longer referenced but still ship in `public/images`. Delete only if the user confirms. |
