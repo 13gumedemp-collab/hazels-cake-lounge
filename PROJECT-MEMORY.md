@@ -1057,14 +1057,14 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 3 | Test account cleanup | `hazelscakelounge+test@gmail.com`, auth user `fa766594-5264-4449-b5e7-a8bedab8d527`, created 29/07/2026 to verify the sign-up flow. Delete the auth user and its `customers` row once the user confirms. |
 | 4 | Unreferenced images | `work-ed-10`, `-17`, `-19`, `-22`, `-23` are no longer referenced but still ship in `public/images`. Delete only if the user confirms. |
 | 5 | Resend key hygiene | The rejected credential was replaced in both Edge Functions and Auth SMTP on 08/08/2026. The new sending key was also supplied in chat, so rotate it again directly from the correct Resend profile when practical and update the same two Supabase locations. Do not paste the replacement into chat. |
-| 6 | Email confirmation session handoff | Narrow final check. Real account confirmation, redirect routing, customer creation and the new-account alert have all been exercised. The local browser kept an earlier Beke session after the confirmation redirect; a versioned auth-load correction is built locally, but still needs one clean-browser visual confirmation before release. |
+| 6 | Email confirmation Gmail visual check | The hosted template now sends an eight-digit `{{ .Token }}` only, with no confirmation link, and production verifies it with OTP type `email`. `bleazyblue14@gmail.com` is confirmed in Auth. Chrome control updated during the Gmail check, so restart the app and visually confirm the newest message is in the inbox, contains the code, and the live sign-in form has no pale autofill block. |
 | 7 | Publish the Google OAuth consent screen | Completed on 08/08/2026. The app is In production; no Supabase change was needed. |
 | 8 | ~~`customers.email` goes stale after an email change~~ | Closed 31/08/2026. Migration `0017` updates the linked customer email from `auth.users` on every sign-in-email change. |
 | 12 | ~~`add-circle-member` not deployed~~ | **Deployed 08/08/2026.** Closed. |
 | 11 | ~~Migrations `0012`, `0013`, `0014` not applied~~ | **Applied 08/08/2026** after Codex confirmed `0012` was final. Closed. |
 | 10 | ~~Two save-a-date forms, one column~~ Closed 08/08/2026 | The Occasion Book and the account calendar sheet write `circle_members.occasion_type` from different lists with different casing, and capture different fields. Unify the list into one shared constant, add the "Other" free-text follow-up to the sheet, and decide which fields are genuinely required. See the 08/08/2026 entry. |
 | 9 | ~~`delete-account` is not deployed~~ | **Deployed 08/08/2026.** Closed. |
-| 13 | Inbound email and bounce handling | The Command Centre records deliveries and sends templates, but replies remain in the business inbox and Resend bounces are not yet ingested or suppressed. Complete the inbound webhook and verified bounce workflow before calling it a two-way inbox. |
+| 13 | Inbound email complete, sender bounce connection outstanding | Managed-domain replies, verified webhook ingestion, Command Centre threads and replies, and local suppression all pass. The existing Hazel sending key belongs to another Resend workspace and has sending-only permission, so its customer delivery events do not reach the Atlas webhook. Obtain a full-access key in the Resend workspace that owns `hazelscakelounge.co.za`, then register the same delivery and bounce webhook there before describing customer-facing bounce suppression as fully operational. |
 | 14 | Replace the admin password | The server-side salted scrypt verifier, strict session cookie and persistent login limit are active. Hazel should still replace the current shorter credential with a unique 12+ character password after launch. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
@@ -1210,3 +1210,65 @@ deprecation notice confirming this. The publish action is a Console-only, human 
 - Vercel remains externally blocked by its existing fair-use 402 restriction. Do not force a
   deployment until the account restriction is lifted and Hazel explicitly requests it. Google
   OAuth production publication remains a Console-only owner click as described above.
+
+### 01/09/2026 Two-way email, OTP and production release (Codex)
+
+- Added private `email_threads`, `email_messages`, `email_suppressions` and
+  `email_webhook_events` tables in migration `0022_email_inbox_and_suppression.sql`.
+  Migration `0022` is applied remotely. Browser roles have no grants, RLS is enabled, and
+  service-role access is reserved for Edge Functions and the Command Centre server.
+- Rebuilt the Command Centre Message Centre with Inbox, Delivery and Suppressed views,
+  safe plain-text conversation rendering, unread state, thread open and close actions, and a
+  reply composer. New authenticated routes are `/api/messages/reply` and
+  `/api/messages/thread`. A production admin login, the `/messages` page, a read action and a
+  real reply all returned 200. The rendered page contained the live test thread and inbound
+  reply.
+- Added a public POST-only `resend-webhook` Edge Function with raw-body Svix HMAC validation,
+  a five-minute timestamp tolerance, idempotent event storage, inbound message retrieval,
+  thread-specific plus-address routing, delivery state updates and automatic hard-bounce,
+  complaint and provider-suppression records. Raw HTML, attachment bytes and secrets are not
+  stored. Unsigned requests return 401, GET returns 405, and a real signed production request
+  returned 200.
+- Created a dedicated full-access Atlas Resend receiving key and production webhook. The
+  reply domain is the managed receiving domain `iibelainex.resend.app`. Encrypted Supabase
+  secrets are `RESEND_INBOUND_API_KEY`, `RESEND_WEBHOOK_SECRET` and
+  `RESEND_REPLY_DOMAIN`. The webhook listens only for `email.received`, `email.sent`,
+  `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.failed`,
+  `email.suppressed` and `email.complained`.
+- A real production test sent a replyable message to `bleazyblue14@gmail.com`. A controlled
+  message to the managed plus-address generated `email.received`, was retrieved from Resend,
+  joined the original customer thread and appeared in the Command Centre. The production
+  reply route then sent back to the Gmail address successfully.
+- Resend's official `bounced+label@resend.dev` simulator generated `email.sent` and
+  `email.bounced` events. The webhook created an active bounce suppression with its SMTP
+  diagnostic, and the next send to the same address returned `skipped` before contacting
+  Resend. `send-test-email` now exposes hard-coded, service-role-only Resend delivery
+  scenarios for safe operational checks. It does not accept an arbitrary test recipient.
+- Important account boundary: the existing `RESEND_API_KEY` that sends Hazel customer email
+  belongs to a different Resend workspace and has sending-only permission. Its webhook-list
+  request returns 401. The Atlas webhook therefore receives Atlas test events and managed
+  inbound replies, but it cannot receive delivery events produced by that older sending
+  workspace. A full-access key from the Resend workspace that owns
+  `hazelscakelounge.co.za` is still required to register the same webhook for real customer
+  bounces. Do not call customer-facing bounce suppression complete until that key is supplied.
+- Replaced the hosted Supabase Confirm signup template through the Management API with the
+  branded code-only template in `supabase/templates/confirmation.html`. The live subject is
+  `Your Hazel's Cake Lounge confirmation code`, the content contains `{{ .Token }}`, contains
+  no `.ConfirmationURL`, the configured OTP length is eight and the site URL is the correct
+  plural domain. Production `account.js` verifies with type `email` and guards missing pending
+  email state. `bleazyblue14@gmail.com` is already confirmed in Auth and linked to customer
+  `570fb488-2733-47e2-a835-6401a709d97c`.
+- Strengthened the final browser-autofill rule with an inset background shadow for current
+  Chrome and the standards `:autofill` fallback. The production CSS contains the fix. Chrome
+  and Computer Use updated during the Gmail visual check and their control services need a
+  fresh app session, so inbox placement, displayed OTP and the autofill screenshot remain the
+  narrow visual checks in open thread 6.
+- Updated the privacy policy for received email text, delivery processing and attachment
+  metadata retention. Public production deployment
+  `dpl_3W2yRmpRz5zoU6GccFMt42L835Yp` is Ready and aliased to the public apex and `www`.
+  Command Centre deployment `dpl_wu2bMLL2yc7AwhpeD682P7tNh9Vb` is Ready and aliased to
+  `admin.hazelscakelounge.co.za`.
+- All 12 public pages and the admin login return 200 with HSTS, CSP and clickjacking headers.
+  Anonymous `/messages` redirects to login, cross-origin writes return 403, and authenticated
+  Message Centre actions pass. Root and admin production dependency audits report zero
+  vulnerabilities. Vite, Next, TypeScript and both Vercel production builds pass.

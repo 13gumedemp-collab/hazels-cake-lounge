@@ -1943,18 +1943,15 @@ html.enq-open, body.enq-open { overflow: hidden; }
 }
 
 /* ============================================================
-   Browser autofill  —  keep this LAST in the file
+   Browser autofill: keep this LAST in the file
    ============================================================
    Chrome and Safari paint an opaque pale blue box with near black text over any
    field the browser fills, which on a black page reads as a broken form.
 
    Two separate fights, and they are won in different ways.
 
-   1. The BACKGROUND comes from a user agent `!important` rule. The cascade puts
-      user agent `!important` above author `!important`, so no ordinary override
-      reaches it. Transitions are the one thing ranked higher still, so a
-      duration long enough never to finish means the new background is never
-      painted. This is the only lever that works.
+   1. Chrome can paint its own pale background above the normal field colour.
+      A large inset shadow covers that paint reliably in current Chrome.
 
    2. The TEXT is easier: the user agent sets `color` but not
       `-webkit-text-fill-color`, and the fill colour wins when both are present.
@@ -1985,6 +1982,10 @@ select:-webkit-autofill:-webkit-autofill:active {
   -webkit-text-fill-color: var(--cream) !important;
   caret-color: var(--gold);
   border-radius: 0;
+  -webkit-box-shadow: 0 0 0 1000px var(--bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--bg) inset !important;
+  background-color: var(--bg) !important;
+  background-clip: padding-box !important;
   transition: border-color 0.4s var(--ease),
               background-color 600000s 0s,
               color 600000s 0s,
@@ -1999,4 +2000,6 @@ select:autofill {
   filter: none;
   -webkit-text-fill-color: var(--cream);
   caret-color: var(--gold);
+  box-shadow: 0 0 0 1000px var(--bg) inset;
+  background-color: var(--bg);
 }

@@ -222,8 +222,13 @@ async function createAccount(e) {
 async function confirmEmail(e) {
   e.preventDefault();
   const token = String(new FormData(e.currentTarget).get('token') || '').replace(/\s/g, '');
+  if (!pendingEmail) {
+    authStatus.textContent = 'Please create your account again so I know which email to confirm.';
+    showPanel('signup');
+    return;
+  }
   authStatus.textContent = 'Checking your code...';
-  const { error } = await supabase.auth.verifyOtp({ email: pendingEmail, token, type: 'signup' });
+  const { error } = await supabase.auth.verifyOtp({ email: pendingEmail, token, type: 'email' });
   if (error) authStatus.textContent = 'That code is not right, or it has expired. Try again or send a new one.';
 }
 

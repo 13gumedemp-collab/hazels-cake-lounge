@@ -35,6 +35,11 @@ verify_jwt = false
 [functions.list-community-reviews]
 verify_jwt = false
 
+# Resend signs the raw request with a dedicated webhook secret. JWT validation
+# is disabled at the gateway because Resend is not a Supabase user.
+[functions.resend-webhook]
+verify_jwt = false
+
 # Google customer sign-in. The client secret is injected only while deploying
 # this configuration and is never committed to the repository.
 [auth.external.google]
