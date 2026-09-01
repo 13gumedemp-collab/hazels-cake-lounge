@@ -1068,6 +1068,47 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   provider-suppression events from Hazel's sending workspace are now connected to the existing
   local suppression controls.
 
+### 01/09/2026 Live customer journey, account reset and Occasion Book email (Codex)
+
+- Removed all six existing production Auth accounts and their six linked customer accounts at
+  the user's request. The two historical orders were retained only in anonymised form for the
+  stated SARS recordkeeping boundary. No unmatched Auth account or linked customer remained.
+- Created and confirmed one clean production account for `bleazyblue14@gmail.com`. The branded
+  eight digit confirmation email appeared in the correct Gmail inbox and the live site entered
+  the signed in account successfully. This is now the only Auth user and the only customer row
+  linked to Auth.
+- The live journey found a genuine signed in Save a Date defect. `main.js` displayed cached
+  account details but called `add-circle-member` with only the public key, so the backend treated
+  the customer as a guest. Public saved dates and cake enquiries now send the active account
+  access token when one exists. `process-enquiry` also rejects an anonymous submission that uses
+  an email already owned by an account, which closes a profile overwrite path. The anonymous
+  takeover test returns 409 with zero rows or emails created.
+- Deployed the repaired `process-enquiry` Edge Function and Vercel production deployment
+  `dpl_7xNJafnePdmob4um4tgkt55vWnCg`, aliased to `www.hazelscakelounge.co.za`. A signed in live
+  saved date then succeeded, a live cake enquiry created the correct order and private
+  Occasion Book row, and a private five star Community review reached pending moderation.
+  The customer account showed the order, payment, annual reminder and one time reminder states.
+- Resend delivered both the Occasion Book confirmation and enquiry acknowledgement to the
+  bleazy Gmail inbox. The Command Centre authenticated successfully and its protected Orders,
+  Community, Customers, Messages and Reminders pages all returned 200 with the matching test
+  data. The test order, both dates, review, two sent logs, two message threads, two messages,
+  five notifications and all temporary contact details were then removed. The verified bleazy
+  account remains with email reminders on and WhatsApp reminders off.
+- Migration `0023_friendlier_occasion_book_email.sql` is applied remotely. The Occasion Book
+  confirmation no longer says "That is my job now". It now explains the one month, two week and
+  one week reminder schedule, confirms that saving is free and does not book a cake, and invites
+  the customer to reply for help. The seed template matches production.
+- Customer email replies already work. Outbound customer messages use a thread specific address
+  on the configured Resend receiving domain. A processed `email.received` webhook and an inbound
+  Message Centre row remain as production evidence of that route. Direct mail to
+  `hello@hazelscakelounge.co.za` also reaches `hazelscakelounge@gmail.com` through the live
+  Forward Email MX and TXT configuration, so no address change is required.
+- Final production checks passed. All 12 public pages return 200 with CSP, HSTS and `nosniff`,
+  57 referenced same origin pages and assets return successfully, the plural apex redirects 308
+  to `www`, anonymous admin screens redirect to login, a hostile cross origin admin write returns
+  403, and the protected administration screens load after a real server side login. The Vite
+  production build and admin TypeScript check pass.
+
 ---
 
 ## 6. Open threads
@@ -1076,10 +1117,10 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 |---|---|---|
 | 1 | ~~Unshipped Vercel release~~ | Closed 01/09/2026. Both projects were transferred to Atlas Projects Pro and the secured production builds are live on the correct public and admin domains. |
 | 2 | ~~One-time Occasion Book reminders~~ | Closed 31/08/2026. `daily-occasion-checker` now sends the 30, 14 and 7 day customer sequence for future one-time dates and has been deployed. |
-| 3 | Test account cleanup | `hazelscakelounge+test@gmail.com`, auth user `fa766594-5264-4449-b5e7-a8bedab8d527`, created 29/07/2026 to verify the sign-up flow. Delete the auth user and its `customers` row once the user confirms. |
+| 3 | ~~Test account cleanup~~ | Closed 01/09/2026. All six previous production Auth accounts and linked customer accounts were removed. The only remaining account is the newly verified `bleazyblue14@gmail.com` journey account. |
 | 4 | Unreferenced images | `work-ed-10`, `-17`, `-19`, `-22`, `-23` are no longer referenced but still ship in `public/images`. Delete only if the user confirms. |
 | 5 | Resend key hygiene | The rejected credential was replaced in both Edge Functions and Auth SMTP on 08/08/2026. The new sending key was also supplied in chat, so rotate it again directly from the correct Resend profile when practical and update the same two Supabase locations. Do not paste the replacement into chat. |
-| 6 | Email confirmation Gmail visual check | The hosted template now sends an eight-digit `{{ .Token }}` only, with no confirmation link, and production verifies it with OTP type `email`. `bleazyblue14@gmail.com` is confirmed in Auth. On 01/09/2026 the updated Chrome extension was verified installed and enabled in the Hazel profile and its native-host manifest passed, but the desktop browser channel returned an internal environment mismatch and Computer Use could not find its native pipe. Fully restart the Codex desktop app, then visually confirm the newest message is in the inbox, contains the code, and the live sign-in form has no pale autofill block. |
+| 6 | ~~Email confirmation Gmail visual check~~ | Closed 01/09/2026. The branded code only message appeared in the `bleazyblue14@gmail.com` Primary inbox, the eight digit code confirmed the account, and the signed in customer journey completed. |
 | 7 | Publish the Google OAuth consent screen | Completed on 08/08/2026. The app is In production; no Supabase change was needed. |
 | 8 | ~~`customers.email` goes stale after an email change~~ | Closed 31/08/2026. Migration `0017` updates the linked customer email from `auth.users` on every sign-in-email change. |
 | 12 | ~~`add-circle-member` not deployed~~ | **Deployed 08/08/2026.** Closed. |
@@ -1088,6 +1129,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 9 | ~~`delete-account` is not deployed~~ | **Deployed 08/08/2026.** Closed. |
 | 13 | ~~Inbound email complete, sender bounce connection outstanding~~ | Closed 01/09/2026. The correct `hazelscakelounge` Resend workspace now has its own seven-event delivery and bounce webhook. The Edge Function verifies both workspace secrets, and a real Hazel-workspace bounce simulation produced processed `email.sent` and `email.bounced` events plus the expected local suppression. |
 | 14 | Replace the admin password | The server-side salted scrypt verifier, strict session cookie and persistent login limit are active. Hazel should still replace the current shorter credential with a unique 12+ character password after launch. |
+| 15 | ~~Occasion Book confirmation and reply path~~ | Closed 01/09/2026. Migration `0023` replaces the unfriendly line, explains all three reminder points and invites replies. Thread replies enter the Command Centre through Resend, while direct mail to `hello@hazelscakelounge.co.za` forwards to `hazelscakelounge@gmail.com`. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 

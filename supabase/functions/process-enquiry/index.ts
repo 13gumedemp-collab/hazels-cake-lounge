@@ -106,6 +106,19 @@ function buildLabels(options: { name: string; relationship: string; occasion: st
   };
 }
 
+async function authenticatedCustomer(supabase: ReturnType<typeof adminClient>, req: Request) {
+  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
+  if (!token) return null;
+  const { data: auth } = await supabase.auth.getUser(token);
+  if (!auth.user) return null;
+  const { data: customer } = await supabase
+    .from("customers")
+    .select("id, full_name, email, whatsapp_number, auth_user_id")
+    .eq("auth_user_id", auth.user.id)
+    .maybeSingle();
+  return customer || null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return browserPreflight(req);
   if (!isAllowedBrowserOrigin(req)) return browserJson(req, { error: "Forbidden" }, 403);
@@ -147,16 +160,30 @@ Deno.serve(async (req) => {
   const whatsappConsent = payload.whatsapp_consent === true;
   const rules = occasionRules(type);
 
-  const { data: customer, error: customerError } = await supabase
+  const authenticated = await authenticatedCustomer(supabase, req);
+  if (authenticated && authenticated.email.toLowerCase() !== email) {
+    return browserJson(req, { error: "Please use the email address on your signed in account." }, 403);
+  }
+  const { data: existing } = await supabase
     .from("customers")
-    .upsert({
+    .select("id, auth_user_id")
+    .eq("email", email)
+    .maybeSingle();
+  if (existing?.auth_user_id && existing.id !== authenticated?.id) {
+    return browserJson(req, { error: "This email already has an account. Please sign in before sending an enquiry." }, 409);
+  }
+
+  const customerWrite = authenticated
+    ? supabase.from("customers").update({ whatsapp_number: phone || authenticated.whatsapp_number || null }).eq("id", authenticated.id)
+    : supabase.from("customers").upsert({
       full_name: fullName,
       email,
       whatsapp_number: phone || null,
       email_consent: emailConsent,
       whatsapp_consent: whatsappConsent,
       whatsapp_consent_date: whatsappConsent ? new Date().toISOString() : null,
-    }, { onConflict: "email" })
+    }, { onConflict: "email" });
+  const { data: customer, error: customerError } = await customerWrite
     .select("id, full_name, email, whatsapp_number")
     .single();
   if (customerError || !customer) return browserJson(req, { error: "I could not save your enquiry just now. Please try again." }, 500);

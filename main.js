@@ -5,6 +5,7 @@ import {
   OCCASIONS, RELATIONSHIPS, OCCASION_OTHER, optionsHtml, repeatsByDefault,
   escapeHtml, occasionBlockHtml,
 } from './occasions.js';
+import { createClient } from '@supabase/supabase-js';
 
 (() => {
   'use strict';
@@ -477,6 +478,12 @@ import {
   // Supabase project (anon key is public by design; data is protected by RLS).
   const SUPABASE_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
+  let sessionClient = null;
+  const browserAuthToken = async () => {
+    sessionClient ||= createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data } = await sessionClient.auth.getSession();
+    return data.session?.access_token || SUPABASE_ANON_KEY;
+  };
 
   if (form) {
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
@@ -551,7 +558,7 @@ import {
           headers: {
             'Content-Type': 'application/json',
             'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + await browserAuthToken(),
           },
           body: JSON.stringify(payload),
         });
@@ -939,7 +946,7 @@ import {
       };
       try {
         const res = await fetch(SB_URL + '/functions/v1/process-enquiry', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON }, body: JSON.stringify(payload),
+          method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + await browserAuthToken() }, body: JSON.stringify(payload),
         });
         const out = await res.json().catch(() => ({}));
         if (!res.ok || out.status !== 'success') throw new Error(out.error || 'failed');
@@ -1232,7 +1239,7 @@ import {
         let added = 0;
         try {
           const res = await fetch(SB_URL + '/functions/v1/add-circle-member', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
+            method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + await browserAuthToken() },
             body: JSON.stringify({
               email: String(f.email).trim().toLowerCase(),
               full_name: String(f.full_name).trim(),
