@@ -82,7 +82,7 @@ export default function SettingsPanel({ initialBusiness, initialReminders, initi
 
       <section className="surface-card settings-section">
         <div className="settings-section__intro"><p className="eyebrow">Business</p><h2>Business details</h2><p>Reference details for the Command Centre and customer facing content. Delivery credentials remain protected in Supabase.</p></div>
-        <form onSubmit={(event) => { event.preventDefault(); save("business", { value: business }); }} className="settings-form settings-form--business">
+        <form onSubmit={(event) => { event.preventDefault(); save("business", { value: business }); }} className="settings-form settings-form--business" method="post">
           {([
             ["business_name", "Business name", "text"], ["business_email", "Public email", "email"], ["business_phone", "Phone", "tel"],
             ["site_url", "Website", "url"], ["service_area", "Service area", "text"], ["reply_days", "Reply within days", "number"],
@@ -95,7 +95,7 @@ export default function SettingsPanel({ initialBusiness, initialReminders, initi
 
       <section className="surface-card settings-section">
         <div className="settings-section__intro"><p className="eyebrow">Automation</p><h2>Reminder channels</h2><p>Pause a channel without removing any customer consent. Existing tasks and delivery history stay intact.</p></div>
-        <form onSubmit={(event) => { event.preventDefault(); save("reminders", { value: reminders }); }} className="settings-toggles">
+        <form onSubmit={(event) => { event.preventDefault(); save("reminders", { value: reminders }); }} className="settings-toggles" method="post">
           {([
             ["email_enabled", "Customer reminder emails", "The one month, two week and one week email sequence."],
             ["whatsapp_enabled", "WhatsApp task creation", "Prepared manual messages for customers who consented."],
@@ -120,7 +120,7 @@ export default function SettingsPanel({ initialBusiness, initialReminders, initi
 
       <section className="surface-card settings-section">
         <div className="settings-section__intro"><p className="eyebrow">Security</p><h2>Admin password</h2><p>The replacement is stored as a salted hash. Existing signed in sessions remain active until they expire.</p></div>
-        <form className="settings-form settings-form--password" onSubmit={changePassword}>
+        <form className="settings-form settings-form--password" onSubmit={changePassword} method="post">
           <label><span>Current password</span><input type="password" name="current_password" autoComplete="current-password" required /></label>
           <label><span>New password</span><input type="password" name="new_password" autoComplete="new-password" minLength={12} required /></label>
           <label><span>Confirm new password</span><input type="password" name="confirm_password" autoComplete="new-password" minLength={12} required /></label>

@@ -91,7 +91,7 @@ export default function MessageCentre({ logs, customers, members, templates }: {
       </div>
 
       {composerOpen && (
-        <form className="message-composer surface-card" onSubmit={manualSend}>
+        <form className="message-composer surface-card" onSubmit={manualSend} method="post">
           <div><p className="eyebrow">Manual send</p><h2>Send a template</h2><p>Choose the customer and the message. An occasion is optional but gives reminder templates the right names and date.</p></div>
           <label><span>Customer</span><select name="customer_id" required value={customerId} onChange={(event) => setCustomerId(event.target.value)}>{customers.map((customer) => <option value={customer.id} key={customer.id}>{customer.label}</option>)}</select></label>
           <label><span>Occasion</span><select name="circle_member_id" defaultValue=""><option value="">No occasion</option>{customerMembers.map((member) => <option value={member.id} key={member.id}>{member.label}</option>)}</select></label>

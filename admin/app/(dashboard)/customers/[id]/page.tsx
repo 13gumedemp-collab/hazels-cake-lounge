@@ -14,16 +14,17 @@ function dateTime(value: string | null) {
   return new Date(value).toLocaleString("en-ZA", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Johannesburg" });
 }
 
-export default async function CustomerProfile({ params }: { params: { id: string } }) {
+export default async function CustomerProfile({ params }: { params: Promise<{ id: string }> }) {
+  const { id: customerId } = await params;
   const sb = supabaseAdmin();
   const [customerResult, circleResult, ordersResult, messagesResult, whatsappResult, callsResult, loginResult] = await Promise.all([
-    sb.from("customers").select("*").eq("id", params.id).maybeSingle(),
-    sb.from("circle_members").select("*").eq("customer_id", params.id).order("occasion_date"),
-    sb.from("orders").select("*").eq("customer_id", params.id).order("created_at", { ascending: false }),
-    sb.from("reminder_log").select("*").eq("customer_id", params.id).order("sent_at", { ascending: false }).limit(100),
-    sb.from("whatsapp_reminders_due").select("*").eq("customer_id", params.id).order("created_at", { ascending: false }),
-    sb.from("phone_call_reminders_due").select("*").eq("customer_id", params.id).order("created_at", { ascending: false }),
-    sb.from("customer_login_activity").select("*").eq("customer_id", params.id).order("created_at", { ascending: false }).limit(12),
+    sb.from("customers").select("*").eq("id", customerId).maybeSingle(),
+    sb.from("circle_members").select("*").eq("customer_id", customerId).order("occasion_date"),
+    sb.from("orders").select("*").eq("customer_id", customerId).order("created_at", { ascending: false }),
+    sb.from("reminder_log").select("*").eq("customer_id", customerId).order("sent_at", { ascending: false }).limit(100),
+    sb.from("whatsapp_reminders_due").select("*").eq("customer_id", customerId).order("created_at", { ascending: false }),
+    sb.from("phone_call_reminders_due").select("*").eq("customer_id", customerId).order("created_at", { ascending: false }),
+    sb.from("customer_login_activity").select("*").eq("customer_id", customerId).order("created_at", { ascending: false }).limit(12),
   ]);
 
   const customer = customerResult.data;

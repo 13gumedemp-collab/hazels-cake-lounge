@@ -5,12 +5,15 @@
 //                   (if first), generate memory card. The +2 day post_celebration
 //                   and +30 day circle_followup are fired by the daily checker.
 //   overdue guard -> red notification if occasion date passed while baking/ready
-import { adminClient, corsHeaders, json, notify } from "../_shared/client.ts";
+import { adminClient, corsHeaders, json, notify, requireServiceRole } from "../_shared/client.ts";
 import { generateMemoryCard } from "../_shared/memory-card.ts";
 import { generateInvoice } from "../_shared/invoice.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const authError = requireServiceRole(req);
+  if (authError) return authError;
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   let b: {
     order_id?: string;
     new_status?: string;

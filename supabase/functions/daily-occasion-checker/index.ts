@@ -9,7 +9,7 @@
 // Completion sweeps: post_celebration 2 days after an order completes;
 //   circle_followup 30 days after a customer's first completed order.
 // Dedupe is per circle_member + reminder_type + calendar year (reminder_log.year_sent).
-import { adminClient, businessVars, corsHeaders, firstName, json, notify } from "../_shared/client.ts";
+import { adminClient, businessVars, corsHeaders, firstName, json, notify, requireServiceRole } from "../_shared/client.ts";
 import { sendEmail } from "../_shared/email.ts";
 
 const EMAIL_TEMPLATE: Record<string, string> = {
@@ -34,6 +34,9 @@ function waCopy(type: string, v: Record<string, string>) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const authError = requireServiceRole(req);
+  if (authError) return authError;
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   const supabase = adminClient();
   const today = sastNow();
   const biz = businessVars();

@@ -3,11 +3,14 @@
 // Sends the one-time circle_followup email (sent once, never again) and sets
 // circle_followup_sent = true. Uses the customer's first completed order to
 // reference the cake it was for.
-import { adminClient, corsHeaders, firstName, json } from "../_shared/client.ts";
+import { adminClient, corsHeaders, firstName, json, requireServiceRole } from "../_shared/client.ts";
 import { sendEmail } from "../_shared/email.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const authError = requireServiceRole(req);
+  if (authError) return authError;
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   let b: { customer_id?: string };
   try { b = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
   if (!b.customer_id) return json({ error: "customer_id is required" }, 400);

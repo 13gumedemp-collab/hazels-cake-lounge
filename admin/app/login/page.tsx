@@ -47,7 +47,7 @@ export default function LoginPage() {
 
   return (
     <main className="login-page min-h-screen grid place-items-center px-5 py-8">
-      <form onSubmit={submit} className="login-card w-full max-w-md rise">
+      <form onSubmit={submit} className="login-card w-full max-w-md rise" method="post">
         <div className="mb-10 flex flex-col items-center text-center">
           <BrandMark />
           <p className="mt-6 text-sm leading-relaxed text-creamSoft">Your private workspace for orders, occasions and every thoughtful detail.</p>

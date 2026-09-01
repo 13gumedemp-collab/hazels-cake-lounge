@@ -17,7 +17,10 @@ const nextConfig = {
   // Never reuse client-side cached server data for dynamic pages, so the
   // dashboard always reflects the live database when navigating.
   experimental: {
-    staleTimes: { dynamic: 0, static: 0 },
+    staleTimes: { dynamic: 0, static: 30 },
+  },
+  turbopack: {
+    root: import.meta.dirname,
   },
   async headers() {
     return [

@@ -11,6 +11,51 @@ export function adminClient(): SupabaseClient {
   );
 }
 
+function constantTimeEqual(left: string, right: string): boolean {
+  const length = Math.max(left.length, right.length);
+  let different = left.length ^ right.length;
+  for (let index = 0; index < length; index++) {
+    different |= (left.charCodeAt(index) || 0) ^ (right.charCodeAt(index) || 0);
+  }
+  return different === 0;
+}
+
+function hasServiceRoleClaims(token: string): boolean {
+  try {
+    const encoded = token.split(".")[1];
+    if (!encoded) return false;
+    const base64 = encoded.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(encoded.length / 4) * 4, "=");
+    const claims = JSON.parse(atob(base64)) as { role?: string; ref?: string };
+    const projectRef = new URL(Deno.env.get("SUPABASE_URL") ?? "").hostname.split(".")[0];
+    return claims.role === "service_role" && !!projectRef && claims.ref === projectRef;
+  } catch {
+    return false;
+  }
+}
+
+// Supabase's gateway accepts the public anon or publishable key as a valid
+// credential when verify_jwt is enabled. Internal functions therefore need to
+// prove that the caller supplied the service-role credential itself.
+export function requireServiceRole(req: Request): Response | null {
+  const expected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const supplied = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+  const apiKey = (req.headers.get("apikey") ?? "").trim();
+  // The gateway has already verified JWT signatures for these internal
+  // functions. Check the validated legacy token's scoped claims as well as the
+  // injected key, because Supabase may rotate the legacy key independently.
+  const legacyServiceRole = (expected && supplied && constantTimeEqual(supplied, expected)) ||
+    hasServiceRoleClaims(supplied);
+  // Supabase's gateway validates opaque secret keys before the request reaches
+  // a verify_jwt function. Requiring the same secret in both headers keeps the
+  // newer server key path distinct from public `sb_publishable_` credentials.
+  const opaqueSecret = supplied.startsWith("sb_secret_") && constantTimeEqual(supplied, apiKey);
+  if (legacyServiceRole || opaqueSecret) return null;
+  return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    status: 401,
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+  });
+}
+
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":

@@ -1,11 +1,14 @@
 // enquiry-followup-check  (hourly via pg_cron)
 // Enquiry orders older than 24h still at status 'enquiry' -> email Hazel the
 // nudge and raise a red notification. Deduped per circle_member.
-import { adminClient, businessVars, corsHeaders, json, notify } from "../_shared/client.ts";
+import { adminClient, businessVars, corsHeaders, json, notify, requireServiceRole } from "../_shared/client.ts";
 import { sendToAddress } from "../_shared/email.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const authError = requireServiceRole(req);
+  if (authError) return authError;
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   const supabase = adminClient();
   const biz = businessVars();
   const businessEmail = Deno.env.get("BUSINESS_EMAIL") ?? "hello@hazelscakelounge.co.za";

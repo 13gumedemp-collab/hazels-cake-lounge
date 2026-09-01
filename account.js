@@ -387,7 +387,7 @@ function orderDetail(o) {
 
 function reorderForm(o) {
   const title = o.circle_member ? `${o.circle_member.person_name}'s ${o.circle_member.occasion_type}` : (o.cake_description || 'this cake');
-  return `<form class="oreorder" data-reorder-form="${o.id}">
+  return `<form class="oreorder" data-reorder-form="${o.id}" method="post">
     <h4>Order this again</h4>
     <p>I will start a fresh enquiry for ${safe(title)} using the same details. Tell me when you need it and I will confirm and quote.</p>
     <div class="form__row">
@@ -455,7 +455,7 @@ function dateEditor(o) {
   const parts = String(o.person_name || '').trim().split(/\s+/);
   const first = parts.shift() || '';
   const last = parts.join(' ');
-  return `<form class="ecard ecard--editing occ-editor" data-save-date="${o.id}">
+  return `<form class="ecard ecard--editing occ-editor" data-save-date="${o.id}" method="post">
     <div class="ecard__body ecard__edit">
       <p class="occ-block__head">Who is this date for?</p>
       <div class="form__row">

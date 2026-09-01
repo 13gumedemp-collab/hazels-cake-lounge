@@ -49,14 +49,14 @@
         <button type="button" data-auth-tab="signup">Create an account</button>
       </div>
 
-      <form id="signInForm" class="account-login-form" data-auth-panel="signin">
+      <form id="signInForm" class="account-login-form" data-auth-panel="signin" method="post">
         <label class="field"><span>Email</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com" /></label>
         <label class="field"><span>Password</span><input type="password" name="password" autocomplete="current-password" required /></label>
         <button class="btn" type="submit">Sign in</button>
         <button type="button" class="account-link" id="forgotPassword">Forgot your password?</button>
       </form>
 
-      <form id="signUpForm" class="account-login-form" data-auth-panel="signup" hidden>
+      <form id="signUpForm" class="account-login-form" data-auth-panel="signup" method="post" hidden>
         <p class="account-step">Step <span id="signUpStepNum">1</span> of 3</p>
         <div class="account-step-panel" data-signup-step="1">
           <div class="form__row">
@@ -84,14 +84,14 @@
         </div>
       </form>
 
-      <form id="otpForm" class="account-login-form" data-auth-panel="otp" hidden>
+      <form id="otpForm" class="account-login-form" data-auth-panel="otp" method="post" hidden>
         <p class="account-fineprint">We emailed a code to <strong id="otpTarget"></strong></p>
         <label class="field"><span>Code</span><input type="text" name="token" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required placeholder="12345678" class="account-code" /></label>
         <button class="btn" type="submit">Confirm</button>
         <button type="button" class="account-link" id="resendCode">Resend code</button>
       </form>
 
-      <form id="newPasswordForm" class="account-login-form" data-auth-panel="recovery" hidden>
+      <form id="newPasswordForm" class="account-login-form" data-auth-panel="recovery" method="post" hidden>
         <label class="field"><span>New password <em class="field__opt">(8 or more characters)</em></span><input type="password" name="password" autocomplete="new-password" required minlength="8" /></label>
         <label class="field"><span>Confirm password</span><input type="password" name="confirm_password" autocomplete="new-password" required minlength="8" /></label>
         <button class="btn" type="submit">Save password</button>
@@ -164,7 +164,7 @@
       </div>
       <div class="account-panel" data-account-panel="profile">
         <div class="account-section-head"><div><span>South Africa</span><h2>Your details</h2></div></div>
-        <form class="account-profile" id="accountProfile">
+        <form class="account-profile" id="accountProfile" method="post">
           <section class="account-profile-photo" aria-labelledby="profilePhotoTitle">
             <div class="account-profile-photo__avatar" id="profileImagePreview"><span id="profileImageInitials" aria-hidden="true"></span><img id="profileImage" alt="Your profile photo" hidden /></div>
             <div>
@@ -197,7 +197,7 @@
         <div class="account-section-head"><div><span>How I reach you</span><h2>Notifications</h2></div></div>
         <p class="account-intro">Every way I might contact you, in one place. Ticking a box is your consent to be contacted that way about your saved dates and your orders. Leave them all unticked and I will only ever email you about a cake you have actually ordered.</p>
 
-        <form class="prefs-form" id="accountPrefs">
+        <form class="prefs-form" id="accountPrefs" method="post">
           <p class="prefs-state" id="prefsAgreed"></p>
 
           <div class="prefs-grid">
@@ -252,12 +252,12 @@
           <h3 class="secblock__title">Email address</h3>
           <p class="secblock__hint" id="signInMethod"></p>
           <p class="secblock__hint" id="currentEmailAddress"></p>
-          <form id="emailChangeForm" class="account-security__form">
+          <form id="emailChangeForm" class="account-security__form" method="post">
             <label class="field"><span>Email address</span><input type="email" name="new_email" autocomplete="email" required /></label>
             <button class="btn" type="submit">Change email</button>
           </form>
 
-          <form id="emailOtpForm" class="account-security__form" hidden>
+          <form id="emailOtpForm" class="account-security__form" method="post" hidden>
             <label class="field"><span>Code sent to <strong id="emailChangeTarget"></strong></span><input type="text" name="token" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required class="account-code" placeholder="12345678" /></label>
             <button class="btn" type="submit">Confirm new email</button>
           </form>
@@ -286,7 +286,7 @@
           <p class="danger__body">This removes your account, your saved dates and your contact details, and it cannot be undone. Cakes you have already ordered stay on my books without your name on them, because I am required to keep sales records for five years. You will stop receiving everything, straight away.</p>
           <button class="btn btn--danger" type="button" id="deleteAccountStart">Delete your account</button>
 
-          <form class="danger__confirm" id="deleteAccountForm" hidden>
+          <form class="danger__confirm" id="deleteAccountForm" method="post" hidden>
             <fieldset class="delete-survey">
               <legend>Before you go, would you like to tell me why? <em>(optional)</em></legend>
               <label class="delete-survey__option"><input type="radio" name="delete_reason" value="I only needed an account for one order" /> I only needed an account for one order</label>

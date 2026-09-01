@@ -983,6 +983,40 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   requested inbox requires an inbound-email integration, Resend webhook verification and
   suppression state before the email workflow can be described as production ready.
 
+### 01/09/2026 Release security recheck and customer journey (Codex)
+
+- Found and closed a critical authorisation gap in the internal Edge Functions. Supabase's
+  gateway accepted the public publishable key at `verify_jwt = true`, so callers could reach
+  internal invoice, order, email and scheduled-job code. Eight internal functions now require
+  a gateway-validated service-role JWT or opaque `sb_secret_` server key and reject every other
+  caller before method parsing or business logic. The hardened functions are deployed. Live
+  controls pass across all eight: the public key returns 401, a fabricated secret returns 401,
+  current legacy and opaque server keys are accepted, and a safe GET returns 405 before work.
+- Added explicit POST-only guards to the four customer-authenticated functions changed in this
+  audit and deployed them. Every public and admin HTML form now declares `method="post"`, so a
+  JavaScript failure cannot place a password, code, email address or customer detail in a URL.
+- Rechecked remote data boundaries. Migrations `0001` to `0021` match locally and remotely, all
+  18 Edge Functions are active, unauthenticated REST reads expose no operational rows, and the
+  five private Storage buckets expose no object listing. Auth reports email and Google enabled.
+- Replaced newly vulnerable build dependencies with Vite 8.2.2 and PostCSS 8.5.26. Root and
+  admin dependency audits now report zero findings. The Vite production build and JavaScript
+  checks pass. The admin Webpack production build, Next route generation and TypeScript check
+  pass, and the built app starts successfully. Fixed the Next 16 asynchronous customer-page
+  parameter contract that the clean build exposed.
+- The local production-equivalent journey passed: all 12 public pages return 200; the earlier
+  browser sweep found no broken loaded images or missing alt attributes; unauthenticated admin
+  access redirects to login; cross-origin admin writes return 403; the session cookie is Secure,
+  HttpOnly and SameSite=Strict; login, all 11 authenticated screens, both read APIs and logout
+  return 200. An isolated disposable customer passed confirmed account creation, password sign
+  in, owner-only RLS reads, profile editing, saved-date creation and editing, private profile
+  photo upload and signed retrieval, login activity, pending private Community moderation, order
+  status movement and complete account erasure. No disposable customer, review, order, upload or
+  notification remains.
+- The public GitHub repository and current tracked tree contain no service-role or Resend secret.
+  Historical JWT candidates are public anon keys only. The safe `admin/.env.example` is the only
+  tracked env example in reachable history, so the earlier history-rewrite warning is resolved.
+- Vercel production publication is still to be attempted after this verified source is committed.
+
 ---
 
 ## 6. Open threads
@@ -1001,6 +1035,8 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 11 | ~~Migrations `0012`, `0013`, `0014` not applied~~ | **Applied 08/08/2026** after Codex confirmed `0012` was final. Closed. |
 | 10 | ~~Two save-a-date forms, one column~~ Closed 08/08/2026 | The Occasion Book and the account calendar sheet write `circle_members.occasion_type` from different lists with different casing, and capture different fields. Unify the list into one shared constant, add the "Other" free-text follow-up to the sheet, and decide which fields are genuinely required. See the 08/08/2026 entry. |
 | 9 | ~~`delete-account` is not deployed~~ | **Deployed 08/08/2026.** Closed. |
+| 13 | Inbound email and bounce handling | The Command Centre records deliveries and sends templates, but replies remain in the business inbox and Resend bounces are not yet ingested or suppressed. Complete the inbound webhook and verified bounce workflow before calling it a two-way inbox. |
+| 14 | Replace the admin password | The server-side salted scrypt verifier, strict session cookie and persistent login limit are active. Hazel should still replace the current shorter credential with a unique 12+ character password after launch. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 
