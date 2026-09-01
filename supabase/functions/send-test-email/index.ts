@@ -13,16 +13,20 @@ async function senderWebhookAccess() {
   return { status: result.ok ? "available" : "unavailable", http_status: result.status };
 }
 
-async function sendDeliveryScenario(scenario: string) {
-  const key = Deno.env.get("RESEND_INBOUND_API_KEY") ?? "";
-  if (!key) return { status: "failed", error: "RESEND_INBOUND_API_KEY is not configured" };
+async function sendDeliveryScenario(scenario: string, outbound = false) {
+  const keyName = outbound ? "RESEND_API_KEY" : "RESEND_INBOUND_API_KEY";
+  const key = Deno.env.get(keyName) ?? "";
+  if (!key) return { status: "failed", error: `${keyName} is not configured` };
+  const fromName = Deno.env.get("RESEND_FROM_NAME") ?? "Hazel's Cake Lounge";
+  const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") ?? "";
+  if (outbound && !fromEmail) return { status: "failed", error: "RESEND_FROM_EMAIL is not configured" };
   const label = `hcl-${Date.now()}`;
   const to = scenario === "suppressed" ? "suppressed@resend.dev" : `${scenario}+${label}@resend.dev`;
   const result = await fetch(RESEND_API, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "Hazel's Cake Lounge Test <onboarding@resend.dev>",
+      from: outbound ? `${fromName} <${fromEmail}>` : "Hazel's Cake Lounge Test <onboarding@resend.dev>",
       to: [to],
       subject: `HCL ${scenario} webhook test`,
       text: "Safe Resend delivery event test for the Hazel's Cake Lounge Command Centre.",
@@ -44,6 +48,11 @@ Deno.serve(async (req) => {
   if (scenario === "sender_access") return json(await senderWebhookAccess());
   if (DELIVERY_SCENARIOS.has(scenario)) {
     const result = await sendDeliveryScenario(scenario);
+    return json(result, result.status === "failed" ? 502 : 200);
+  }
+  const outboundScenario = scenario.startsWith("outbound_") ? scenario.slice("outbound_".length) : "";
+  if (DELIVERY_SCENARIOS.has(outboundScenario)) {
+    const result = await sendDeliveryScenario(outboundScenario, true);
     return json(result, result.status === "failed" ? 502 : 200);
   }
   const to = Deno.env.get("BUSINESS_EMAIL");

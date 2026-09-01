@@ -36,31 +36,38 @@ async function verifyWebhook(req: Request, rawBody: string): Promise<boolean> {
   const id = req.headers.get("svix-id") ?? "";
   const timestamp = req.headers.get("svix-timestamp") ?? "";
   const signatureHeader = req.headers.get("svix-signature") ?? "";
-  const configuredSecret = Deno.env.get("RESEND_WEBHOOK_SECRET") ?? "";
-  if (!id || !timestamp || !signatureHeader || !configuredSecret) return false;
+  const configuredSecrets = [
+    Deno.env.get("RESEND_WEBHOOK_SECRET"),
+    Deno.env.get("RESEND_OUTBOUND_WEBHOOK_SECRET"),
+  ].filter((secret): secret is string => Boolean(secret));
+  if (!id || !timestamp || !signatureHeader || configuredSecrets.length === 0) return false;
 
   const timestampSeconds = Number(timestamp);
   if (!Number.isFinite(timestampSeconds) || Math.abs(Date.now() / 1000 - timestampSeconds) > SIGNATURE_TOLERANCE_SECONDS) {
     return false;
   }
 
-  try {
-    const secret = decodeBase64(configuredSecret.replace(/^whsec_/, ""));
-    const key = await crypto.subtle.importKey("raw", secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-    const signed = new TextEncoder().encode(`${id}.${timestamp}.${rawBody}`);
-    const expected = new Uint8Array(await crypto.subtle.sign("HMAC", key, signed));
-    return signatureHeader.split(" ").some((candidate) => {
-      const [version, signature] = candidate.split(",", 2);
-      if (version !== "v1" || !signature) return false;
-      try {
-        return constantTimeEqual(expected, decodeBase64(signature));
-      } catch {
-        return false;
-      }
-    });
-  } catch {
-    return false;
+  const signed = new TextEncoder().encode(`${id}.${timestamp}.${rawBody}`);
+  for (const configuredSecret of configuredSecrets) {
+    try {
+      const secret = decodeBase64(configuredSecret.replace(/^whsec_/, ""));
+      const key = await crypto.subtle.importKey("raw", secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+      const expected = new Uint8Array(await crypto.subtle.sign("HMAC", key, signed));
+      const matches = signatureHeader.split(" ").some((candidate) => {
+        const [version, signature] = candidate.split(",", 2);
+        if (version !== "v1" || !signature) return false;
+        try {
+          return constantTimeEqual(expected, decodeBase64(signature));
+        } catch {
+          return false;
+        }
+      });
+      if (matches) return true;
+    } catch {
+      // Try the other configured Resend workspace secret.
+    }
   }
+  return false;
 }
 
 function emailPart(value: unknown): { email: string; name: string | null } {

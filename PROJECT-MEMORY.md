@@ -1046,6 +1046,28 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   Priority=High; anonymous dashboard and API access return 307 and 401 respectively; and a
   cross-origin write returns 403.
 
+### 01/09/2026 Hazel Resend delivery webhook completion (Codex)
+
+- Connected the signed-in `hazelscakelounge` Resend workspace, which owns the real
+  `hazelscakelounge.co.za` sending history. Created an enabled webhook to the existing
+  `resend-webhook` Edge Function for `email.sent`, `email.delivered`,
+  `email.delivery_delayed`, `email.bounced`, `email.failed`, `email.suppressed` and
+  `email.complained`. No new Resend API key was needed.
+- Added the encrypted `RESEND_OUTBOUND_WEBHOOK_SECRET` Supabase secret without exposing it in
+  chat or source control. The webhook verifier now accepts either the existing Atlas inbound
+  secret or the Hazel outbound secret, while retaining raw-body HMAC verification and the
+  five-minute timestamp tolerance. Deployed `resend-webhook`; unsigned POST and GET requests
+  return 401 and 405 respectively.
+- Extended the service-role-only `send-test-email` function with fixed `outbound_` Resend
+  simulator scenarios. It still accepts no arbitrary recipient. Deployed the function and sent
+  one controlled bounce simulation through Hazel's actual sending key and verified both
+  `email.sent` and `email.bounced` were signed successfully, stored as `processed`, and produced
+  an active local bounce suppression with no processing error.
+- Removed only the disposable simulator suppression from the Command Centre after verification;
+  the processed webhook audit events remain. Real customer delivery, bounce, complaint and
+  provider-suppression events from Hazel's sending workspace are now connected to the existing
+  local suppression controls.
+
 ---
 
 ## 6. Open threads
@@ -1064,7 +1086,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 11 | ~~Migrations `0012`, `0013`, `0014` not applied~~ | **Applied 08/08/2026** after Codex confirmed `0012` was final. Closed. |
 | 10 | ~~Two save-a-date forms, one column~~ Closed 08/08/2026 | The Occasion Book and the account calendar sheet write `circle_members.occasion_type` from different lists with different casing, and capture different fields. Unify the list into one shared constant, add the "Other" free-text follow-up to the sheet, and decide which fields are genuinely required. See the 08/08/2026 entry. |
 | 9 | ~~`delete-account` is not deployed~~ | **Deployed 08/08/2026.** Closed. |
-| 13 | Inbound email complete, sender bounce connection outstanding | Managed-domain replies, verified webhook ingestion, Command Centre threads and replies, and local suppression all pass. The existing Hazel sending key belongs to another Resend workspace and has sending-only permission, so its customer delivery events do not reach the Atlas webhook. Obtain a full-access key in the Resend workspace that owns `hazelscakelounge.co.za`, then register the same delivery and bounce webhook there before describing customer-facing bounce suppression as fully operational. |
+| 13 | ~~Inbound email complete, sender bounce connection outstanding~~ | Closed 01/09/2026. The correct `hazelscakelounge` Resend workspace now has its own seven-event delivery and bounce webhook. The Edge Function verifies both workspace secrets, and a real Hazel-workspace bounce simulation produced processed `email.sent` and `email.bounced` events plus the expected local suppression. |
 | 14 | Replace the admin password | The server-side salted scrypt verifier, strict session cookie and persistent login limit are active. Hazel should still replace the current shorter credential with a unique 12+ character password after launch. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
