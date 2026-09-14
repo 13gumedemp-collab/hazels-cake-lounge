@@ -1150,6 +1150,25 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   deployment was performed; the source is ready for the next explicitly authorised public
   deployment.
 
+### 14/09/2026 Customer identity and clean URL production release (Codex)
+
+- Deployed public commit `3cdc8e7` to Vercel production. The deployment is Ready and aliased
+  to `https://www.hazelscakelounge.co.za`. The revised `daily-occasion-checker` Edge Function
+  is also deployed so reminder email links use the clean contact path.
+- Live production checks confirm `/story` and `/account` return 200, while `/story.html`,
+  `/account.html` and `/index.html` return permanent redirects to their clean equivalents.
+  The live Story page contains 17 clean links and no `.html` links.
+- A follow-up production deployment of commit `47cd5ee` resolves the account-link name from
+  the current local Auth session immediately, rather than waiting for the dashboard customer
+  query. Session persistence, token refresh and callback handling are explicit in the account
+  and public-site clients. A live signed-in browser check shows **Journey's Account** and
+  `Welcome, Journey.` on the account dashboard. The UID-bound profile cache and RLS-owned
+  dashboard lookup remain the data boundary, so the quick label cannot revive another
+  customer's profile.
+- The configured GitHub credential still lacks permission to push these local commits to
+  `13gumedemp-collab/hazels-cake-lounge`. The production releases are live; restore GitHub
+  write access and push `main` so the remote repository matches production.
+
 ## 6. Open threads
 
 | # | Item | Detail |
