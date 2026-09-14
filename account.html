@@ -15,11 +15,11 @@
   <div class="loader" id="loader" aria-hidden="true"><div class="loader__inner"><span class="loader__name">Hazel's</span></div><div class="loader__count"><span id="loaderCount">00</span></div></div>
   <div class="cursor" id="cursor" aria-hidden="true"></div>
   <header class="nav nav--solid scrolled" id="nav">
-    <a href="index.html" class="nav__brand" data-cursor="link"><span>Hazel's</span><em>Cake Lounge</em></a>
+    <a href="/" class="nav__brand" data-cursor="link"><span>Hazel's</span><em>Cake Lounge</em></a>
     <nav class="nav__links" id="navLinks">
-      <a href="menu.html" data-cursor="link">Menu</a><a href="work.html" data-cursor="link">My Work</a>
-      <a href="occasion-book.html" data-cursor="link">The Occasion Book</a><a href="reviews.html" data-cursor="link">Community</a>
-      <a href="contact.html" data-cursor="link">Contact</a><a href="account.html" class="is-active" data-cursor="link">Your Account</a>
+      <a href="/menu" data-cursor="link">Menu</a><a href="/work" data-cursor="link">My Work</a>
+      <a href="/occasion-book" data-cursor="link">The Occasion Book</a><a href="/reviews" data-cursor="link">Community</a>
+      <a href="/contact" data-cursor="link">Contact</a><a href="/account" class="is-active" data-cursor="link">Your Account</a>
     </nav>
     <button class="nav__menu" id="menuToggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
   </header>
@@ -73,7 +73,7 @@
           <button type="button" class="account-link" id="signUpBack">Back</button>
         </div>
         <div class="account-step-panel" data-signup-step="3" hidden>
-          <p class="account-fineprint account-fineprint--left">Last thing. How would you like your reminders? Ticking a box is your consent, and you can change it any time from your account. Leave them unticked and I will only email you about a cake you have actually ordered. See the <a href="privacy.html">privacy policy</a>, and for WhatsApp the <a href="messaging-terms.html">messaging terms</a>.</p>
+          <p class="account-fineprint account-fineprint--left">Last thing. How would you like your reminders? Ticking a box is your consent, and you can change it any time from your account. Leave them unticked and I will only email you about a cake you have actually ordered. See the <a href="/privacy">privacy policy</a>, and for WhatsApp the <a href="messaging-/terms">messaging terms</a>.</p>
           <div class="prefs__boxes">
             <label class="pref"><input type="checkbox" name="email_consent" checked /><span class="pref__box" aria-hidden="true"></span><span>Email me my occasion reminders</span></label>
             <label class="pref"><input type="checkbox" name="whatsapp_consent" /><span class="pref__box" aria-hidden="true"></span><span>Message me on WhatsApp</span></label>
@@ -123,7 +123,7 @@
             <b>Order a cake</b>
             <span>Tell me what you need and when. I will phone you to talk it through, then send a quote.</span>
           </button>
-          <a class="ovaction" href="save-date.html">
+          <a class="ovaction" href="/save-date">
             <b>Save a date</b>
             <span>A birthday or anniversary you would rather not forget. Free, nothing booked, and I remind you in good time.</span>
           </a>
@@ -158,7 +158,7 @@
         <div class="account-list" id="paymentsList"></div>
       </div>
       <div class="account-panel" data-account-panel="dates">
-        <div class="account-section-head"><div><span>Reminders</span><h2>Your Occasion Book</h2></div><a class="btn" href="save-date.html">Add a date</a></div>
+        <div class="account-section-head"><div><span>Reminders</span><h2>Your Occasion Book</h2></div><a class="btn" href="/save-date">Add a date</a></div>
         <p class="account-intro">Occasions you have asked me to remember. Nothing is booked and nothing is owed. I will email you before each one, in good time to order a cake if you want one.</p>
         <div class="account-list" id="accountDates"></div>
       </div>
@@ -188,7 +188,7 @@
             </label>
             <label class="field"><span>Postal code</span><input name="postal_code" inputmode="numeric" /></label>
           </div>
-          <p class="account-fineprint account-fineprint--left">Your address is used to deliver your cake, and your number to reach you about an order. Nothing is shared or sold. See the <a href="privacy.html">privacy policy</a>.</p>
+          <p class="account-fineprint account-fineprint--left">Your address is used to deliver your cake, and your number to reach you about an order. Nothing is shared or sold. See the <a href="/privacy">privacy policy</a>.</p>
           <button class="btn btn--solid" type="submit">Save details</button><p class="form__status" id="profileStatus"></p>
         </form>
       </div>
@@ -215,7 +215,7 @@
               <span class="pref__box" aria-hidden="true"></span>
               <span class="pref__copy">
                 <strong>WhatsApp messages</strong>
-                <em>The same reminders on WhatsApp, to the number saved in Your details. Covered by the <a href="messaging-terms.html">messaging terms</a>.</em>
+                <em>The same reminders on WhatsApp, to the number saved in Your details. Covered by the <a href="messaging-/terms">messaging terms</a>.</em>
               </span>
             </label>
 
@@ -230,7 +230,7 @@
 
           <p class="prefs-note" id="prefsNeedsNumber" hidden>WhatsApp and phone calls need a number. Add one under <button type="button" class="linkish" data-goto-tab="profile">Your details</button> and save it.</p>
 
-          <p class="account-fineprint account-fineprint--left">Whatever you decide here, I will always email you about a cake you have actually ordered. That one is not marketing, it is your order. You can change any of this whenever you like. It is covered by the <a href="privacy.html">privacy policy</a>.</p>
+          <p class="account-fineprint account-fineprint--left">Whatever you decide here, I will always email you about a cake you have actually ordered. That one is not marketing, it is your order. You can change any of this whenever you like. It is covered by the <a href="/privacy">privacy policy</a>.</p>
 
           <button class="btn btn--solid" type="submit">Save notifications</button>
           <p class="form__status" id="prefsStatus" role="status"></p>

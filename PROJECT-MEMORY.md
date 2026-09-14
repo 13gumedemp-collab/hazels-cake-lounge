@@ -6,7 +6,7 @@ other) reads this file before working and appends to it after working.
 **Never put secrets in this file.** No API keys, tokens, passwords or client secrets.
 Record that a credential exists and where it lives, never its value.
 
-Last updated: 01/09/2026
+Last updated: 14/09/2026
 
 ---
 
@@ -1110,6 +1110,45 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   production build and admin TypeScript check pass.
 
 ---
+
+### 14/09/2026 Customer identity cache hardening (Codex)
+
+- Diagnosed the reported wrong-profile display as a browser-state issue, not a row-level
+  data-access failure. The account data query is and remains constrained to the current
+  Supabase Auth user ID, with the database's customer RLS policy enforcing that same
+  ownership boundary.
+- The browser convenience cache `hcl.me` previously held only a name and email. A shared
+  browser could therefore display a previous customer's identity in the Occasion Book or
+  account navigation while a different session was becoming active. It now carries the
+  matching Auth user ID, is discarded unless it matches the live session, and old cache
+  entries are deliberately ignored. The account dashboard is also cleared and hidden while
+  a different session resolves, so one customer's rendered view cannot remain visible for
+  the next customer.
+- The public Vite build and JavaScript syntax checks pass. Production checks confirm HSTS,
+  CSP, `nosniff`, frame protection and restrictive cross-origin writes; anonymous customer
+  REST access returns an empty RLS-filtered result, anonymous staff statistics return 401,
+  and the internal email function rejects the public key with 401. The admin dependency
+  audit has one moderate, build-time transitive `baseline-browser-mapping` advisory whose
+  fixed release is not yet available from the installed registry range; do not force an
+  incompatible package change solely to silence it.
+- No production deployment was performed. The source fix is ready for the next explicitly
+  authorised public-site deployment.
+
+### 14/09/2026 Clean public URLs (Codex)
+
+- Added `cleanUrls: true` to the public Vercel configuration. Each static page now has an
+  extension-free canonical route, such as `/story`, while a previous `.html` address is
+  permanently redirected by Vercel. `/index` also redirects to `/` and the legacy
+  `/contact-me` alias remains supported.
+- Replaced public navigation, calls to action, form guidance, account links and the shared
+  email enquiry fallback with clean paths, so normal customer journeys do not take a
+  redirect. Kept the existing `.html` Supabase Auth return addresses: after the Vercel
+  redirect the browser still ends on `/account`, while Auth continues to use its already
+  authorised callback URL.
+- Vite build, JavaScript syntax checks, JSON validation and a local production Vercel build
+  pass. The generated routing configuration contains the clean URL redirects. No production
+  deployment was performed; the source is ready for the next explicitly authorised public
+  deployment.
 
 ## 6. Open threads
 

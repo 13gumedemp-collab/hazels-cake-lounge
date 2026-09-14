@@ -126,25 +126,83 @@ import { createClient } from '@supabase/supabase-js';
     }
   }
 
-  /* ---- Custom cursor ---- */
+  /* ---- Custom cursor (gold spatula) ----
+     Two rules hold this together.
+
+     It tracks the pointer exactly, with no easing. The lerp that used to live
+     here moved the spatula 18% of the remaining distance per frame, so it sat
+     roughly 200ms behind the real pointer at 60Hz, further behind on a busy
+     frame, and a different distance again on a 120Hz or 144Hz screen. That lag
+     is what read as a slow cursor, and it was slow by a different amount on
+     every machine.
+
+     And it owns `.cursor-live` on <html>, which is now the only thing that
+     hides the native cursor. Any visitor it cannot serve — touch, a pen, a
+     coarse pointer, reduced motion, a script error before this line — keeps the
+     ordinary system cursor rather than being left with none at all. */
   const cursor = $('#cursor');
-  if (cursor && !reduce && window.matchMedia('(pointer:fine)').matches) {
+  if (cursor) {
+    const root = document.documentElement;
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // Hybrid machines — touch laptops, tablets with a mouse or trackpad — report
+    // a fine pointer while a finger is on the glass, so the pointer last used
+    // decides, not the one the device claims.
+    let touching = false, live = false, frame = 0, px = 0, py = 0, placed = false;
     cursor.innerHTML = '<svg viewBox="0 0 36 40" fill="currentColor"><defs><mask id="spatHoles"><rect width="36" height="40" fill="#fff"/><rect x="11" y="5" width="2.6" height="8" rx="1.3" fill="#000"/><rect x="16.7" y="5" width="2.6" height="8" rx="1.3" fill="#000"/><rect x="22.4" y="5" width="2.6" height="8" rx="1.3" fill="#000"/></mask></defs><rect x="15.8" y="14" width="4.4" height="24" rx="2.2"/><rect x="6" y="2" width="24" height="14" rx="3" mask="url(#spatHoles)"/></svg>';
-    let cx = innerWidth / 2, cy = innerHeight / 2, x = cx, y = cy;
-    addEventListener('mousemove', (e) => { cx = e.clientX; cy = e.clientY; });
-    const loop = () => {
-      x += (cx - x) * 0.18; y += (cy - y) * 0.18;
-      cursor.style.transform = `translate(${x}px, ${y}px) translate(-50%,-50%)`;
-      requestAnimationFrame(loop);
+    const paint = () => {
+      frame = 0;
+      cursor.style.transform = `translate3d(${px}px, ${py}px, 0) translate(-50%, -50%)`;
+      if (!placed) { placed = true; cursor.classList.add('is-on'); }
     };
-    loop();
-    document.addEventListener('mouseover', (e) => {
-      const t = e.target.closest('[data-cursor]');
+
+    /* Decide, and keep deciding, whether this device can have the spatula. */
+    const sync = () => {
+      const next = finePointer.matches && !reduceMotion.matches && !touching;
+      if (next === live) return;
+      live = next;
+      root.classList.toggle('cursor-live', live);
+      if (!live) {
+        if (frame) { cancelAnimationFrame(frame); frame = 0; }
+        placed = false;
+        cursor.classList.remove('is-on', 'is-link', 'is-view');
+      }
+    };
+
+    const onMove = (e) => {
+      if (e.pointerType === 'touch') { if (!touching) { touching = true; sync(); } return; }
+      if (touching) { touching = false; sync(); }
+      if (!live) return;
+      px = e.clientX; py = e.clientY;
+      // One write per frame. A 1000Hz mouse fires far more moves than there are
+      // frames to show them, and every extra style write is work the frame the
+      // visitor is actually waiting for has to queue behind.
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
+    addEventListener('pointermove', onMove, { passive: true });
+    addEventListener('pointerdown', onMove, { passive: true });
+
+    document.addEventListener('pointerover', (e) => {
+      if (!live) return;
+      const t = e.target instanceof Element ? e.target.closest('[data-cursor]') : null;
       cursor.classList.toggle('is-link', !!t && t.dataset.cursor === 'link');
       cursor.classList.toggle('is-view', !!t && t.dataset.cursor === 'view');
     });
-  } else if (cursor) {
-    cursor.remove();
+
+    // Leaving the window or tabbing away must not strand the spatula against an
+    // edge, where a still cursor reads as a frozen one.
+    const park = () => { placed = false; cursor.classList.remove('is-on'); };
+    document.addEventListener('mouseleave', park);
+    addEventListener('blur', park);
+
+    // Plugging in a mouse, folding a laptop into tablet mode, or turning
+    // reduced motion on all change the answer with no reload in between.
+    const watch = (mql) => {
+      if (mql.addEventListener) mql.addEventListener('change', sync);
+      else if (mql.addListener) mql.addListener(sync); // Safari < 14
+    };
+    watch(finePointer); watch(reduceMotion);
+    sync();
   }
 
   /* ============================================================
@@ -274,17 +332,18 @@ import { createClient } from '@supabase/supabase-js';
   /* ---- Account link: named after the signed-in customer, never "My", so it
      is never mistaken for Hazel's own pages (My Work, My Story) ---- */
   const NAME_KEY = 'hcl.firstName';
-  const readName = () => { try { return (localStorage.getItem(NAME_KEY) || '').trim(); } catch { return ''; } };
+  let verifiedAccountFirstName = '';
+  const readName = () => verifiedAccountFirstName;
   const possessive = (name) => (/s$/i.test(name) ? `${name}'` : `${name}'s`);
   const paintAccountLink = () => {
-    const link = navLinks?.querySelector('a[href="account.html"]');
+    const link = navLinks?.querySelector('a[href="/account"]');
     if (!link) return;
     const first = readName();
     link.textContent = first ? `${possessive(first)} Account` : 'Your Account';
   };
-  if (navLinks && !navLinks.querySelector('a[href="account.html"]')) {
+  if (navLinks && !navLinks.querySelector('a[href="/account"]')) {
     const accountLink = document.createElement('a');
-    accountLink.href = 'account.html'; accountLink.dataset.cursor = 'link';
+    accountLink.href = '/account'; accountLink.dataset.cursor = 'link';
     navLinks.appendChild(accountLink);
   }
   paintAccountLink();
@@ -293,6 +352,7 @@ import { createClient } from '@supabase/supabase-js';
     // Fall back to "Your Account" when we only have an email-style handle, not a real name.
     const first = /^\p{L}[\p{L}'’-]*$/u.test(candidate) ? candidate : '';
     try { first ? localStorage.setItem(NAME_KEY, first) : localStorage.removeItem(NAME_KEY); } catch { /* private mode */ }
+    verifiedAccountFirstName = first;
     paintAccountLink();
   };
   let lastY = 0;
@@ -435,7 +495,7 @@ import { createClient } from '@supabase/supabase-js';
   $$('.card__enquire').forEach((btn) => {
     btn.addEventListener('click', () => {
       const p = btn.dataset.product || '';
-      window.location.href = 'contact.html?product=' + encodeURIComponent(p);
+      window.location.href = '/contact?product=' + encodeURIComponent(p);
     });
   });
 
@@ -479,11 +539,34 @@ import { createClient } from '@supabase/supabase-js';
   const SUPABASE_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
   let sessionClient = null;
+  const ME_KEY = 'hcl.me';
+  const forgetCachedIdentity = () => {
+    try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ }
+    window.hclSetAccountName?.('');
+  };
+  const verifiedCachedIdentity = async () => {
+    let cached;
+    try { cached = JSON.parse(localStorage.getItem(ME_KEY) || 'null'); } catch { cached = null; }
+    if (!cached?.user_id || !cached?.full_name || !cached?.email) {
+      forgetCachedIdentity();
+      return null;
+    }
+    sessionClient ||= createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data } = await sessionClient.auth.getSession();
+    if (data.session?.user?.id !== cached.user_id) {
+      forgetCachedIdentity();
+      return null;
+    }
+    return cached;
+  };
   const browserAuthToken = async () => {
     sessionClient ||= createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data } = await sessionClient.auth.getSession();
     return data.session?.access_token || SUPABASE_ANON_KEY;
   };
+  void verifiedCachedIdentity().then((me) => {
+    if (me) window.hclSetAccountName?.(me.full_name);
+  });
 
   if (form) {
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
@@ -664,7 +747,7 @@ import { createClient } from '@supabase/supabase-js';
             <p class="enq__sub enq__body">Every occasion you share with me goes into my Occasion Book. A personal record I keep of every celebration. Next year, before the date arrives, I will reach out personally so you never have to remember to order. It is already taken care of.</p>
             <div class="consent">
               <label class="consent__row"><input type="checkbox" name="occasion_book" checked /><span data-book-label>Remember this occasion for me every year.</span></label>
-              <label class="consent__row"><input type="checkbox" name="whatsapp_consent" /><span>Send me WhatsApp reminders too. <a href="messaging-terms.html" target="_blank" rel="noopener" data-cursor="link">View messaging terms</a>. Personal messages from Hazel, not automated texts.</span></label>
+              <label class="consent__row"><input type="checkbox" name="whatsapp_consent" /><span>Send me WhatsApp reminders too. <a href="/messaging-terms" target="_blank" rel="noopener" data-cursor="link">View messaging terms</a>. Personal messages from Hazel, not automated texts.</span></label>
             </div>
             <div class="enq__nav"><button type="button" class="enq__back" data-cursor="link">Back</button>
               <button type="button" class="btn btn--solid enq__submit" id="enqSubmit" data-cursor="link"><span class="enq__submit-txt">Send my enquiry to Hazel</span><span class="enq__spinner" hidden></span></button>
@@ -683,7 +766,7 @@ import { createClient } from '@supabase/supabase-js';
               </div>
             </div>
             <label class="field"><span>Your phone or WhatsApp number</span><input type="tel" id="enqCallNum" placeholder="073 373 4234" /></label>
-            <label class="consent__row enq__exit-consent"><input type="checkbox" id="enqCallConsent" /><span>I am happy to be contacted by phone or WhatsApp about my order. <a href="messaging-terms.html" target="_blank" rel="noopener" data-cursor="link">View terms</a>.</span></label>
+            <label class="consent__row enq__exit-consent"><input type="checkbox" id="enqCallConsent" /><span>I am happy to be contacted by phone or WhatsApp about my order. <a href="/messaging-terms" target="_blank" rel="noopener" data-cursor="link">View terms</a>.</span></label>
             <div class="enq__nav">
               <button type="button" class="enq__back" id="enqExitClose" data-cursor="link">No thanks, close</button>
               <button type="button" class="btn btn--solid" id="enqCallMe" data-cursor="link">Send to Hazel</button>
@@ -972,7 +1055,7 @@ import { createClient } from '@supabase/supabase-js';
     /* ---- triggers: every enquire / order button opens the overlay ---- */
     const touch = window.matchMedia('(hover: none)').matches;
     document.addEventListener('click', (e) => {
-      let t = e.target.closest('a.btn[href*="contact.html"], .card__enquire, #floatEnquire, [data-enquire]');
+      let t = e.target.closest('a.btn[href*="/contact"], .card__enquire, #floatEnquire, [data-enquire]');
       if (!t) {
         // Fallback: any link or button clearly labelled as an enquiry opens the form.
         const c = e.target.closest('a, button');
@@ -1020,14 +1103,12 @@ import { createClient } from '@supabase/supabase-js';
       const blocks = $('#occBlocks');
       const addBtn = $('#addAnother');
 
-      // A signed-in customer should never be asked for their own name and email
-      // again, and "Your name" sitting next to "First name" read as a trick
-      // question. Cached by the account page on sign in.
-      let me = null;
-      try { me = JSON.parse(localStorage.getItem('hcl.me') || 'null'); } catch { me = null; }
+      // A cached identity is only a convenience after its Auth user ID matches
+      // the live session. Never show or submit a previous browser user's name.
       const nameEl = addForm.elements.full_name;
       const mailEl = addForm.elements.email;
-      if (me?.full_name && me?.email && nameEl && mailEl) {
+      const showSignedInIdentity = (me) => {
+        if (!me?.full_name || !me?.email || !nameEl || !mailEl || addForm.querySelector('.occ-signedin')) return;
         nameEl.value = me.full_name;
         mailEl.value = me.email;
         const row = nameEl.closest('.form__row') || nameEl.closest('.field');
@@ -1035,9 +1116,10 @@ import { createClient } from '@supabase/supabase-js';
         const who = document.createElement('p');
         who.className = 'occ-signedin';
         who.innerHTML = `Saving as <b>${esc(me.full_name)}</b> (${esc(me.email)}). `
-          + '<a href="account.html">Not you?</a>';
+          + '<a href="/account">Not you?</a>';
         addForm.prepend(who);
-      }
+      };
+      void verifiedCachedIdentity().then(showSignedInIdentity);
       const blockComplete = (b) => {
         if (!b) return false;
         const type = $('.occ-type', b)?.value || '';
@@ -1261,7 +1343,7 @@ import { createClient } from '@supabase/supabase-js';
             added = Number(out.count || items.length);
           } else if (res.status === 409) {
             if (btn) { btn.disabled = false; btn.textContent = label; }
-            addStatus.innerHTML = 'This email already has an account. <a href="account.html">Please sign in</a> before changing its Occasion Book.';
+            addStatus.innerHTML = 'This email already has an account. <a href="/account">Please sign in</a> before changing its Occasion Book.';
             return;
           }
         } catch (err) { /* the recovery message below gives the customer a safe next step */ }
@@ -1280,7 +1362,7 @@ import { createClient } from '@supabase/supabase-js';
             + added + ' occasion' + (added > 1 ? 's' : '')
             + ' for you. I will email you before each date. You can decide then whether you would like to order a cake.</p>'
             + rolledNote
-            + '<p><a class="btn" href="account.html?tab=dates">See your Occasion Book</a></p></div>';
+            + '<p><a class="btn" href="/account?tab=dates">See your Occasion Book</a></p></div>';
         } else {
           if (btn) { btn.disabled = false; btn.textContent = label; }
           addStatus.textContent = 'Something went wrong. Please try again, or email hello@hazelscakelounge.co.za.';
@@ -1303,7 +1385,7 @@ import { createClient } from '@supabase/supabase-js';
     const href = b.tagName === 'A' ? b.getAttribute('href') : null;
     const external = b.target === '_blank' || (href && /^(https?:|mailto:|tel:|#)/.test(href));
     // Enquire/order buttons open the overlay (handled elsewhere); they must NOT navigate.
-    const isTrigger = b.matches('[data-enquire], #floatEnquire') || b.classList.contains('card__enquire') || (href && /contact\.html/.test(href)) || /\benqu(?:ire|iry)\b/i.test(b.textContent || '');
+    const isTrigger = b.matches('[data-enquire], #floatEnquire') || b.classList.contains('card__enquire') || (href && /\/contact(?:[?#]|$)/.test(href)) || /\benqu(?:ire|iry)\b/i.test(b.textContent || '');
     if (isTouch && href && !external && !isTrigger) {
       b.addEventListener('click', (e) => {
         e.preventDefault();

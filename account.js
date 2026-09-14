@@ -270,19 +270,49 @@ const setNavName = (fullName) => window.hclSetAccountName?.(fullName || '');
 // same as the first name already cached for the nav link. Cleared on sign out.
 // Drops the "One moment..." placeholder once we know which panel to show.
 const doneChecking = () => { const c = $('#accountChecking'); if (c) c.hidden = true; };
+const showChecking = () => { const c = $('#accountChecking'); if (c) c.hidden = false; };
 
 const ME_KEY = 'hcl.me';
 function cacheMe(c) {
   try {
     const full = [c?.first_name, c?.last_name].filter(Boolean).join(' ').trim() || String(c?.full_name || '').trim();
-    if (full && c?.email) localStorage.setItem(ME_KEY, JSON.stringify({ full_name: full, email: c.email }));
+    if (full && c?.email && c?.auth_user_id) {
+      localStorage.setItem(ME_KEY, JSON.stringify({ user_id: c.auth_user_id, full_name: full, email: c.email }));
+    }
     else localStorage.removeItem(ME_KEY);
   } catch { /* private mode */ }
 }
 const forgetMe = () => { try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ } };
 
+function discardMismatchedCachedIdentity(userId) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(ME_KEY) || 'null');
+    if (!userId || cached?.user_id !== userId) {
+      localStorage.removeItem(ME_KEY);
+      setNavName('');
+    }
+  } catch {
+    forgetMe();
+    setNavName('');
+  }
+}
+
+function clearRenderedAccount() {
+  customer = null;
+  occasions = [];
+  orders = [];
+  sentLog = [];
+  authEmail = '';
+  dashboard.hidden = true;
+  authBox.hidden = true;
+  showChecking();
+}
+
 function beginAccountLoad(session) {
   const version = ++authLoadVersion;
+  const userId = session?.user?.id || null;
+  if (customer?.auth_user_id !== userId) clearRenderedAccount();
+  discardMismatchedCachedIdentity(userId);
   void loadAccount(session, version);
 }
 
@@ -290,14 +320,14 @@ async function loadAccount(session, version) {
   if (version !== authLoadVersion) return;
   if (recoveryMode) { doneChecking(); authBox.hidden = false; dashboard.hidden = true; showPanel('recovery'); return; }
   if (!session) { doneChecking(); authBox.hidden = false; dashboard.hidden = true; setNavName(''); return; }
-  const { data: rows, error } = await supabase.from('customers').select('*').eq('auth_user_id', session.user.id).limit(1);
+  const { data: loadedCustomer, error } = await supabase.from('customers').select('*').eq('auth_user_id', session.user.id).maybeSingle();
   if (version !== authLoadVersion) return;
-  if (error || !rows?.length) {
+  if (error || !loadedCustomer || loadedCustomer.auth_user_id !== session.user.id) {
     doneChecking(); authBox.hidden = false; dashboard.hidden = true;
     authStatus.textContent = error?.message || 'Your account is still being prepared. Please sign in again.';
     return;
   }
-  customer = rows[0];
+  customer = loadedCustomer;
   // This secured function deduplicates server-side, so it is safe to call on
   // every signed-in load. It only alerts Hazel for a genuinely new account.
   void supabase.functions.invoke('account-created-alert').catch(() => {});
@@ -1340,6 +1370,7 @@ async function saveProfile(e) {
   if (data) {
     customer = data;
     setNavName(customer.first_name || customer.full_name);
+    cacheMe(customer);
     $('#accountName').textContent = customer.first_name || String(customer.full_name || '').split(' ')[0] || 'there';
     syncPrefsSummary(); // a number saved here clears the warning on Notifications
   }
@@ -1716,7 +1747,7 @@ $$('.pwfield__eye').forEach((eye) => eye.addEventListener('click', () => {
 // Save the date: the focused save-date page, with the day already filled in.
 $('#choiceSave').addEventListener('click', () => {
   if (!choiceDate) return;
-  location.href = `save-date.html?date=${encodeURIComponent(choiceDate)}`;
+  location.href = `/save-date?date=${encodeURIComponent(choiceDate)}`;
 });
 // Order a cake: the enquiry overlay, opened in place with the date prefilled.
 // main.js listens for [data-enquire] and reads the prefill off the dataset.

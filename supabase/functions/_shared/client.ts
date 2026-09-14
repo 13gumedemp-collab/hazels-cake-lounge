@@ -194,7 +194,7 @@ export function businessVars(): Record<string, string> {
     business_phone: Deno.env.get("BUSINESS_PHONE") ?? "073 373 4234",
     admin_dashboard_url: Deno.env.get("ADMIN_DASHBOARD_URL") ??
       "https://admin.hazelscakelounge.co.za",
-    enquiry_url: Deno.env.get("ENQUIRY_URL") ?? `${site}/contact.html`,
+    enquiry_url: Deno.env.get("ENQUIRY_URL") ?? `${site}/contact`,
   };
 }
 
