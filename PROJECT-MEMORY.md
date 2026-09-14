@@ -1285,6 +1285,12 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   Atlas org `team_PhbjNbAXygVjZqOAjJBObCC7` (`ofentses-projects-66d84f30`), so the
   `--scope 13gumedemp-collabs-projects` flag recorded in §3 is stale: plain
   `npx vercel --prod --yes` from the linked directory is what works.
+- **Both sites now carry the circular gold logo as their icon.** The customer site declared
+  no favicon at all and the Command Centre used the black H tile. `public/brand/hazels-logo.jpeg`
+  is the source; it was trimmed of its flat black surround and rendered to `favicon.ico`
+  (16/32/48), `icon-192.png`, `icon-512.png` and `apple-touch-icon.png` in both `public/`
+  directories, wired into every public page head, `admin/app/layout.tsx` and the admin
+  manifest. Regenerate with the same trim-then-resize step if the logo is ever replaced.
 - A concurrent Codex session appended its own §5 entry while this work was in progress, and
   `git add -A` swept that edit into commit `94d5f3b`. Its content is intact. Stage files
   explicitly while another session is live in this repository.
