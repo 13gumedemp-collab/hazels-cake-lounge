@@ -1222,6 +1222,23 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   **Verify** click, so branding remains unverified until that click succeeds. Do not remove
   the meta tag after verification.
 
+### 14/09/2026 SEO foundation (Codex)
+
+- Used the requested SEO audit toolkit as a checklist, then added unique, customer-focused
+  titles and descriptions for the home, menu, gallery, story, reviews, contact and Occasion
+  Book pages. The natural service phrases cover custom cakes, wedding cakes, birthday cakes,
+  celebration cakes, cupcakes and the existing home-bake range without keyword stuffing.
+- Added extensionless canonical URLs, Open Graph and Twitter sharing data, and accurate image
+  alternatives. The customer account remains `noindex`, so personal account pages cannot be
+  introduced into search results.
+- Added `public/robots.txt` and `public/sitemap.xml`. The sitemap contains only the
+  indexable, extensionless canonical URLs and is copied into `dist` by Vite for deployment.
+- Added `Bakery` structured data on the home page with only confirmed business facts: the
+  public website, phone number, South Africa service area and existing social profiles. No
+  street address, town or unverified rating has been invented.
+- Vite production build, sitemap XML parsing, unique metadata, image-alternative, canonical,
+  `noindex` and deployable-output checks all pass. This source change has not been deployed.
+
 ### 14/09/2026 Cursor responsiveness, Command Centre dark mode and hero loading *(Claude Code)*
 
 - **The spatula cursor tracked slowly on every machine.** It eased 18% of the remaining
@@ -1315,6 +1332,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 14 | Replace the admin password | The server-side salted scrypt verifier, strict session cookie and persistent login limit are active. Hazel should still replace the current shorter credential with a unique 12+ character password after launch. |
 | 15 | ~~Occasion Book confirmation and reply path~~ | Closed 01/09/2026. Migration `0023` replaces the unfriendly line, explains all three reminder points and invites replies. Thread replies enter the Command Centre through Resend, while direct mail to `hello@hazelscakelounge.co.za` forwards to `hazelscakelounge@gmail.com`. |
 | 16 | Branded Google sign-in | The free on-site Google Identity Services flow is deployed. The Search Console verification tag is live, but the final Google ownership verification click remains after browser control disconnected. A paid `auth.hazelscakelounge.co.za` custom Auth domain remains optional if a fully branded Supabase hostname is still needed later. |
+| 17 | Local search expansion | The public site confirms South Africa but not a collection town, city or address. Obtain Hazel's approved collection area and any public address before targeting area-specific searches or adding those LocalBusiness fields. Do not guess. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 

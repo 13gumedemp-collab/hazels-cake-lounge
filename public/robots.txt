@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.hazelscakelounge.co.za/sitemap.xml
