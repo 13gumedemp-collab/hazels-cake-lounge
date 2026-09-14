@@ -931,16 +931,14 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .account-tabs-wrap::before { left:0; background:linear-gradient(90deg, var(--bg) 35%, rgba(11,10,8,0)); }
 .account-tabs-wrap::after { right:0; background:linear-gradient(270deg, var(--bg) 35%, rgba(11,10,8,0)); }
 .account-tabs-wrap.can-scroll-start::before, .account-tabs-wrap.can-scroll-end::after { opacity:1; }
-.account-tabs-hint { position:absolute; right:0; top:50%; z-index:3; display:grid; place-items:center;
-  width:30px; height:30px; margin-top:-15px; border-radius:999px;
-  background:var(--gold); box-shadow:0 4px 14px rgba(0,0,0,.5);
-  font-size:0; pointer-events:none; opacity:0; transition:opacity .35s var(--ease); }
-/* Drawn rather than typed, so the arrow is the same crisp shape whatever the
-   font does with a chevron glyph. */
-.account-tabs-hint::before { content:''; width:7px; height:7px; margin-left:-2px;
-  border-top:2px solid #0b0a08; border-right:2px solid #0b0a08; rotate:45deg; }
-.account-tabs-wrap.can-scroll-end .account-tabs-hint { opacity:1; animation:tabNudge 2.2s var(--ease) 3; }
-@keyframes tabNudge { 0%,70%,100% { transform:translateX(0); } 80% { transform:translateX(4px); } 90% { transform:translateX(0); } }
+/* A hairline chevron, no tile behind it: the fade already does the work, and
+   anything heavier sits on top of the tab it is pointing past. */
+.account-tabs-hint { position:absolute; right:3px; top:50%; z-index:3; display:grid; place-items:center;
+  width:14px; height:14px; margin-top:-7px; font-size:0;
+  pointer-events:none; opacity:0; transition:opacity .35s var(--ease); }
+.account-tabs-hint::before { content:''; width:6px; height:6px; margin-left:-2px;
+  border-top:1px solid var(--gold); border-right:1px solid var(--gold); rotate:45deg; }
+.account-tabs-wrap.can-scroll-end .account-tabs-hint { opacity:.8; }
 /* A pointer has a scrollbar and a wheel; this is for thumbs. */
 @media (hover:hover) and (pointer:fine) { .account-tabs-hint { display:none; } }
 

@@ -1216,8 +1216,9 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   while there is more to reach, driven by the measured scroll position in `account.js`, so it
   is only ever shown when it is true. First attempt was invisible: `.account-tabs` is itself
   positioned and comes later in the DOM, so the absolutely positioned fades painted
-  underneath it. They carry `z-index` now, the fade is wider, and the chevron is a solid gold
-  pill with a drawn arrow rather than a faint outline around a font glyph.
+  underneath it. They carry `z-index` now and the fade is wider. The first chevron was a solid gold pill,
+  which the user rejected as too heavy and as sitting on top of the tab it points past; the
+  shipped one is a hairline gold chevron with no tile behind it and no nudge animation.
 - **The home page hero photo arrived late.** It was a 1920px file loaded straight from
   `images.unsplash.com`, so the first thing any visitor saw waited on a third-party DNS
   lookup, TCP connection and TLS handshake. The same picture now ships from
