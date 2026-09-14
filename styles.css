@@ -893,6 +893,8 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .account-oauth__btn, .account-login-form .btn { width: 100%; }
 .account-oauth__btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem; }
 .account-oauth__btn svg { width: 1.05rem; height: 1.05rem; fill: currentColor; flex: none; }
+.account-oauth__google { display: flex; justify-content: center; min-height: 44px; }
+.account-oauth__google > div { max-width: 100%; }
 .account-divider { display: flex; align-items: center; gap: 1rem; color: var(--muted); margin: 1.5rem 0; }
 .account-divider::before,.account-divider::after { content:''; height:1px; background:var(--line); flex:1; }
 .account-login-form { display:grid; gap:1rem; text-align:left; }

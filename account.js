@@ -6,6 +6,7 @@ import {
 
 const SB_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
 const SB_ANON = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
+const GOOGLE_CLIENT_ID = '732761854674-iu5290u4h316avdc4tcr298ooifmelim.apps.googleusercontent.com';
 const supabase = createClient(SB_URL, SB_ANON, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
 });
@@ -35,8 +36,9 @@ const ORDER_FIELDS = 'id,circle_member_id,status,payment_status,total_amount_zar
 const REDIRECT = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
   ? 'http://localhost:5173/account.html'
   : location.origin + '/account.html';
-const PROVIDERS = { google: 'Google' };
 let pendingEmail = '';
+let googleNonce = '';
+let googleSignInBusy = false;
 // An email confirmation can arrive while this browser still has a previous
 // customer's session in storage. Keep only the newest auth result so an older
 // asynchronous customer lookup cannot paint over the confirmed account.
@@ -147,13 +149,64 @@ function showPanel(name) {
   swap(current, next);
 }
 
-async function signInWithProvider(provider) {
-  authStatus.textContent = `Opening ${PROVIDERS[provider]}...`;
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: { redirectTo: REDIRECT },
+function waitForGoogleIdentity() {
+  if (window.google?.accounts?.id) return Promise.resolve();
+  const script = document.querySelector('script[data-google-identity]');
+  if (!script) return Promise.reject(new Error('Google sign-in could not be loaded.'));
+  return new Promise((resolve, reject) => {
+    script.addEventListener('load', () => resolve(), { once: true });
+    script.addEventListener('error', () => reject(new Error('Google sign-in could not be loaded.')), { once: true });
   });
-  if (error) authStatus.textContent = friendly(error);
+}
+
+async function createGoogleNonce() {
+  const nonce = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(nonce));
+  const hashedNonce = Array.from(new Uint8Array(hash)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  return { nonce, hashedNonce };
+}
+
+async function completeGoogleSignIn(response) {
+  if (googleSignInBusy || !response?.credential || !googleNonce) return;
+  googleSignInBusy = true;
+  authStatus.textContent = 'Signing you in securely...';
+  const { error } = await supabase.auth.signInWithIdToken({
+    provider: 'google',
+    token: response.credential,
+    nonce: googleNonce,
+  });
+  if (error) authStatus.textContent = friendly(error, 'Google could not sign you in. Please try again.');
+  googleSignInBusy = false;
+}
+
+async function initialiseGoogleSignIn() {
+  const target = $('#googleSignIn');
+  if (!target) return;
+  try {
+    await waitForGoogleIdentity();
+    const { nonce, hashedNonce } = await createGoogleNonce();
+    googleNonce = nonce;
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: completeGoogleSignIn,
+      nonce: hashedNonce,
+      use_fedcm_for_prompt: true,
+      cancel_on_tap_outside: true,
+    });
+    const width = Math.min(400, Math.max(120, Math.floor(target.getBoundingClientRect().width || 320)));
+    window.google.accounts.id.renderButton(target, {
+      type: 'standard',
+      theme: 'outline',
+      size: 'large',
+      text: 'continue_with',
+      shape: 'rectangular',
+      width,
+      logo_alignment: 'left',
+    });
+  } catch {
+    target.hidden = true;
+    authStatus.textContent = 'Google sign-in is unavailable just now. Please use your email address instead.';
+  }
 }
 
 async function signIn(e) {
@@ -1744,7 +1797,7 @@ $('.account-tabs')?.addEventListener('scroll', syncTabOverflow, { passive: true 
 syncTabOverflow();
 addEventListener('load', syncTabOverflow);
 setTimeout(syncTabOverflow, 600);
-$('#googleSignIn').addEventListener('click', () => signInWithProvider('google'));
+void initialiseGoogleSignIn();
 $$('[data-auth-tab]').forEach((b) => b.addEventListener('click', () => {
   clearRecoveryState();
   showPanel(b.dataset.authTab);

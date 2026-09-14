@@ -1191,6 +1191,27 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   OAuth, verify the records, then activate the custom Auth domain. This preserves active
   customer sessions and makes the branded hostname appear in future Google consent flows.
 
+### 14/09/2026 Free Google Identity Services sign-in (Codex)
+
+- Replaced the redirect-based Google button with Google's on-site Identity Services button.
+  It exchanges the returned Google ID token directly with Supabase through
+  `signInWithIdToken`, retaining the existing Supabase session, RLS and UID-bound display
+  protections. The implementation generates a fresh random nonce, sends its SHA-256 hex
+  hash to Google and sends the original nonce to Supabase, as required for replay protection.
+- The existing Web OAuth client remains the only client. Its authorised JavaScript origins
+  now include both the historic apex and `https://www.hazelscakelounge.co.za`; the existing
+  Supabase callback URI was preserved. Do not add broad wildcard, preview or untrusted
+  origins to this client.
+- Google consent branding already has the Hazel's Cake Lounge app name and support email.
+  Added the public home, privacy and terms URLs and submitted Google's no-cost branding
+  verification. No logo was uploaded because no compliant square logo asset is currently in
+  the repository. Google reports verification as in progress and may take several business
+  days; this does not block the on-site button.
+- The public CSP now permits the Google Identity Services script, frame and connection only
+  from `accounts.google.com`. `Cross-Origin-Opener-Policy: same-origin-allow-popups` was
+  already correct. Vite production build, JavaScript syntax and a local visual check of the
+  rendered Google button pass.
+
 ### 14/09/2026 Cursor responsiveness, Command Centre dark mode and hero loading *(Claude Code)*
 
 - **The spatula cursor tracked slowly on every machine.** It eased 18% of the remaining

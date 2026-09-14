@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://accounts.google.com/gsi/client" defer data-google-identity></script>
 </head>
 <body>
   <div class="loader" id="loader" aria-hidden="true"><div class="loader__inner"><span class="loader__name">Hazel's</span></div><div class="loader__count"><span id="loaderCount">00</span></div></div>
@@ -37,10 +38,7 @@
       <h1>Everything you are<br /><em class="gold">celebrating.</em></h1>
       <p>Sign in to see your saved dates, confirmed cakes, payments and reminders.</p>
       <div class="account-oauth">
-        <button class="btn account-oauth__btn" id="googleSignIn" type="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" /></svg>
-          <span>Continue with Google</span>
-        </button>
+        <div class="account-oauth__google" id="googleSignIn"></div>
       </div>
       <div class="account-divider"><span>or</span></div>
 
