@@ -32,9 +32,12 @@ Last updated: 14/09/2026
 
 - Vite entry points are declared explicitly in [vite.config.js](vite.config.js). **Adding a
   new page means adding it to `rollupOptions.input`, or it silently will not build.**
-- Vercel IDs: project `prj_yDGfitUPfAcXrA2RgiYoT9I1XTvK`, team
-  `team_f2rrWrh7T89Jr1089ET6jRbG`, scope `13gumedemp-collabs-projects`, account
-  `13gumedemp-collab` (not Ofentse's).
+- Vercel IDs: public project `prj_yDGfitUPfAcXrA2RgiYoT9I1XTvK`, admin project
+  `prj_k8sR1zsBZFSYkJGljuGI2XtA5YSW`. Both now sit in the Atlas org
+  `team_PhbjNbAXygVjZqOAjJBObCC7`, slug `ofentses-projects-66d84f30`, which is what the
+  linked `.vercel` directories carry. The original team `team_f2rrWrh7T89Jr1089ET6jRbG` /
+  scope `13gumedemp-collabs-projects` under account `13gumedemp-collab` is the pre-migration
+  home and no longer the deploy target.
 - Supabase project ref: `qgzpoyyijafblzfiyhoc`. CLI is authenticated and linked on this
   machine; its personal access token lives in Windows Credential Manager under target
   `Supabase CLI:supabase`. Never print it.
@@ -81,9 +84,12 @@ once and had to be renamed to `0010`.
 - Committing and pushing to GitHub is still fine and expected — pushing does **not**
   trigger a deploy here; deploys are CLI-only.
 - Deploy only when the user explicitly asks. Batch several changes into one deploy.
-  Command: `npx vercel --prod --yes --scope 13gumedemp-collabs-projects` from the repo
-  root, then confirm the deployment is Ready **and** aliased to
-  `https://hazelscakelounge.co.za`.
+  Command: `npx vercel --prod --yes` from the repo root for the public site, and the same
+  from `admin/` for the Command Centre. Then confirm each deployment is Ready **and**
+  aliased, to `https://www.hazelscakelounge.co.za` and `https://admin.hazelscakelounge.co.za`.
+  Do **not** pass `--scope 13gumedemp-collabs-projects`: since the Atlas migration both
+  projects live under `ofentses-projects-66d84f30`, and the linked `.vercel` directory in
+  each already carries the right org. (Verified 14/09/2026.)
 - To deploy without picking up another session's uncommitted edits:
   `git worktree add --detach <tmp> <commit>`, copy `.vercel` into it, run the CLI there.
 
@@ -1184,6 +1190,72 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   records, add the new custom callback alongside the existing default callback in Google
   OAuth, verify the records, then activate the custom Auth domain. This preserves active
   customer sessions and makes the branded hostname appear in future Google consent flows.
+
+### 14/09/2026 Cursor responsiveness, Command Centre dark mode and hero loading *(Claude Code)*
+
+- **The spatula cursor tracked slowly on every machine.** It eased 18% of the remaining
+  distance per animation frame, so it sat roughly 200ms behind the real pointer at 60Hz,
+  further behind whenever a frame ran long, and a different distance again on a 120Hz or
+  144Hz screen. It now takes the pointer position exactly, written once per frame from a
+  `pointermove` listener with `requestAnimationFrame` coalescing. The permanent rAF loop is
+  gone too: it ran forever whether or not the pointer moved.
+- **Worse, several devices had no visible cursor at all.** `cursor: none` was applied from
+  media queries while the spatula was drawn only when `(pointer:fine)` matched and reduced
+  motion was off, so the two disagreed. A reduced-motion desktop, a tablet or touch laptop
+  with a mouse, and any desktop window narrower than 901px hid the native cursor and then
+  drew nothing in its place; a script error before that block did the same to everyone.
+  `cursor: none` is now gated entirely on `html.cursor-live`, which `main.js` sets only while
+  the spatula is genuinely running and clears the moment it is not, including live changes:
+  a mouse being plugged in, a laptop folding into tablet mode, reduced motion being switched
+  on, or a finger touching the glass. The per-element `cursor: none` declarations became
+  ordinary `pointer` and `text` values, since the gated blanket rule already covers the
+  spatula case. The spatula also stays hidden until the first real pointer position is known
+  and parks when the pointer leaves the window.
+- **The account tabs now say they scroll.** On a phone the strip ran off the edge of the
+  glass and read as the whole set. The wrapper fades both edges and floats a gold chevron
+  while there is more to reach, driven by the measured scroll position in `account.js`, so it
+  is only ever shown when it is true. First attempt was invisible: `.account-tabs` is itself
+  positioned and comes later in the DOM, so the absolutely positioned fades painted
+  underneath it. They carry `z-index` now, the fade is wider, and the chevron is a solid gold
+  pill with a drawn arrow rather than a faint outline around a font glyph.
+- **The home page hero photo arrived late.** It was a 1920px file loaded straight from
+  `images.unsplash.com`, so the first thing any visitor saw waited on a third-party DNS
+  lookup, TCP connection and TLS handshake. The same picture now ships from
+  `public/images/hero-home.jpg` with a phone-sized `hero-home-1080.jpg` variant, a `preload`
+  in the head and `fetchpriority="high"`. The Unsplash URL stays as `data-fallback-src`, the
+  convention the rest of the site already uses. `.hero__media` also carries the warm brand
+  gradient, so a slow connection shows that instead of a black rectangle. The cinematic
+  loader curtain was left alone; it is deliberate, and it was not what held the photo up.
+- **Command Centre: the raster logo is gone from the login card and the sidebar.** The
+  `.brand-mark` tile and `.sidebar-wordmark__mark` were removed; the collapsed rail keeps a
+  typographic initial so its header does not lose height. `/hazels-h-mark.png` is still the
+  browser tab and installed app icon in `app/layout.tsx`, which is deliberate and separate.
+- **Command Centre: a black and gold theme, chosen in Settings.** The palette is the public
+  site's own tokens. It is opt-in per device, stored in `localStorage` under
+  `hcl.admin.theme`, and applied to `<html>` by a tiny inline script in `app/layout.tsx`
+  before first paint so the workspace never flashes ivory on the way to black. The whole
+  theme is one override section at the end of `admin/app/globals.css` scoped to
+  `html.theme-dark`; the ivory palette is untouched and stays the default. Note for whoever
+  works on it next: the Tailwind palette in `tailwind.config.ts` is itself the ivory one
+  (`ink` is a dark brown, `cream` is dark, `ink2` is near-white), so each colour utility a
+  component uses needs its counterpart in that section.
+- **Command Centre: Settings no longer changes anything by accident.** Business details and
+  each email template are read-only until Edit is pressed, with Save and Cancel; Cancel
+  restores the last saved values. The email body can now be written as plain words in a
+  "Plain words" mode that converts to and from the stored HTML, keeping whatever wrapper the
+  template already carries so the email keeps its typography, and leaving `{{variables}}`
+  untouched. Templates whose body contains markup beyond `div/p/br/strong/em/span` open in
+  HTML mode instead, so nothing rich gets flattened silently.
+- **Both projects deployed to production at the user's explicit request** and verified live:
+  public commit `94d5f3b` aliased to `https://www.hazelscakelounge.co.za` with the new hero
+  files and cursor bundle served, and the Command Centre aliased to
+  `https://admin.hazelscakelounge.co.za`. Note that both Vercel projects now sit under the
+  Atlas org `team_PhbjNbAXygVjZqOAjJBObCC7` (`ofentses-projects-66d84f30`), so the
+  `--scope 13gumedemp-collabs-projects` flag recorded in §3 is stale: plain
+  `npx vercel --prod --yes` from the linked directory is what works.
+- A concurrent Codex session appended its own §5 entry while this work was in progress, and
+  `git add -A` swept that edit into commit `94d5f3b`. Its content is intact. Stage files
+  explicitly while another session is live in this repository.
 
 ## 6. Open threads
 
