@@ -11,7 +11,14 @@ export const metadata: Metadata = {
   description: "Private command centre for Hazel's Cake Lounge.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Hazel's CC" },
-  icons: { icon: "/hazels-h-mark.png", apple: "/hazels-h-mark.png" },
+  // The circular gold mark, the same one the customer site wears in its tab.
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
