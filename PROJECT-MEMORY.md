@@ -1216,6 +1216,11 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   contains the Google client loader, serves the nonce-protected ID-token flow, and has the
   expected CSP and `same-origin-allow-popups` headers. The GitHub push still fails with the
   existing `OfentseThulare` HTTP 403 credential, so GitHub is behind the deployed local main.
+- Google Search Console requested proof of ownership for the `www` URL-prefix property. The
+  `google-site-verification` meta tag is deployed and live in the home-page head through
+  commit `df3fe26`. The browser control connection dropped before the final Search Console
+  **Verify** click, so branding remains unverified until that click succeeds. Do not remove
+  the meta tag after verification.
 
 ### 14/09/2026 Cursor responsiveness, Command Centre dark mode and hero loading *(Claude Code)*
 
@@ -1303,7 +1308,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 13 | ~~Inbound email complete, sender bounce connection outstanding~~ | Closed 01/09/2026. The correct `hazelscakelounge` Resend workspace now has its own seven-event delivery and bounce webhook. The Edge Function verifies both workspace secrets, and a real Hazel-workspace bounce simulation produced processed `email.sent` and `email.bounced` events plus the expected local suppression. |
 | 14 | Replace the admin password | The server-side salted scrypt verifier, strict session cookie and persistent login limit are active. Hazel should still replace the current shorter credential with a unique 12+ character password after launch. |
 | 15 | ~~Occasion Book confirmation and reply path~~ | Closed 01/09/2026. Migration `0023` replaces the unfriendly line, explains all three reminder points and invites replies. Thread replies enter the Command Centre through Resend, while direct mail to `hello@hazelscakelounge.co.za` forwards to `hazelscakelounge@gmail.com`. |
-| 16 | Branded Google sign-in | The free on-site Google Identity Services flow is deployed. Google's consent branding verification is in progress. A paid `auth.hazelscakelounge.co.za` custom Auth domain remains optional if a fully branded Supabase hostname is still needed later. |
+| 16 | Branded Google sign-in | The free on-site Google Identity Services flow is deployed. The Search Console verification tag is live, but the final Google ownership verification click remains after browser control disconnected. A paid `auth.hazelscakelounge.co.za` custom Auth domain remains optional if a fully branded Supabase hostname is still needed later. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 
