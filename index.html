@@ -10,6 +10,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <!-- The hero photo is the first thing anyone sees, so it is fetched at the
+       same priority as the stylesheet rather than waiting its turn. -->
+  <link rel="preload" as="image" href="/images/hero-home.jpg" fetchpriority="high"
+        imagesrcset="/images/hero-home-1080.jpg 1080w, /images/hero-home.jpg 1920w" imagesizes="100vw" />
 </head>
 <body>
   <!-- Cinematic intro curtain -->
@@ -40,7 +44,14 @@
     <!-- HERO -->
     <section class="hero" id="hero">
       <div class="hero__media" data-parallax="0.18">
-        <img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&w=1920&q=80" alt="A freshly baked cake" data-fallback />
+        <!-- Served from our own domain, not Unsplash: the remote copy cost a
+             fresh DNS lookup, connection and handshake before a single byte of
+             the picture arrived, and the hero sat black meanwhile. The stock
+             URL stays as the fallback, as everywhere else on the site. -->
+        <img src="/images/hero-home.jpg"
+             srcset="/images/hero-home-1080.jpg 1080w, /images/hero-home.jpg 1920w" sizes="100vw"
+             data-fallback-src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?auto=format&fit=crop&w=1920&q=80"
+             alt="A freshly baked cake" fetchpriority="high" decoding="async" data-fallback />
         <div class="hero__veil"></div>
       </div>
 

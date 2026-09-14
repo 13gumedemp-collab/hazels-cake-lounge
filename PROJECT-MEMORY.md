@@ -1169,6 +1169,22 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   `13gumedemp-collab/hazels-cake-lounge`. The production releases are live; restore GitHub
   write access and push `main` so the remote repository matches production.
 
+### 14/09/2026 Branded Google sign-in domain assessment (Codex)
+
+- The Google consent screen identifies `qgzpoyyijafblzfiyhoc.supabase.co` because the
+  project is using Supabase's default Auth hostname. This is a trust and presentation
+  concern, but it is not evidence of cross-account access or an unauthorised OAuth redirect.
+- Supabase's supported remedy is a custom Auth hostname, proposed as
+  `auth.hazelscakelounge.co.za`. The required entitlement check returned
+  `entitlement_required`: this organisation does not have the Custom Domain add-on, which
+  is available only on paid Supabase plans. Do not substitute a redirect or alter the
+  existing authorised callback as a workaround.
+- DNS currently resolves the proposed `auth` hostname via the apex's existing wildcard
+  handling. Once the owner approves the paid add-on, obtain Supabase's CNAME and ACME TXT
+  records, add the new custom callback alongside the existing default callback in Google
+  OAuth, verify the records, then activate the custom Auth domain. This preserves active
+  customer sessions and makes the branded hostname appear in future Google consent flows.
+
 ## 6. Open threads
 
 | # | Item | Detail |
@@ -1188,6 +1204,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 13 | ~~Inbound email complete, sender bounce connection outstanding~~ | Closed 01/09/2026. The correct `hazelscakelounge` Resend workspace now has its own seven-event delivery and bounce webhook. The Edge Function verifies both workspace secrets, and a real Hazel-workspace bounce simulation produced processed `email.sent` and `email.bounced` events plus the expected local suppression. |
 | 14 | Replace the admin password | The server-side salted scrypt verifier, strict session cookie and persistent login limit are active. Hazel should still replace the current shorter credential with a unique 12+ character password after launch. |
 | 15 | ~~Occasion Book confirmation and reply path~~ | Closed 01/09/2026. Migration `0023` replaces the unfriendly line, explains all three reminder points and invites replies. Thread replies enter the Command Centre through Resend, while direct mail to `hello@hazelscakelounge.co.za` forwards to `hazelscakelounge@gmail.com`. |
+| 16 | Branded Google sign-in domain | Pending owner approval to purchase the Supabase Custom Domain add-on. Then configure `auth.hazelscakelounge.co.za`, Google OAuth's additional callback URI and DNS verification before activation. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 

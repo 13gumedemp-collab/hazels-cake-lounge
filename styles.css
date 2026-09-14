@@ -237,7 +237,12 @@ section { position: relative; }
 /* ----------  HERO  ---------- */
 .hero { height: 100vh; min-height: 640px; display: flex; align-items: flex-end;
   padding: clamp(7rem, 15vh, 10rem) clamp(1.4rem, 5vw, 4rem) clamp(3rem, 8vh, 6rem); overflow: hidden; }
-.hero__media { position: absolute; inset: -8% 0; z-index: -1; }
+/* The warm ground behind the photo. On the slowest connection the hero is then
+   never a plain black rectangle, and once the picture lands it covers this. */
+.hero__media { position: absolute; inset: -8% 0; z-index: -1;
+  background:
+    radial-gradient(120% 120% at 30% 0%, rgba(212,175,55,0.16) 0%, transparent 58%),
+    linear-gradient(150deg, #2a2316 0%, #181410 55%, #0f0c09 100%); }
 .hero__media img { transform: scale(1.15); animation: heroZoom 2.4s var(--ease) 0.4s forwards;
   filter: saturate(0.9) contrast(1.05) brightness(0.92); }
 @keyframes heroZoom { to { transform: scale(1); } }
@@ -918,18 +923,24 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
    chevron while there is more to reach. Both are driven by the scroll position
    in account.js, so they are only ever shown when they are true. */
 .account-tabs-wrap { position:relative; }
+/* z-index matters here: .account-tabs is itself positioned and comes later in
+   the DOM, so without it the strip paints straight over both fades. */
 .account-tabs-wrap::before, .account-tabs-wrap::after {
-  content:''; position:absolute; top:0; bottom:1px; width:clamp(32px, 12vw, 64px);
+  content:''; position:absolute; top:0; bottom:1px; z-index:2; width:clamp(48px, 18vw, 96px);
   pointer-events:none; opacity:0; transition:opacity .35s var(--ease); }
-.account-tabs-wrap::before { left:0; background:linear-gradient(90deg, var(--bg) 25%, transparent); }
-.account-tabs-wrap::after { right:0; background:linear-gradient(270deg, var(--bg) 25%, transparent); }
+.account-tabs-wrap::before { left:0; background:linear-gradient(90deg, var(--bg) 35%, rgba(11,10,8,0)); }
+.account-tabs-wrap::after { right:0; background:linear-gradient(270deg, var(--bg) 35%, rgba(11,10,8,0)); }
 .account-tabs-wrap.can-scroll-start::before, .account-tabs-wrap.can-scroll-end::after { opacity:1; }
-.account-tabs-hint { position:absolute; right:.1rem; bottom:.85rem; display:grid; place-items:center;
-  width:26px; height:26px; border:1px solid var(--line); border-radius:999px;
-  background:rgba(11,10,8,.9); color:var(--gold); font-size:.85rem; line-height:1;
-  pointer-events:none; opacity:0; transition:opacity .35s var(--ease); }
-.account-tabs-wrap.can-scroll-end .account-tabs-hint { opacity:1; animation:tabNudge 2.4s var(--ease) 3; }
-@keyframes tabNudge { 0%,72%,100% { transform:translateX(0); } 80% { transform:translateX(3px); } 88% { transform:translateX(0); } }
+.account-tabs-hint { position:absolute; right:0; top:50%; z-index:3; display:grid; place-items:center;
+  width:30px; height:30px; margin-top:-15px; border-radius:999px;
+  background:var(--gold); box-shadow:0 4px 14px rgba(0,0,0,.5);
+  font-size:0; pointer-events:none; opacity:0; transition:opacity .35s var(--ease); }
+/* Drawn rather than typed, so the arrow is the same crisp shape whatever the
+   font does with a chevron glyph. */
+.account-tabs-hint::before { content:''; width:7px; height:7px; margin-left:-2px;
+  border-top:2px solid #0b0a08; border-right:2px solid #0b0a08; rotate:45deg; }
+.account-tabs-wrap.can-scroll-end .account-tabs-hint { opacity:1; animation:tabNudge 2.2s var(--ease) 3; }
+@keyframes tabNudge { 0%,70%,100% { transform:translateX(0); } 80% { transform:translateX(4px); } 90% { transform:translateX(0); } }
 /* A pointer has a scrollbar and a wheel; this is for thumbs. */
 @media (hover:hover) and (pointer:fine) { .account-tabs-hint { display:none; } }
 
