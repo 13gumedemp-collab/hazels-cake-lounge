@@ -46,16 +46,17 @@ body {
      the body became a second scroll container and the page grew two
      scrollbars that fought each other. html already clips the x axis. */
   overflow-x: clip;
-  cursor: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-@media (max-width: 900px) { body { cursor: auto; } }
-/* Desktop with a fine pointer: hide the native cursor everywhere so only the
-   gold spatula shows (links, buttons, inputs all default to it). */
-@media (hover: hover) and (pointer: fine) and (min-width: 901px) {
-  *, *::before, *::after { cursor: none !important; }
-}
+/* Hide the native cursor only while the gold spatula is genuinely running.
+   main.js puts `.cursor-live` on <html> for exactly as long as it is, and takes
+   it off again the moment it is not: touch input, reduced motion, a device with
+   no fine pointer, a script that never reached this far. Gating on media
+   queries alone left those visitors with no cursor at all — a reduced-motion
+   desktop, a tablet with a mouse and a narrow desktop window each hid the
+   native cursor and then drew no replacement. */
+html.cursor-live *, html.cursor-live *::before, html.cursor-live *::after { cursor: none !important; }
 
 img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
@@ -117,14 +118,20 @@ a { color: inherit; text-decoration: none; }
 /* ----------  Custom cursor (gold spatula)  ---------- */
 .cursor { position: fixed; top: 0; left: 0; z-index: 3000; width: 24px; height: 24px;
   pointer-events: none; color: var(--gold); transform: translate(-50%, -50%);
-  transition: opacity 0.3s var(--ease); will-change: transform; }
+  opacity: 0; transition: opacity 0.3s var(--ease);
+  /* Own compositor layer, so moving it never repaints the page under it. Not
+     `contain`, which would clip the drop shadow and the hover scale. */
+  will-change: transform; }
+/* Shown only once a real pointer position is known, so it never sits parked in
+   the middle of the screen waiting for the first move. */
+.cursor.is-on { opacity: 1; }
 .cursor svg { width: 100%; height: 100%; display: block;
   filter: drop-shadow(0 1.5px 3px rgba(0,0,0,0.4));
   transform: rotate(-38deg); transform-origin: 50% 50%;
   transition: transform 0.3s var(--ease); }
 .cursor.is-link svg { transform: rotate(-16deg) scale(1.25); }
 .cursor.is-view svg { transform: rotate(-16deg) scale(1.4); }
-@media (max-width: 900px) { .cursor { display: none; } }
+html:not(.cursor-live) .cursor { display: none; }
 
 /* ----------  Navigation  ---------- */
 .nav {
@@ -287,7 +294,7 @@ section { position: relative; }
 .card__num { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
 .card__meta h3 { font-size: 1.7rem; margin: 0.3rem 0 0.5rem; }
 .card__meta p { font-size: 0.92rem; color: var(--cream-soft); max-width: 32ch; }
-.card__enquire { margin-top: auto; padding-top: 0.9rem; background: none; border: none; cursor: none;
+.card__enquire { margin-top: auto; padding-top: 0.9rem; background: none; border: none; cursor: pointer;
   font-family: 'Jost', sans-serif; font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--cream); display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.3s var(--ease); }
 .card__enquire span { color: var(--gold); transition: transform 0.4s var(--ease); display: inline-block; }
@@ -470,12 +477,13 @@ section { position: relative; }
 .field span { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
 .field input, .field textarea, .field select { background: transparent; border: none; border-bottom: 1px solid rgba(244,236,221,0.22);
   color: var(--cream); font-family: 'Jost', sans-serif; font-size: 1rem; padding: 0.6rem 0; resize: none;
-  transition: border-color 0.4s var(--ease); cursor: none; width: 100%; }
+  transition: border-color 0.4s var(--ease); cursor: text; width: 100%; }
 .field input::placeholder, .field textarea::placeholder { color: rgba(244,236,221,0.3); }
 .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--gold); }
 .field select { -webkit-appearance: none; appearance: none; border-radius: 0;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23d4af37' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 0.2rem center; padding-right: 1.8rem; }
+  background-repeat: no-repeat; background-position: right 0.2rem center; padding-right: 1.8rem;
+  cursor: pointer; }
 .field select option { color: #f4ecdd; background: #14110d; }
 .field select.is-set { border-color: var(--gold); }
 @keyframes fieldFlash { 0%,100% { border-color: rgba(244,236,221,0.22); } 35% { border-color: var(--gold-bright); } }
@@ -528,7 +536,7 @@ section { position: relative; }
 /* Inspiration photo upload */
 .filefield { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; position: relative; }
 .filefield input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%;
-  opacity: 0; cursor: none; }
+  opacity: 0; cursor: pointer; }
 .filefield__btn { display: inline-flex; align-items: center; white-space: nowrap;
   font-family: 'Jost', sans-serif; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--gold); border: 1px solid var(--gold); border-radius: 2px; padding: 0.7rem 1.2rem;
@@ -540,7 +548,7 @@ section { position: relative; }
 .filepreview img { display: block; width: 100%; height: auto; }
 .filepreview__clear { position: absolute; top: 0.4rem; right: 0.4rem; width: 26px; height: 26px;
   border: none; border-radius: 50%; background: rgba(11,10,8,0.72); color: var(--cream);
-  font-size: 1.1rem; line-height: 1; cursor: none; display: grid; place-items: center;
+  font-size: 1.1rem; line-height: 1; cursor: pointer; display: grid; place-items: center;
   transition: background 0.3s var(--ease); }
 .filepreview__clear:hover { background: var(--gold); color: #0b0a08; }
 
@@ -560,7 +568,7 @@ section { position: relative; }
   font-size: clamp(1.8rem, 5vw, 3rem); color: var(--cream); }
 
 .rating { display: inline-flex; gap: clamp(0.5rem, 2.4vw, 1.1rem); margin: clamp(1.6rem, 4vh, 2.6rem) 0 1rem; }
-.rating__star { background: none; border: none; padding: 0; cursor: none; line-height: 0;
+.rating__star { background: none; border: none; padding: 0; cursor: pointer; line-height: 0;
   transform: scale(1); transition: transform 0.35s var(--ease); }
 .rating__star svg { width: clamp(40px, 9vw, 64px); height: clamp(40px, 9vw, 64px);
   fill: rgba(244,236,221,0.1); stroke: rgba(212,175,55,0.45); stroke-width: 1;
@@ -588,7 +596,7 @@ section { position: relative; }
 .reviewform__upload { position: relative; width: fit-content; }
 .reviewform__upload input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 1; }
 .reviewform__photo-trigger { position: relative; display: inline-flex; align-items: baseline; gap: 0.55rem; min-height: 44px; padding: 0.2rem 0;
-  border: none; border-bottom: 1px solid rgba(212,175,55,0.4); color: var(--cream); background: none; cursor: none; text-align: left; }
+  border: none; border-bottom: 1px solid rgba(212,175,55,0.4); color: var(--cream); background: none; cursor: pointer; text-align: left; }
 .reviewform__photo-trigger::after { content: ''; position: absolute; right: 0; bottom: -1px; left: 0; height: 1px; background: var(--gold);
   transform: scaleX(0); transform-origin: left; transition: transform 0.45s var(--ease); }
 .reviewform__upload:hover .reviewform__photo-trigger::after, .reviewform__upload:focus-within .reviewform__photo-trigger::after { transform: scaleX(1); }
@@ -726,7 +734,7 @@ section { position: relative; }
 .cselect { position: relative; width: 100%; }
 .cselect__trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   background: transparent; border: none; border-bottom: 1px solid rgba(244,236,221,0.22); color: var(--cream);
-  font-family: 'Jost', sans-serif; font-size: 1rem; padding: 0.6rem 0; cursor: none; text-align: left;
+  font-family: 'Jost', sans-serif; font-size: 1rem; padding: 0.6rem 0; cursor: pointer; text-align: left;
   transition: border-color 0.4s var(--ease); }
 .cselect.open .cselect__trigger, .cselect__trigger:focus { outline: none; border-color: var(--gold); }
 .cselect__label.is-placeholder { color: rgba(244,236,221,0.4); }
@@ -741,7 +749,7 @@ section { position: relative; }
 .cselect__list { display: flex; flex-direction: column; padding: 0.4rem; }
 .cselect__opt { text-align: left; background: transparent; border: none; color: var(--cream-soft);
   font-family: 'Jost', sans-serif; font-size: 0.98rem; letter-spacing: 0.02em; padding: 0.72rem 0.9rem;
-  border-radius: 4px; cursor: none; opacity: 0; transform: translateY(10px);
+  border-radius: 4px; cursor: pointer; opacity: 0; transform: translateY(10px);
   transition: background 0.25s var(--ease), color 0.25s var(--ease); }
 .cselect.open .cselect__opt { animation: optIn 0.5s var(--ease) forwards; animation-delay: calc(var(--i) * 0.04s + 0.08s); }
 .cselect__opt:hover { background: rgba(212,175,55,0.12); color: var(--gold-bright); }
@@ -759,7 +767,7 @@ section { position: relative; }
 .cards.is-carousel .card__media { clip-path: none; animation: none; }
 .carousel-dots { display: flex; justify-content: center; gap: 0.5rem; padding-top: 1.6rem; }
 .carousel-dot { width: 8px; height: 8px; border-radius: 50%; padding: 0; border: none;
-  background: rgba(244,236,221,0.25); cursor: none; transition: width 0.4s var(--ease), background 0.4s var(--ease); }
+  background: rgba(244,236,221,0.25); cursor: pointer; transition: width 0.4s var(--ease), background 0.4s var(--ease); }
 .carousel-dot.is-active { width: 26px; border-radius: 5px; background: var(--gold); }
 
 /* ----------  Floating Enquire (landing)  ---------- */
@@ -905,11 +913,32 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
   transform:translateX(var(--tab-x,0)); pointer-events:none;
   background:linear-gradient(90deg, transparent, var(--gold-bright, var(--gold)), transparent);
   transition:transform .55s var(--ease), width .55s var(--ease); }
+/* The strip scrolls on a narrow screen, and a row of tabs that simply stops at
+   the edge of the glass reads as the whole set. Fade the edge and float a
+   chevron while there is more to reach. Both are driven by the scroll position
+   in account.js, so they are only ever shown when they are true. */
+.account-tabs-wrap { position:relative; }
+.account-tabs-wrap::before, .account-tabs-wrap::after {
+  content:''; position:absolute; top:0; bottom:1px; width:clamp(32px, 12vw, 64px);
+  pointer-events:none; opacity:0; transition:opacity .35s var(--ease); }
+.account-tabs-wrap::before { left:0; background:linear-gradient(90deg, var(--bg) 25%, transparent); }
+.account-tabs-wrap::after { right:0; background:linear-gradient(270deg, var(--bg) 25%, transparent); }
+.account-tabs-wrap.can-scroll-start::before, .account-tabs-wrap.can-scroll-end::after { opacity:1; }
+.account-tabs-hint { position:absolute; right:.1rem; bottom:.85rem; display:grid; place-items:center;
+  width:26px; height:26px; border:1px solid var(--line); border-radius:999px;
+  background:rgba(11,10,8,.9); color:var(--gold); font-size:.85rem; line-height:1;
+  pointer-events:none; opacity:0; transition:opacity .35s var(--ease); }
+.account-tabs-wrap.can-scroll-end .account-tabs-hint { opacity:1; animation:tabNudge 2.4s var(--ease) 3; }
+@keyframes tabNudge { 0%,72%,100% { transform:translateX(0); } 80% { transform:translateX(3px); } 88% { transform:translateX(0); } }
+/* A pointer has a scrollbar and a wheel; this is for thumbs. */
+@media (hover:hover) and (pointer:fine) { .account-tabs-hint { display:none; } }
+
 .account-panel { display:none; }
 .account-panel.is-active { display:block; animation:authRise .5s var(--ease) both; }
 @media (prefers-reduced-motion: reduce) {
   .account-tabs__ink { transition:none; }
   .account-panel.is-active { animation:none; }
+  .account-tabs-wrap.can-scroll-end .account-tabs-hint { animation:none; }
 }
 .account-section-head { margin-bottom:1.5rem; }.account-section-head span,.account-card span,.account-event div>span { color:var(--gold); font-size:.7rem; letter-spacing:.15em; text-transform:uppercase; }
 .account-section-head h2 { font-size:clamp(2rem,5vw,3.5rem); }
@@ -1580,11 +1609,11 @@ body:has(#floatEnquire) .footer__base { padding-bottom: clamp(4rem, 8vw, 6rem); 
 .account-profile-photo__avatar > * { grid-area:1 / 1; }
 .account-profile-photo__avatar img { width:100%; height:100%; object-fit:cover; }
 .account-profile-photo p { margin:.35rem 0 .75rem; color:var(--cream-soft); font-size:.8rem; line-height:1.55; }
-.account-profile-photo__choose { position:relative; display:inline-flex; min-height:38px; align-items:center; border-bottom:1px solid rgba(212,175,55,.42); color:var(--gold); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; cursor:none; }
+.account-profile-photo__choose { position:relative; display:inline-flex; min-height:38px; align-items:center; border-bottom:1px solid rgba(212,175,55,.42); color:var(--gold); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; }
 .account-profile-photo__choose::after { content:''; position:absolute; right:0; bottom:-1px; left:0; height:1px; background:var(--gold); transform:scaleX(0); transform-origin:left; transition:transform .4s var(--ease); }
 .account-profile-photo__choose:hover::after, .account-profile-photo__choose:focus-within::after { transform:scaleX(1); }
 .account-profile-photo__choose input { position:fixed; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
-.account-profile-photo__remove { min-height:38px; margin-left:1rem; border:none; color:var(--cream-soft); background:none; font-size:.74rem; text-decoration:underline; text-underline-offset:.2em; cursor:none; }
+.account-profile-photo__remove { min-height:38px; margin-left:1rem; border:none; color:var(--cream-soft); background:none; font-size:.74rem; text-decoration:underline; text-underline-offset:.2em; cursor:pointer; }
 .account-profile-photo__remove:hover { color:#e7a17a; }
 .account-profile-photo #profileImageStatus { margin:.65rem 0 0; }
 .account-preferences { border:1px solid var(--line); padding:1rem 1.2rem 1.2rem; display:flex; flex-wrap:wrap; gap:1.4rem; }

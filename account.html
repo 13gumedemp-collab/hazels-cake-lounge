@@ -103,16 +103,21 @@
       <div class="account-welcome">
         <div><p class="page-hero__eyebrow">Your Cake Calendar</p><h1>Welcome, <span id="accountName">there</span>.</h1></div>
       </div>
-      <nav class="account-tabs" aria-label="Account sections">
-        <button class="is-active" data-account-tab="overview">Overview</button>
-        <button data-account-tab="calendar">Calendar</button>
-        <button data-account-tab="orders">Orders</button>
-        <button data-account-tab="payments">Payments</button>
-        <button data-account-tab="dates">Occasion Book</button>
-        <button data-account-tab="profile">Your details</button>
-        <button data-account-tab="notifications">Notifications</button>
-        <button data-account-tab="security">Sign in</button>
-      </nav>
+      <div class="account-tabs-wrap">
+        <nav class="account-tabs" aria-label="Account sections">
+          <button class="is-active" data-account-tab="overview">Overview</button>
+          <button data-account-tab="calendar">Calendar</button>
+          <button data-account-tab="orders">Orders</button>
+          <button data-account-tab="payments">Payments</button>
+          <button data-account-tab="dates">Occasion Book</button>
+          <button data-account-tab="profile">Your details</button>
+          <button data-account-tab="notifications">Notifications</button>
+          <button data-account-tab="security">Sign in</button>
+        </nav>
+        <!-- Shown only while the strip has more to reach, so a narrow screen
+             does not read the visible tabs as the whole set. -->
+        <span class="account-tabs-hint" aria-hidden="true">&rsaquo;</span>
+      </div>
 
       <div class="account-panel is-active" data-account-panel="overview">
         <div class="account-section-head"><div><span>At a glance</span><h2>Overview</h2></div></div>

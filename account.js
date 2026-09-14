@@ -1703,6 +1703,18 @@ function moveTabInk() {
   tabs.style.setProperty('--tab-w', `${active.offsetWidth}px`);
 }
 
+// Fades the edges of the tab strip and shows the chevron while there is more of
+// it to reach. Measured rather than assumed: the strip only overflows on narrow
+// screens, and it stops overflowing the moment the phone is turned.
+function syncTabOverflow() {
+  const tabs = $('.account-tabs');
+  const wrap = $('.account-tabs-wrap');
+  if (!tabs || !wrap) return;
+  const max = tabs.scrollWidth - tabs.clientWidth;
+  wrap.classList.toggle('can-scroll-start', tabs.scrollLeft > 4);
+  wrap.classList.toggle('can-scroll-end', max > 4 && tabs.scrollLeft < max - 4);
+}
+
 function showAccountTab(name) {
   const button = $(`[data-account-tab="${name}"]`);
   if (!button) return;
@@ -1710,6 +1722,7 @@ function showAccountTab(name) {
   $$('[data-account-panel]').forEach((p) => p.classList.toggle('is-active', p.dataset.accountPanel === name));
   button.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
   moveTabInk();
+  syncTabOverflow();
 }
 
 $$('[data-account-tab]').forEach((button) => button.addEventListener('click', () => showAccountTab(button.dataset.accountTab)));
@@ -1724,7 +1737,13 @@ document.addEventListener('click', (e) => {
   const jump = e.target.closest('[data-goto-tab]');
   if (jump) showAccountTab(jump.dataset.gotoTab);
 });
-addEventListener('resize', moveTabInk);
+addEventListener('resize', () => { moveTabInk(); syncTabOverflow(); });
+$('.account-tabs')?.addEventListener('scroll', syncTabOverflow, { passive: true });
+// The smooth scrollIntoView above lands a moment after the click, and the web
+// fonts can change the strip's width after first paint, so settle it twice.
+syncTabOverflow();
+addEventListener('load', syncTabOverflow);
+setTimeout(syncTabOverflow, 600);
 $('#googleSignIn').addEventListener('click', () => signInWithProvider('google'));
 $$('[data-auth-tab]').forEach((b) => b.addEventListener('click', () => {
   clearRecoveryState();

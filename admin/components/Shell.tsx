@@ -49,7 +49,9 @@ export default function Shell({ counts, children }: { counts: Record<string, num
     <>
       <div className={`px-5 py-6 ${collapsed ? "lg:px-0 lg:justify-center" : ""}`}>
       <div className={`sidebar-wordmark ${collapsed ? "sidebar-wordmark--compact" : ""}`}>
-        {collapsed ? <span className="sidebar-wordmark__mark" role="img" aria-label="Hazel's Cake Lounge logo" /> : <><strong>Hazel&apos;s</strong><em>Cake Lounge</em></>}
+        {/* Collapsed, the rail keeps a typographic initial rather than the raster
+            logo tile, so the header holds its height without an image. */}
+        {collapsed ? <strong className="sidebar-wordmark__initial">H</strong> : <><strong>Hazel&apos;s</strong><em>Cake Lounge</em></>}
         </div>
       </div>
 

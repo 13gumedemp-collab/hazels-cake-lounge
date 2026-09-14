@@ -43,13 +43,6 @@ h1, h2, h3, .font-serif { font-family: var(--font-fraunces), Georgia, serif; }
 .admin-main { max-width: 1700px; margin: 0 auto; }
 
 .brand-lockup { display: inline-flex; align-items: center; gap: 0.72rem; }
-.brand-lockup--compact { display: flex; justify-content: center; }
-.brand-mark {
-  display: block; width: 46px; height: 46px; flex: 0 0 46px; border-radius: 14px;
-  background: #000 url('/hazels-h-mark.png') center / cover no-repeat;
-  border: 1px solid rgba(212,175,55,0.3);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 30px rgba(0,0,0,0.28);
-}
 .brand-lockup__copy { display: flex; flex-direction: column; line-height: 1; }
 .brand-lockup__copy strong { font-family: var(--font-fraunces), Georgia, serif; color: #f7e9bd; font-size: 1.26rem; font-weight: 500; }
 .brand-lockup__copy em { margin-top: 0.32rem; color: #c9a84c; font-size: 0.56rem; letter-spacing: 0.34em; font-style: normal; text-transform: uppercase; }
@@ -105,7 +98,6 @@ h1, h2, h3, .font-serif { font-family: var(--font-fraunces), Georgia, serif; }
 .login-page { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.13), transparent 28rem), #08090d; }
 .login-page::before { content: ""; position: absolute; width: 34rem; height: 34rem; border: 1px solid rgba(212,175,55,0.11); border-radius: 50%; top: -17rem; right: -9rem; }
 .login-card { position: relative; padding: clamp(2rem, 6vw, 3.25rem); border: 1px solid rgba(255,255,255,0.1); border-radius: 28px; background: rgba(17,19,27,0.85); box-shadow: 0 30px 70px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06); }
-.login-card .brand-mark { width: 64px; height: 64px; flex-basis: 64px; border-radius: 18px; }
 .login-card .brand-lockup { flex-direction: column; gap: 0.8rem; }
 .login-card .brand-lockup__copy { align-items: center; }
 .login-card .brand-lockup__copy strong { font-size: 1.75rem; }
@@ -139,7 +131,10 @@ body {
 .sidebar-wordmark strong { color: #332d22; font-family: var(--font-fraunces), Georgia, serif; font-size: 1.28rem; font-weight: 500; }
 .sidebar-wordmark em { margin-top: 0.32rem; color: #a28349; font-size: 0.56rem; letter-spacing: 0.34em; font-style: normal; text-transform: uppercase; }
 .sidebar-wordmark--compact { display: grid; width: 100%; place-items: center; }
-.sidebar-wordmark__mark { display: block; width: 38px; height: 38px; border-radius: 12px; background: #000 url('/hazels-h-mark.png') center / cover no-repeat; box-shadow: 0 8px 18px rgba(74,59,34,0.14); }
+/* Collapsed rail: the initial, set in the same serif as the full wordmark, at
+   the height the logo tile used to hold so the rail header does not jump. */
+.sidebar-wordmark__initial { display: grid; place-items: center; width: 38px; height: 38px;
+  color: #332d22; font-family: var(--font-fraunces), Georgia, serif; font-size: 1.5rem; font-weight: 500; line-height: 1; }
 
 .brand-lockup__copy strong, .admin-page h1, .page-heading h1 { color: #302d27; }
 .brand-lockup__copy em, .eyebrow { color: #a28349; }
@@ -322,7 +317,6 @@ button, a, input, select, textarea { touch-action: manipulation; }
   .login-page { align-items: start; padding-top: max(2rem, env(safe-area-inset-top)); }
   .login-card { padding: 1.75rem 1.35rem; border-radius: 22px; }
   .login-card > div:first-child { margin-bottom: 2rem; }
-  .login-card .brand-mark { width: 56px; height: 56px; flex-basis: 56px; border-radius: 16px; }
   .login-card .brand-lockup__copy strong { font-size: 1.55rem; }
   .welcome__glow { width: 320px; height: 320px; }
   .dashboard-hero h1 { font-size: clamp(2rem, 10vw, 2.8rem); }
@@ -818,3 +812,252 @@ button, a, input, select, textarea { touch-action: manipulation; }
               color 600000s 0s,
               -webkit-text-fill-color 600000s 0s;
 }
+
+/* ---------- Dark theme: the public site's black and gold ----------
+   Opt in from Settings. The choice is kept in localStorage and written onto
+   <html> by the inline script in app/layout.tsx before first paint, so the
+   workspace never flashes ivory on its way to black.
+
+   Everything below is an override laid over the ivory palette, which stays the
+   default, so no rule here can change light mode. The values are the public
+   site's own tokens, lifted from ../styles.css so the two sites match. */
+html.theme-dark {
+  --d-bg: #0b0a08;
+  --d-panel: #14110d;
+  --d-card: #1c1813;
+  --d-raise: #241e16;
+  --d-text: #f4ecdd;
+  --d-soft: #c5bba6;
+  --d-muted: #8b8270;
+  --d-gold: #d4af37;
+  --d-gold-bright: #f4dd8b;
+  --d-gold-deep: #a8801f;
+  --d-line: rgba(212,175,55,0.22);
+  --d-shadow: 0 18px 40px rgba(0,0,0,0.5);
+  color-scheme: dark;
+}
+
+/* Ground */
+html.theme-dark, html.theme-dark body { background: var(--d-bg); color: var(--d-text); }
+html.theme-dark body {
+  background:
+    radial-gradient(circle at 12% -10%, rgba(212,175,55,0.13), transparent 30rem),
+    radial-gradient(circle at 100% 18%, rgba(212,175,55,0.05), transparent 28rem),
+    var(--d-bg);
+}
+html.theme-dark .admin-app::before {
+  background-image: linear-gradient(rgba(244,236,221,0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(244,236,221,0.022) 1px, transparent 1px);
+}
+html.theme-dark ::selection { background: var(--d-gold); color: #0b0a08; }
+html.theme-dark ::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); }
+html.theme-dark ::placeholder { color: #6f6759; }
+
+/* Text. Every ivory text colour is a dark brown set on a single class, so one
+   pass of `inherit` clears all of them at once and the cream cascades down from
+   body. The tonal hierarchy goes straight back on underneath, and the Tailwind
+   colour utilities at the end of this section outrank both. */
+html.theme-dark :is(h1,h2,h3,h4,p,span,strong,em,small,b,dt,dd,li,label,time,a,summary,figcaption,button,input,textarea,select) { color: inherit; }
+html.theme-dark :is(dt,small,time,figcaption) { color: var(--d-muted); }
+html.theme-dark :is(.eyebrow, .notification-list__eyebrow, .brand-lockup__copy em, .sidebar-wordmark em, .occasion-detail__notes span, .occasion-detail dd a, .whatsapp-task__meta a) { color: var(--d-gold); }
+
+/* Shell */
+html.theme-dark .admin-sidebar {
+  border-right-color: rgba(212,175,55,0.16);
+  background: linear-gradient(180deg, #14110d, #0b0a08);
+  box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+}
+html.theme-dark .admin-sidebar nav a:hover { border-color: rgba(212,175,55,0.18); background: rgba(212,175,55,0.06); }
+html.theme-dark .admin-sidebar nav a.bg-gold\/10 { border-color: rgba(212,175,55,0.24); background: linear-gradient(90deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05)); }
+html.theme-dark .admin-topbar { border-bottom-color: rgba(212,175,55,0.14); background: rgba(11,10,8,0.72); }
+html.theme-dark .admin-bottom-nav { border-top-color: rgba(212,175,55,0.16); background: rgba(11,10,8,0.94); box-shadow: 0 -10px 28px rgba(0,0,0,0.5); }
+html.theme-dark :is(.sidebar-wordmark strong, .sidebar-wordmark__initial, .brand-lockup__copy strong) { color: var(--d-text); }
+
+/* Panels and cards */
+html.theme-dark :is(.surface-card, .task-card, .metric-card, .login-card, .notification-panel, .customer-card, .customer-profile-hero,
+  .occasion-detail, .occasion-calendar, .occasion-agenda, .nlist__card, .order-board article, .analytics-metrics article, .analytics-panel,
+  .community-summary > div, .message-conversation, .message-thread-list, .message-composer, .whatsapp-task, .profile-table, .profile-timeline,
+  .template-preview) {
+  border-color: var(--d-line); background: var(--d-card);
+  box-shadow: var(--d-shadow), inset 0 1px 0 rgba(244,236,221,0.04);
+}
+html.theme-dark .dashboard-hero { border-color: var(--d-line); background: linear-gradient(120deg, #1a1610, #0f0d0a); box-shadow: var(--d-shadow); }
+html.theme-dark .metric-card--accent { border-color: rgba(212,175,55,0.35); background: linear-gradient(145deg, #241d12, #17130d); }
+html.theme-dark .surface-card--empty { background: rgba(28,24,19,0.5); }
+html.theme-dark :is(.metric-card:hover, .customer-card:hover, .order-board article:hover) { border-color: rgba(212,175,55,0.38); background: var(--d-raise); }
+html.theme-dark .notification-item { border-color: rgba(244,236,221,0.09); background: var(--d-panel); }
+html.theme-dark .notification-item.is-unread { border-color: rgba(212,175,55,0.3); background: rgba(212,175,55,0.07); }
+/* The preview is a real customer email, so it keeps its white page inside the
+   dark frame rather than pretending emails arrive in black. */
+html.theme-dark .template-preview iframe { border-top-color: rgba(244,236,221,0.09); }
+
+/* Fields */
+html.theme-dark :is(input, textarea, select) { border-color: rgba(212,175,55,0.22); background: var(--d-panel); color: var(--d-text); }
+html.theme-dark :is(input, textarea, select):focus { border-color: var(--d-gold); box-shadow: 0 0 0 4px rgba(212,175,55,0.12); }
+html.theme-dark select option { color: var(--d-text); background: var(--d-panel); }
+html.theme-dark .login-input { border-bottom-color: rgba(212,175,55,0.3); background: transparent; }
+html.theme-dark .settings-toggles label { border-color: rgba(244,236,221,0.09); background: var(--d-panel); }
+html.theme-dark .settings-toggles input { background: #2a241a; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5); }
+html.theme-dark .settings-toggles input:checked { background: var(--d-gold); }
+html.theme-dark .settings-toggles input::before { background: #f4ecdd; }
+
+/* Solid gold actions */
+html.theme-dark :is(.settings-form button, .settings-toggles > button, .template-editor button, .settings-test button, .message-compose-button,
+  .task-card__primary, .whatsapp-task__actions .is-primary, .login-submit, .message-reply button, .pipeline-summary .pipeline-run,
+  .customer-filters button.is-active, .task-tabs button.is-active, .message-filters button.is-active, .message-centre-tabs > button.is-active,
+  .occasion-calendar__grid .is-today > time) {
+  border-color: var(--d-gold-deep); color: #0b0a08;
+  background: linear-gradient(135deg, #f0d478, #d4af37 55%, #a8801f);
+  box-shadow: 0 10px 22px rgba(212,175,55,0.16);
+}
+html.theme-dark :is(.settings-form button:hover, .settings-toggles > button:hover, .template-editor button:hover, .settings-test button:hover,
+  .message-compose-button:hover, .task-card__primary:hover, .whatsapp-task__actions .is-primary:hover, .message-reply button:hover) { background: var(--d-gold-bright); }
+html.theme-dark .message-centre-tabs > button.is-active span { background: rgba(11,10,8,0.22); }
+
+/* Quiet actions: pills, tabs, tool buttons */
+html.theme-dark :is(.customer-filters button, .task-tabs button, .message-filters button, .occasion-calendar__toolbar button,
+  .occasion-agenda__heading button, .whatsapp-task__actions button, .whatsapp-task__actions a, .notification-list__mark-all,
+  .occasion-detail__close, .message-log__row button, .pipeline-table__row button, .pipeline-summary > button, .community-review__actions button,
+  .message-conversation > header a, .message-conversation > header button, .message-composer > button, .quick-action, .task-card__secondary,
+  .message-centre-tabs > button:not(.message-compose-button)) {
+  border-color: rgba(212,175,55,0.28); color: var(--d-gold); background: rgba(212,175,55,0.07);
+}
+html.theme-dark :is(.customer-filters button:hover, .task-tabs button:hover, .occasion-calendar__toolbar button:hover, .quick-action:hover,
+  .task-card__secondary:hover, .whatsapp-task__actions button:hover, .whatsapp-task__actions a:hover, .pipeline-summary > button:hover,
+  .message-centre-tabs > button:not(.message-compose-button):hover, .message-thread-list > div > button:hover, .occasion-agenda__list > button:hover,
+  .message-log__row:hover, .pipeline-table__row:hover) { border-color: rgba(212,175,55,0.45); background: rgba(212,175,55,0.14); }
+html.theme-dark :is(.task-tabs, .message-centre-tabs, .message-filters) { border-color: rgba(212,175,55,0.18); background: rgba(20,17,13,0.8); }
+
+/* Chips, tags, initials */
+html.theme-dark :is(.customer-card__tags span, .customer-profile-hero__tags span, .profile-pill, .occasion-agenda__list em,
+  .whatsapp-task header time, .section-heading > span, .page-heading > span, .message-centre-tabs > button span, .message-thread-list button em) {
+  border-color: rgba(212,175,55,0.24); color: var(--d-gold); background: rgba(212,175,55,0.08);
+}
+html.theme-dark :is(.customer-card__initial, .customer-profile-hero__initial) {
+  border-color: rgba(212,175,55,0.3); color: var(--d-gold-bright); background: linear-gradient(145deg, #241d12, #14110d);
+}
+
+/* Rows, heads and quiet panels */
+html.theme-dark :is(.profile-table__row, .profile-timeline > article, .occasion-agenda__list > button, .message-log__row, .pipeline-table__row,
+  .notification-list__toggle, .occasion-detail dl, .occasion-calendar__toolbar, .occasion-agenda__heading, .occasion-calendar__weekdays,
+  .message-thread-list, .message-thread-list > div > button) { border-color: rgba(244,236,221,0.09); }
+html.theme-dark :is(.message-log__head, .pipeline-table__head, .occasion-calendar__weekdays, .customer-card__stats div, .profile-metrics div,
+  .occasion-detail__notes, .message-bubbles, .analytics-empty, .consent-ring-grid > div) { background: rgba(244,236,221,0.04); }
+html.theme-dark :is(.message-thread-list > div > button.is-active, .message-thread-list > div > button.is-unread) { background: rgba(212,175,55,0.1); }
+
+/* Calendar */
+html.theme-dark .occasion-calendar__grid > div { border-color: rgba(244,236,221,0.07); background: rgba(20,17,13,0.6); }
+html.theme-dark .occasion-calendar__grid > div.is-empty { background: rgba(11,10,8,0.5); }
+html.theme-dark .occasion-calendar__grid > div.is-today { background: rgba(212,175,55,0.08); box-shadow: inset 0 0 0 1px rgba(212,175,55,0.35); }
+html.theme-dark .occasion-calendar__events button { background: color-mix(in srgb, var(--event-colour) 26%, #14110d); }
+html.theme-dark .occasion-calendar__events button:hover { background: color-mix(in srgb, var(--event-colour) 38%, #14110d); }
+
+/* Conversation */
+html.theme-dark .message-bubble { border-color: rgba(244,236,221,0.1); background: #17130e; }
+html.theme-dark .message-bubble.is-outbound { border-color: rgba(212,175,55,0.24); background: rgba(212,175,55,0.1); }
+html.theme-dark .message-bubble li { background: rgba(244,236,221,0.05); }
+html.theme-dark .whatsapp-task__message { border-left-color: #70aa7e; color: var(--d-soft); background: rgba(112,170,126,0.1); }
+
+/* Status tones keep their hue and gain the lightness a black ground needs. */
+html.theme-dark :is(.message-status, .pipeline-status, .message-delivery) {
+  border-color: rgba(244,236,221,0.12); color: var(--d-soft); background: rgba(244,236,221,0.05);
+}
+html.theme-dark :is(.message-notice, .community-notice) { border-color: rgba(212,175,55,0.24); color: var(--d-gold-bright); background: rgba(212,175,55,0.08); }
+html.theme-dark :is(.dashboard-hero__status, .pipeline-table__row.is-sent .pipeline-status, .customer-profile-hero__tags span.is-on) {
+  border-color: rgba(112,217,158,0.28); color: #a8dcc0; background: rgba(112,217,158,0.1);
+}
+html.theme-dark .dashboard-hero__status span { background: #70d99e; box-shadow: 0 0 0 4px rgba(112,217,158,0.14); }
+html.theme-dark :is(.message-log__row.is-failed .message-status, .message-delivery.is-bounced, .message-delivery.is-failed,
+  .message-delivery.is-complained, .pipeline-table__row.is-attention .pipeline-status) {
+  border-color: rgba(183,125,112,0.4); color: #e2a294; background: rgba(183,125,112,0.12);
+}
+html.theme-dark .pipeline-table__row.is-scheduled .pipeline-status { border-color: rgba(111,141,172,0.35); color: #a9c4dd; background: rgba(111,141,172,0.12); }
+html.theme-dark .profile-timeline small { color: #e2a294; }
+
+/* Analytics */
+html.theme-dark .analytics-bars i { background: rgba(244,236,221,0.08); }
+html.theme-dark .analytics-bars b { background: linear-gradient(90deg, #d4af37, #f0d478); }
+
+/* Login and the welcome splash */
+html.theme-dark .login-page { background: radial-gradient(circle at 50% 0%, rgba(212,175,55,0.13), transparent 28rem), #0b0a08; }
+html.theme-dark .login-page::before { border-color: rgba(212,175,55,0.12); }
+html.theme-dark .welcome { background: #0b0a08 !important; }
+html.theme-dark .welcome__glow { background: radial-gradient(circle, rgba(212,175,55,0.18), transparent 60%); }
+
+/* Tailwind colour utilities. The palette in tailwind.config.ts is the ivory
+   one, so each utility a component uses needs its black and gold counterpart. */
+html.theme-dark .bg-ink { background-color: #0b0a08; }
+html.theme-dark .bg-ink2 { background-color: var(--d-panel); }
+html.theme-dark .bg-ink3 { background-color: var(--d-card); }
+html.theme-dark .bg-cream\/5 { background-color: rgba(244,236,221,0.05); }
+html.theme-dark .bg-creamSoft\/40 { background-color: rgba(197,187,166,0.4); }
+html.theme-dark .text-cream { color: var(--d-text); }
+html.theme-dark .text-creamSoft { color: var(--d-soft); }
+html.theme-dark .text-muted { color: var(--d-muted); }
+html.theme-dark .text-gold { color: var(--d-gold); }
+html.theme-dark .text-goldBright { color: var(--d-gold-bright); }
+/* Paired with bg-gold, so it stays the dark ink on a gold chip. */
+html.theme-dark .text-ink { color: #0b0a08; }
+html.theme-dark .bg-gold { background-color: var(--d-gold); }
+html.theme-dark .bg-gold\/10 { background-color: rgba(212,175,55,0.1); }
+html.theme-dark .bg-gold\/20 { background-color: rgba(212,175,55,0.2); }
+html.theme-dark :is(.border-line, .border-line\/60, .border-line\/50) { border-color: var(--d-line); }
+html.theme-dark :is(.border-gold, .border-gold\/60) { border-color: rgba(212,175,55,0.55); }
+html.theme-dark :is(.border-gold\/20, .border-gold\/15) { border-color: rgba(212,175,55,0.2); }
+
+/* Autofill, for the same reason the ivory rule exists: only a transition long
+   enough never to finish outranks Chrome's own paint. */
+html.theme-dark .admin-app :is(input, textarea, select):-webkit-autofill,
+html.theme-dark .admin-app :is(input, textarea, select):-webkit-autofill:hover,
+html.theme-dark .admin-app :is(input, textarea, select):-webkit-autofill:focus,
+html.theme-dark .admin-app :is(input, textarea, select):-webkit-autofill:active {
+  -webkit-text-fill-color: var(--d-text);
+  caret-color: var(--d-gold);
+  transition: border-color 180ms ease,
+              background-color 600000s 0s,
+              color 600000s 0s,
+              -webkit-text-fill-color 600000s 0s;
+}
+
+/* The appearance choice in Settings */
+.theme-choice { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.theme-choice button {
+  display: grid; gap: 0.5rem; min-width: 0; flex: 1 1 190px; padding: 0.85rem;
+  border: 1px solid #e3d8c6; border-radius: 15px; background: #fffdfa; text-align: left;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.theme-choice button:hover { border-color: #b89a60; }
+.theme-choice button.is-active { border-color: #a28349; box-shadow: 0 0 0 4px rgba(169,138,77,0.12); }
+.theme-choice__swatch { height: 46px; border: 1px solid rgba(0,0,0,0.06); border-radius: 10px; }
+.theme-choice__swatch--light { background: linear-gradient(120deg, #fffdfa 55%, #e4d3a6); }
+.theme-choice__swatch--dark { background: linear-gradient(120deg, #0b0a08 55%, #d4af37); }
+.theme-choice strong { color: #40382e; font-size: 0.78rem; }
+.theme-choice small { display: block; margin-top: 0.15rem; color: #8b8174; font-size: 0.64rem; line-height: 1.45; }
+html.theme-dark .theme-choice button { border-color: rgba(212,175,55,0.22); background: var(--d-panel); }
+html.theme-dark .theme-choice button.is-active { border-color: var(--d-gold); box-shadow: 0 0 0 4px rgba(212,175,55,0.14); }
+html.theme-dark .theme-choice strong { color: var(--d-text); }
+html.theme-dark .theme-choice small { color: var(--d-muted); }
+
+/* Settings sections that are locked until the edit button is pressed */
+.settings-lock { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.settings-lock__note { color: #8b8174; font-size: 0.66rem; }
+html.theme-dark .settings-lock__note { color: var(--d-muted); }
+.settings-form--locked input, .template-editor--locked :is(input, textarea, select) { opacity: 0.72; }
+.settings-edit {
+  justify-self: start; min-height: 42px; padding: 0.45rem 0.85rem; border: 1px solid #d9c9ab; border-radius: 11px;
+  color: #795f30; background: #fffaf0; font-size: 0.7rem; font-weight: 700;
+}
+.settings-edit:hover { border-color: #b4975d; background: #fcf4e5; }
+html.theme-dark .settings-edit { border-color: rgba(212,175,55,0.28); color: var(--d-gold); background: rgba(212,175,55,0.07); }
+html.theme-dark .settings-edit:hover { border-color: rgba(212,175,55,0.45); background: rgba(212,175,55,0.14); }
+.settings-cancel { border: 0; color: #8b8174; font-size: 0.68rem; text-decoration: underline; text-underline-offset: 3px; }
+html.theme-dark .settings-cancel { color: var(--d-muted); }
+
+/* Plain text and HTML modes for the email body */
+.template-mode { display: inline-flex; gap: 0.25rem; padding: 0.22rem; border: 1px solid #e3d8c6; border-radius: 999px; background: #fffdfa; }
+.template-mode button { min-height: 32px; padding: 0.25rem 0.7rem; border-radius: 999px; color: #817668; font-size: 0.66rem; font-weight: 700; }
+.template-mode button.is-active { color: #fffdfa; background: #a28349; }
+html.theme-dark .template-mode { border-color: rgba(212,175,55,0.18); background: rgba(20,17,13,0.8); }
+html.theme-dark .template-mode button { color: var(--d-gold); }
+html.theme-dark .template-mode button.is-active { color: #0b0a08; background: var(--d-gold); }
+.template-editor__label { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.template-editor textarea.is-plain { font-family: var(--font-jost), system-ui, sans-serif; font-size: 0.82rem; line-height: 1.6; }

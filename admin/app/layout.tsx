@@ -15,15 +15,25 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f7f4ee",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f4ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0a08" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
+// Runs before the first paint, so a workspace set to black and gold never
+// flashes ivory on the way there. Kept inline and tiny for that reason.
+const THEME_SCRIPT = `try{if(localStorage.getItem('hcl.admin.theme')==='dark')document.documentElement.classList.add('theme-dark')}catch(e){}`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${jost.variable}`}>
+    <html lang="en" className={`${fraunces.variable} ${jost.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body>
         {children}
         <ServiceWorker />
