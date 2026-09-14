@@ -540,33 +540,45 @@ import { createClient } from '@supabase/supabase-js';
   const SUPABASE_ANON_KEY = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
   let sessionClient = null;
   const ME_KEY = 'hcl.me';
+  const authOptions = { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } };
+  const getSessionClient = () => (sessionClient ||= createClient(SUPABASE_URL, SUPABASE_ANON_KEY, authOptions));
   const forgetCachedIdentity = () => {
     try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ }
     window.hclSetAccountName?.('');
   };
-  const verifiedCachedIdentity = async () => {
+  const sessionName = (user) => {
+    const meta = user?.user_metadata || {};
+    return [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim()
+      || String(meta.full_name || meta.name || meta.given_name || '').trim();
+  };
+  const identityForSession = (session) => {
+    const user = session?.user;
+    if (!user) {
+      forgetCachedIdentity();
+      return null;
+    }
     let cached;
     try { cached = JSON.parse(localStorage.getItem(ME_KEY) || 'null'); } catch { cached = null; }
-    if (!cached?.user_id || !cached?.full_name || !cached?.email) {
-      forgetCachedIdentity();
-      return null;
+    if (cached?.user_id === user.id && cached?.full_name && cached?.email) {
+      window.hclSetAccountName?.(cached.full_name);
+      return cached;
     }
-    sessionClient ||= createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const { data } = await sessionClient.auth.getSession();
-    if (data.session?.user?.id !== cached.user_id) {
-      forgetCachedIdentity();
-      return null;
-    }
-    return cached;
+    try { localStorage.removeItem(ME_KEY); } catch { /* private mode */ }
+    window.hclSetAccountName?.(sessionName(user));
+    return null;
+  };
+  const verifiedCachedIdentity = async () => {
+    const { data } = await getSessionClient().auth.getSession();
+    return identityForSession(data.session);
   };
   const browserAuthToken = async () => {
-    sessionClient ||= createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const { data } = await sessionClient.auth.getSession();
+    const { data } = await getSessionClient().auth.getSession();
     return data.session?.access_token || SUPABASE_ANON_KEY;
   };
-  void verifiedCachedIdentity().then((me) => {
-    if (me) window.hclSetAccountName?.(me.full_name);
+  getSessionClient().auth.onAuthStateChange((_event, session) => {
+    identityForSession(session);
   });
+  void verifiedCachedIdentity();
 
   if (form) {
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (

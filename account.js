@@ -6,7 +6,9 @@ import {
 
 const SB_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
 const SB_ANON = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
-const supabase = createClient(SB_URL, SB_ANON);
+const supabase = createClient(SB_URL, SB_ANON, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+});
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
 const authBox = $('#accountAuth');
@@ -273,6 +275,12 @@ const doneChecking = () => { const c = $('#accountChecking'); if (c) c.hidden = 
 const showChecking = () => { const c = $('#accountChecking'); if (c) c.hidden = false; };
 
 const ME_KEY = 'hcl.me';
+function sessionName(user) {
+  const meta = user?.user_metadata || {};
+  return [meta.first_name, meta.last_name].filter(Boolean).join(' ').trim()
+    || String(meta.full_name || meta.name || meta.given_name || '').trim();
+}
+
 function cacheMe(c) {
   try {
     const full = [c?.first_name, c?.last_name].filter(Boolean).join(' ').trim() || String(c?.full_name || '').trim();
@@ -311,6 +319,9 @@ function clearRenderedAccount() {
 function beginAccountLoad(session) {
   const version = ++authLoadVersion;
   const userId = session?.user?.id || null;
+  // The current Auth session is local and immediate. Name the navigation now,
+  // then let the server-owned customer row populate the dashboard separately.
+  setNavName(sessionName(session?.user));
   if (customer?.auth_user_id !== userId) clearRenderedAccount();
   discardMismatchedCachedIdentity(userId);
   void loadAccount(session, version);
