@@ -6,7 +6,7 @@ other) reads this file before working and appends to it after working.
 **Never put secrets in this file.** No API keys, tokens, passwords or client secrets.
 Record that a credential exists and where it lives, never its value.
 
-Last updated: 14/09/2026
+Last updated: 25/09/2026
 
 ---
 
@@ -1312,6 +1312,18 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   `git add -A` swept that edit into commit `94d5f3b`. Its content is intact. Stage files
   explicitly while another session is live in this repository.
 
+### 25/09/2026 Admin Price Guide (Codex)
+
+- Added an authenticated Command Centre workspace at `/pricing` and a Price Guide link in
+  the Insight navigation. The public menu remains unchanged and price-free.
+- Added the prices supplied by Hazel for 8-inch cakes, biscuits and baked treats, and rusks.
+  The original `5L` and `10L` labels are shown as `5 L` and `10 L` without assuming a
+  packaging type.
+- The top Memory Key groups the repeat prices together for quick recall, followed by the
+  exact size and product reference. The new workspace supports both the ivory and dark
+  dashboard themes.
+- The full Next production build passed, including the new dynamic `/pricing` route.
+
 ## 6. Open threads
 
 | # | Item | Detail |
@@ -1333,6 +1345,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 15 | ~~Occasion Book confirmation and reply path~~ | Closed 01/09/2026. Migration `0023` replaces the unfriendly line, explains all three reminder points and invites replies. Thread replies enter the Command Centre through Resend, while direct mail to `hello@hazelscakelounge.co.za` forwards to `hazelscakelounge@gmail.com`. |
 | 16 | Branded Google sign-in | The free on-site Google Identity Services flow is deployed. The Search Console verification tag is live, but the final Google ownership verification click remains after browser control disconnected. A paid `auth.hazelscakelounge.co.za` custom Auth domain remains optional if a fully branded Supabase hostname is still needed later. |
 | 17 | Local search expansion | The public site confirms South Africa but not a collection town, city or address. Obtain Hazel's approved collection area and any public address before targeting area-specific searches or adding those LocalBusiness fields. Do not guess. |
+| 18 | GitHub push access | The local commit `a199a95` for the Admin Price Guide could not be pushed on 25/09/2026. GitHub returned 403 because the configured account `OfentseThulare` does not have permission to `13gumedemp-collab/hazels-cake-lounge`. Restore the correct repository access, then push `main`. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 

@@ -8,6 +8,7 @@ const PATHS: Record<string, React.ReactNode> = {
   mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></>,
   bell: <path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6M10 21a2 2 0 004 0" />,
   chart: <path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-7" />,
+  tag: <path d="M20 13l-7 7-9-9V4h7l9 9zM8 8h.01" />,
   gear: <><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" /></>,
   logout: <path d="M14 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2v-2M9 12h11M17 9l3 3-3 3" />,
 };

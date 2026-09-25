@@ -18,5 +18,6 @@ export const NAV: NavItem[] = [
   { href: "/messages", label: "Messages", icon: "mail", badge: null },
   { href: "/reminders", label: "Reminders", icon: "bell", badge: null },
   { href: "/analytics", label: "Analytics", icon: "chart", badge: null },
+  { href: "/pricing", label: "Price Guide", icon: "tag", badge: null },
   { href: "/settings", label: "Settings", icon: "gear", badge: null },
 ];

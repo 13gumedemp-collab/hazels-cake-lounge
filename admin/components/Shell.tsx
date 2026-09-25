@@ -9,7 +9,7 @@ import NotificationBell from "./NotificationBell";
 const GROUPS: { label: string; items: typeof NAV }[] = [
   { label: "Today", items: NAV.filter((n) => ["/", "/orders", "/occasions"].includes(n.href)) },
   { label: "People", items: NAV.filter((n) => ["/customers", "/community", "/whatsapp", "/messages", "/reminders"].includes(n.href)) },
-  { label: "Insight", items: NAV.filter((n) => ["/analytics", "/settings"].includes(n.href)) },
+  { label: "Insight", items: NAV.filter((n) => ["/analytics", "/pricing", "/settings"].includes(n.href)) },
 ];
 
 export default function Shell({ counts, children }: { counts: Record<string, number>; children: React.ReactNode }) {

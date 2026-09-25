@@ -738,6 +738,30 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .template-preview iframe { width: 100%; min-height: 380px; margin-top: 0.75rem; border-top: 1px solid #eee5d8; background: #fff; }
 .settings-test { display: flex; align-items: center; }
 
+/* ---------- Price Guide ---------- */
+.pricing-memory { padding: 1.3rem; }
+.pricing-memory__intro { display: flex; align-items: flex-start; gap: 0.8rem; }
+.pricing-memory__icon { display: grid; flex: 0 0 auto; place-items: center; width: 2.5rem; height: 2.5rem; border: 1px solid #dfcca6; border-radius: 13px; color: #946f2e; background: #fff8e8; }
+.pricing-memory h2 { margin: 0.16rem 0 0; }
+.pricing-memory__intro p:last-child { max-width: 41rem; margin-top: 0.45rem; color: #84796c; font-size: 0.75rem; line-height: 1.55; }
+.pricing-memory__groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.7rem; margin-top: 1.15rem; }
+.pricing-memory__group { min-height: 112px; padding: 0.85rem; border: 1px solid #e6ddcf; border-radius: 14px; background: #fffefa; }
+.pricing-memory__group--gold { border-color: #ddc494; background: linear-gradient(145deg, #fffaf0, #f8f0df); }
+.pricing-memory__group strong { display: block; color: #473c2a; font-family: var(--font-fraunces), Georgia, serif; font-size: 1.52rem; font-weight: 500; }
+.pricing-memory__group p { margin-top: 0.38rem; color: #7d7162; font-size: 0.68rem; line-height: 1.45; }
+.pricing-memory__note { margin-top: 0.85rem; padding: 0.7rem 0.8rem; border-left: 3px solid #c5a365; color: #75695b; background: #fbf5e8; font-size: 0.71rem; line-height: 1.55; }
+.pricing-memory__note b { color: #594b36; }
+.pricing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: start; }
+.price-list { padding: 1.2rem; }
+.price-list:nth-child(2) { grid-row: span 2; }
+.price-list h2 { margin-bottom: 0.9rem; }
+.price-list__rows { display: grid; gap: 0.38rem; }
+.price-list__row { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.68rem 0.72rem; border: 1px solid #ebe3d6; border-radius: 11px; background: #fffefa; }
+.price-list__row > span { display: grid; gap: 0.08rem; min-width: 0; }
+.price-list__row strong { color: #493f34; font-size: 0.75rem; font-weight: 700; }
+.price-list__row small { color: #988e81; font-size: 0.65rem; }
+.price-list__row b { flex: 0 0 auto; color: #8d6d35; font-family: var(--font-fraunces), Georgia, serif; font-size: 1rem; font-weight: 600; }
+
 @media (max-width: 639px) {
   .notification-panel { position: fixed; top: calc(68px + env(safe-area-inset-top)); right: 0.75rem; left: 0.75rem; width: auto; max-height: calc(100dvh - 10rem - env(safe-area-inset-bottom)); }
   .notification-list__header { padding-bottom: 0.8rem; }
@@ -789,6 +813,8 @@ button, a, input, select, textarea { touch-action: manipulation; }
   .settings-form--business, .settings-form--password { grid-template-columns: 1fr; }
   .settings-form--business button, .settings-form--password button { grid-column: auto; width: 100%; }
   .settings-toggles > button, .template-editor > button, .settings-test button { width: 100%; }
+  .pricing-memory__groups, .pricing-grid { grid-template-columns: 1fr; }
+  .price-list:nth-child(2) { grid-row: auto; }
 }
 
 /* Keep this after every admin form rule. Chrome's autofill paint otherwise
@@ -880,6 +906,14 @@ html.theme-dark :is(.surface-card, .task-card, .metric-card, .login-card, .notif
   border-color: var(--d-line); background: var(--d-card);
   box-shadow: var(--d-shadow), inset 0 1px 0 rgba(244,236,221,0.04);
 }
+html.theme-dark .pricing-memory__icon { border-color: rgba(212,175,55,0.28); color: var(--d-gold); background: rgba(212,175,55,0.09); }
+html.theme-dark .pricing-memory__intro p:last-child, html.theme-dark .pricing-memory__group p, html.theme-dark .pricing-memory__note { color: var(--d-muted); }
+html.theme-dark .pricing-memory__group, html.theme-dark .price-list__row { border-color: var(--d-line); background: var(--d-panel); }
+html.theme-dark .pricing-memory__group--gold { border-color: rgba(212,175,55,0.26); background: rgba(212,175,55,0.08); }
+html.theme-dark .pricing-memory__group strong, html.theme-dark .price-list__row strong, html.theme-dark .pricing-memory__note b { color: var(--d-text); }
+html.theme-dark .pricing-memory__note { border-left-color: var(--d-gold); background: rgba(212,175,55,0.07); }
+html.theme-dark .price-list__row small { color: var(--d-muted); }
+html.theme-dark .price-list__row b { color: var(--d-gold); }
 html.theme-dark .dashboard-hero { border-color: var(--d-line); background: linear-gradient(120deg, #1a1610, #0f0d0a); box-shadow: var(--d-shadow); }
 html.theme-dark .metric-card--accent { border-color: rgba(212,175,55,0.35); background: linear-gradient(145deg, #241d12, #17130d); }
 html.theme-dark .surface-card--empty { background: rgba(28,24,19,0.5); }
