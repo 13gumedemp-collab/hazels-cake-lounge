@@ -1324,6 +1324,14 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   dashboard themes.
 - The full Next production build passed, including the new dynamic `/pricing` route.
 
+### 25/09/2026 GitHub push access restored (Codex)
+
+- Git's credential helper delegates to GitHub CLI. The active account was
+  `OfentseThulare`, which does not have access to this repository and caused the 403 push
+  failure.
+- Switched the already authenticated GitHub CLI account to `13gumedemp-collab` and pushed
+  the Admin Price Guide commit `8f84df1` to `main` successfully. No deployment was run.
+
 ## 6. Open threads
 
 | # | Item | Detail |
@@ -1345,7 +1353,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 15 | ~~Occasion Book confirmation and reply path~~ | Closed 01/09/2026. Migration `0023` replaces the unfriendly line, explains all three reminder points and invites replies. Thread replies enter the Command Centre through Resend, while direct mail to `hello@hazelscakelounge.co.za` forwards to `hazelscakelounge@gmail.com`. |
 | 16 | Branded Google sign-in | The free on-site Google Identity Services flow is deployed. The Search Console verification tag is live, but the final Google ownership verification click remains after browser control disconnected. A paid `auth.hazelscakelounge.co.za` custom Auth domain remains optional if a fully branded Supabase hostname is still needed later. |
 | 17 | Local search expansion | The public site confirms South Africa but not a collection town, city or address. Obtain Hazel's approved collection area and any public address before targeting area-specific searches or adding those LocalBusiness fields. Do not guess. |
-| 18 | GitHub push access | The local commit `a199a95` for the Admin Price Guide could not be pushed on 25/09/2026. GitHub returned 403 because the configured account `OfentseThulare` does not have permission to `13gumedemp-collab/hazels-cake-lounge`. Restore the correct repository access, then push `main`. |
+| 18 | ~~GitHub push access~~ | Closed 25/09/2026. GitHub CLI was switched to the already authenticated `13gumedemp-collab` account and commit `8f84df1` was pushed to `main`. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 
