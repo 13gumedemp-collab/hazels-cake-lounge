@@ -1332,6 +1332,17 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 - Switched the already authenticated GitHub CLI account to `13gumedemp-collab` and pushed
   the Admin Price Guide commit `8f84df1` to `main` successfully. No deployment was run.
 
+### 25/09/2026 Broader public menu and deployment diagnosis (Codex)
+
+- Reworked the public Menu page into broad, price-free categories: celebration cakes,
+  wedding and occasion cakes, cupcakes and mini treats, tea-time bakes, biscuits and tarts,
+  rusks and pantry bakes, and bespoke orders. The public Vite build passed and the change
+  was pushed in commit `0196c01`.
+- Live publishing is currently blocked for both the public site and Command Centre. The
+  local Vercel CLI returned `deploy_failed: Not authorized`; the connected Vercel API returned
+  403 and requires re-authentication to the `ofentses-projects-66d84f30` scope. No deployment
+  was created.
+
 ## 6. Open threads
 
 | # | Item | Detail |
@@ -1354,6 +1365,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 16 | Branded Google sign-in | The free on-site Google Identity Services flow is deployed. The Search Console verification tag is live, but the final Google ownership verification click remains after browser control disconnected. A paid `auth.hazelscakelounge.co.za` custom Auth domain remains optional if a fully branded Supabase hostname is still needed later. |
 | 17 | Local search expansion | The public site confirms South Africa but not a collection town, city or address. Obtain Hazel's approved collection area and any public address before targeting area-specific searches or adding those LocalBusiness fields. Do not guess. |
 | 18 | ~~GitHub push access~~ | Closed 25/09/2026. GitHub CLI was switched to the already authenticated `13gumedemp-collab` account and commit `8f84df1` was pushed to `main`. |
+| 19 | Restore Vercel scope access | On 25/09/2026, both Vercel projects returned 403 `Not authorized`, including the instruction to re-authenticate to `ofentses-projects-66d84f30`. Re-authenticate the Vercel CLI and connected Vercel app with a team member account, then deploy the public root and `admin/` from `main`. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 
