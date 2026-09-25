@@ -1343,6 +1343,17 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   403 and requires re-authentication to the `ofentses-projects-66d84f30` scope. No deployment
   was created.
 
+### 25/09/2026 Public and Command Centre release (Codex)
+
+- Vercel was re-authenticated to the Atlas Projects Pro team. Public deployment
+  `dpl_HFMxE7wVhKeAjhtniFJKe36cn2y4` is Ready and aliased to
+  `https://www.hazelscakelounge.co.za`.
+- Command Centre deployment `dpl_FVwRGLjLJu8D7dMzNTqy4C1oNPcN` is Ready and aliased to
+  `https://admin.hazelscakelounge.co.za`. It includes the protected `/pricing` workspace.
+- Verified the live public `/menu` page returns 200 and contains the new broad menu
+  categories. The production `/pricing` route returns the expected 307 redirect to `/login`
+  before authentication.
+
 ## 6. Open threads
 
 | # | Item | Detail |
@@ -1365,7 +1376,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 16 | Branded Google sign-in | The free on-site Google Identity Services flow is deployed. The Search Console verification tag is live, but the final Google ownership verification click remains after browser control disconnected. A paid `auth.hazelscakelounge.co.za` custom Auth domain remains optional if a fully branded Supabase hostname is still needed later. |
 | 17 | Local search expansion | The public site confirms South Africa but not a collection town, city or address. Obtain Hazel's approved collection area and any public address before targeting area-specific searches or adding those LocalBusiness fields. Do not guess. |
 | 18 | ~~GitHub push access~~ | Closed 25/09/2026. GitHub CLI was switched to the already authenticated `13gumedemp-collab` account and commit `8f84df1` was pushed to `main`. |
-| 19 | Restore Vercel scope access | On 25/09/2026, both Vercel projects returned 403 `Not authorized`, including the instruction to re-authenticate to `ofentses-projects-66d84f30`. Re-authenticate the Vercel CLI and connected Vercel app with a team member account, then deploy the public root and `admin/` from `main`. |
+| 19 | ~~Restore Vercel scope access~~ | Closed 25/09/2026. Vercel was re-authenticated to the Atlas Projects Pro team; the public and Command Centre deployments are Ready and aliased to their production domains. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 
