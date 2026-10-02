@@ -1354,6 +1354,19 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   categories. The production `/pricing` route returns the expected 307 redirect to `/login`
   before authentication.
 
+### 02/10/2026 My Work gallery refresh (Codex)
+
+- Replaced every existing Cake gallery entry with the 38 new cake designs supplied in the
+  shared Google Drive folder. The new images are stored locally in
+  `public/images/work-cakes` and have descriptive captions and alternative text.
+- The folder also contained three cupcake designs, which were added to the existing Cupcakes
+  gallery rather than mislabelled as cakes. Added the supplied scone photograph to Scones,
+  buns & bakes in `public/images/work-bakes`.
+- Updated the My Work social preview to use the new caramel chocolate cake image. The public
+  Vite production build passes. A running local Vite server returned 200 for `/work` and all
+  42 new gallery image URLs; a browser screenshot and console check could not run because no
+  browser surface is available in this session. No production deployment was requested.
+
 ## 6. Open threads
 
 | # | Item | Detail |
