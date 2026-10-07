@@ -6,7 +6,7 @@ other) reads this file before working and appends to it after working.
 **Never put secrets in this file.** No API keys, tokens, passwords or client secrets.
 Record that a credential exists and where it lives, never its value.
 
-Last updated: 25/09/2026
+Last updated: 07/10/2026
 
 ---
 
@@ -1596,3 +1596,15 @@ deprecation notice confirming this. The publish action is a Console-only, human 
   Anonymous `/messages` redirects to login, cross-origin writes return 403, and authenticated
   Message Centre actions pass. Root and admin production dependency audits report zero
   vulnerabilities. Vite, Next, TypeScript and both Vercel production builds pass.
+
+### 07/10/2026 Menu image and offering correction (Codex)
+
+- Updated the public menu so Wedding and occasion cakes uses the white two tier rose cake from
+  the landing page rather than a cupcake. Cupcakes and mini treats now uses the tuxedo cupcake
+  photograph from My Work, and Biscuits and tarts now uses the handmade biscuit photograph from
+  My Work.
+- Removed the Rusks and pantry bakes menu card and every rusk reference from the menu's search
+  preview descriptions. The historical rusk photographs remain in My Work, which was left
+  untouched because this request was made in the context of the menu.
+- Verified the new local image paths and completed `npm run build` successfully. No deployment
+  was requested or performed.
