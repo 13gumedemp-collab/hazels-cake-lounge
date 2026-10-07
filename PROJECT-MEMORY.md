@@ -1456,6 +1456,53 @@ lightbox opens, pages, closes on Escape, restores focus, scopes itself to the ac
 and hands off to a pre-filled enquiry, with no console errors and no failed requests. No
 deployment was run.
 
+### 07/10/2026 (later) — Public production release of the new gallery *(Claude Code)*
+
+Deployed at the user's explicit request, with `npx vercel --prod --yes` from the repo root.
+Deployment `hazels-cake-lounge-f8rqihee9` is Ready and aliased to
+`https://www.hazelscakelounge.co.za`; the apex still 308s to `www`. Commits `366b7fe` (the
+62 new photographs, the image pipeline and the lightbox) and `32cc434` (the Command Centre
+prospect removal carried over from a Codex session) are live.
+
+**The Command Centre was not deployed.** The user asked for the main website. `32cc434` is
+committed and pushed but `admin.hazelscakelounge.co.za` still runs the previous build, so
+the prospect-removal action is not live. **Migration `0024_increase_inspiration_image_size`
+has also not been applied to the remote database.** Both are outstanding.
+
+**Verified against the live domain, not just locally.** All 12 public pages return 200 and
+the security headers (CSP, HSTS, X-Frame-Options, nosniff) are intact. `/work` serves 62
+figures and the lightbox markup. Sample derivatives return the right content types
+(`image/avif`, `image/webp`, `image/jpeg`), and the old paths — `work-ed-01.png`,
+`hero-home.jpg`, `work-cakes/cut_cake.png` — now correctly 404.
+
+Driven over the Chrome DevTools Protocol in headless Edge at 1440x900 and 390x844 against
+production:
+
+- Hero art direction works: desktop receives `chocolate-and-vanilla-cakes-1440.avif`,
+  mobile receives `floral-gold-birthday-cake-480.avif`.
+- First paint of `/work` fetches **379 KB** of imagery on desktop and **199 KB** on mobile.
+- The lightbox opens, loads the full size photo, pages forward and back, closes on Escape,
+  releases the scroll lock, restores focus to the photo that opened it, scopes paging to the
+  active category filter, and hands off to the enquiry pre-filled with the cake name.
+- No broken images and no zero-sized images anywhere on the home page or `/work`.
+
+**Two traps worth remembering for the next session.**
+
+1. **Edge `--headless --screenshot` is not a verification tool for this site.** The brand
+   intro, the loader curtain and the `rise`/`reveal` animations mean a plain screenshot
+   regularly captures a black page or a hero with no headline, and an injected
+   `<script>` probe silently does not run. Three separate "bugs" found this way were all
+   artefacts. Drive the page over CDP instead: launch with `--remote-debugging-port` plus
+   `--remote-allow-origins=*`, connect with `websocket-client` using `suppress_origin=True`,
+   and read real geometry with `Runtime.evaluate`. The helper used here is disposable, but
+   the flags are the part that is easy to lose a session to.
+2. **`element.click()` from JavaScript does not move focus**, so it cannot test focus
+   restoration and will report a false failure. Dispatch a real
+   `Input.dispatchMouseEvent` at the element's centre *after* scrolling it into view, since
+   `getBoundingClientRect` is viewport relative and the first gallery photo sits below the
+   fold. For keyboard activation, CDP only emits a click if a `char` event with `text: ""`
+   is sent between `keyDown` and `keyUp`.
+
 ## 6. Open threads
 
 | # | Item | Detail |
@@ -1481,6 +1528,8 @@ deployment was run.
 | 19 | ~~Restore Vercel scope access~~ | Closed 25/09/2026. Vercel was re-authenticated to the Atlas Projects Pro team; the public and Command Centre deployments are Ready and aliased to their production domains. |
 | 20 | Gallery is generated, not hand-written | `work.html`'s gallery block and everything in `public/images/gallery/` are produced by `scripts/optimise-gallery-images.py` and `scripts/build-gallery-html.py` from `scripts/gallery.json` and `media/gallery/`. Edit the manifest and re-run both, never the output. |
 | 21 | Other pages still hand-maintained | `index.html` and `menu.html` now carry `<picture>` markup written by hand against the same derivatives. If a slug in `gallery.json` is renamed or removed, those two pages will not notice and will 404 on the image. Worth folding into the generator if the photographs change often. |
+| 22 | Command Centre not deployed | `32cc434` adds an authenticated prospect-removal route and the matching OrderBoard action. It is committed and pushed but **not deployed**: run `npx vercel --prod --yes` from `admin/` and confirm the alias to `admin.hazelscakelounge.co.za`. The feature is also unverified beyond a TypeScript check. |
+| 23 | Migration 0024 not applied | `0024_increase_inspiration_image_size.sql` raises the private `inspiration-photos` bucket limit from 10 MB to 20 MB. It is committed but has **not** been applied to the remote database, so large customer reference photos are still rejected. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 
