@@ -422,11 +422,10 @@ import { createClient } from '@supabase/supabase-js';
   }
 
   /* ============================================================
-     Premium enquiry flow
+  Premium enquiry flow
      ============================================================ */
   const form = $('#enquiryForm');
   const status = $('#formStatus');
-  const select = $('#productSelect');
 
   /* Cinematic dropdown: replace native <select> with an animated custom menu
      that stays synced to the hidden select (so form value + pre-select still work) */
@@ -483,30 +482,6 @@ import { createClient } from '@supabase/supabase-js';
   // Selects rendered later (the account dashboard builds its own) must get the
   // same branded menu, otherwise the operating system draws a blue popup.
   window.hclEnhanceSelects = (root = document) => $$('select', root).forEach(enhanceSelect);
-
-  const setProduct = (product) => {
-    if (select && product) {
-      const opt = [...select.options].find((o) => o.value === product || o.text === product);
-      if (opt) { select.value = opt.value || opt.text; select.dispatchEvent(new Event('change', { bubbles: true })); }
-    }
-  };
-
-  // Category "Enquire" buttons -> contact page with the chosen item
-  $$('.card__enquire').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const p = btn.dataset.product || '';
-      window.location.href = '/contact?product=' + encodeURIComponent(p);
-    });
-  });
-
-  // Contact page: pre-select the product passed in the URL
-  const chosen = new URLSearchParams(location.search).get('product');
-  if (chosen && select) {
-    setProduct(chosen);
-    if (status) status.textContent = `Lovely choice. Tell us a little about your ${chosen.toLowerCase()} below.`;
-    setTimeout(() => form?.querySelector('input[name="name"]')?.focus({ preventScroll: true }), reduce ? 0 : 900);
-  }
-  select?.addEventListener('change', () => select.classList.toggle('is-set', !!select.value));
 
   // Enquiry form: inspiration image preview
   const refInput = $('#refImage');
@@ -715,6 +690,19 @@ import { createClient } from '@supabase/supabase-js';
           </button>
         </div>
         <div class="enq__stage" id="enqStage">
+          <section class="enq__step enq__quick-step" data-quick-step="0">
+            <span class="enq__label">Quick menu enquiry</span>
+            <h2 class="enq__title">Enquire about <em data-quick-product></em>.</h2>
+            <p class="enq__sub">A few essentials are all I need. I will come back to you personally within two days.</p>
+            <input type="hidden" name="quick_product" />
+            <label class="field"><span>When do you need it?</span><input type="date" name="quick_date" /></label>
+            <label class="field"><span>How many would you like?</span><input type="text" name="quick_quantity" placeholder="12 cupcakes, a cake for 30, two dozen biscuits" /></label>
+            <label class="field"><span>Flavours or anything else I should know? <em class="field__opt">(optional)</em></span><textarea name="quick_notes" rows="2" placeholder="Flavours, colours, dietary needs or a short note"></textarea></label>
+            <label class="field"><span>Your name</span><input type="text" name="quick_full_name" placeholder="Your full name" autocomplete="name" /></label>
+            <label class="field"><span>Your email</span><input type="email" name="quick_email" placeholder="Where I can reach you" autocomplete="email" /></label>
+            <label class="field"><span>Your phone or WhatsApp <em class="field__opt">(optional)</em></span><input type="tel" name="quick_phone" placeholder="073 373 4234" autocomplete="tel" /></label>
+            <div class="enq__nav"><span></span><button type="button" class="btn btn--solid enq__submit" id="enqQuickSubmit" data-cursor="link"><span class="enq__submit-txt">Send my enquiry to Hazel</span><span class="enq__spinner" hidden></span></button></div>
+          </section>
           <section class="enq__step" data-step="0">
             <span class="enq__label">Step 1 of 4 &mdash; The Celebration</span>
             <h2 class="enq__title">Tell me about the occasion.</h2>
@@ -796,18 +784,24 @@ import { createClient } from '@supabase/supabase-js';
     document.body.appendChild(overlay);
 
     const stage = $('#enqStage', overlay);
-    const steps = $$('.enq__step', overlay);
+    const steps = $$('.enq__step[data-step]', overlay);
+    const quickStep = $('[data-quick-step]', overlay);
+    const quickProductEl = $('[data-quick-product]', overlay);
+    const quickProductInput = $('[name="quick_product"]', overlay);
+    const quickDateEl = $('[name="quick_date"]', overlay);
     const fill = $('#enqFill', overlay);
     let current = 0;
     let open = false;
     let submitted = false;
+    let quickMode = false;
+    let quickProduct = '';
     let inspirationUrl = '';
 
     // Enhance the two dropdowns with the site's cinematic select.
     $$('select', overlay).forEach((s) => { try { enhanceSelect(s); } catch (e) {} });
     const odEl = $('[name="occasion_date"]', overlay); if (odEl) odEl.min = minDate();
 
-    const setProgress = () => { fill.style.width = ((current + 1) * 25) + '%'; };
+    const setProgress = () => { fill.style.width = quickMode ? '100%' : ((current + 1) * 25) + '%'; };
 
     const showStep = (n, dir) => {
       steps.forEach((s, i) => {
@@ -821,6 +815,13 @@ import { createClient } from '@supabase/supabase-js';
         }
       });
       current = n;
+      setProgress();
+      stage.scrollTop = 0;
+    };
+
+    const showQuickStep = () => {
+      steps.forEach((s) => s.classList.remove('is-active'));
+      quickStep.classList.add('is-active');
       setProgress();
       stage.scrollTop = 0;
     };
@@ -883,16 +884,23 @@ import { createClient } from '@supabase/supabase-js';
     };
     overlay.addEventListener('change', (e) => { if (e.target.name === 'occasion_type' || e.target.name === 'relationship') applyConditionals(); });
 
-    const started = () => !submitted && !!(val('occasion_for') || val('occasion_type') || val('occasion_date') || val('full_name') || val('email'));
+    const started = () => {
+      if (submitted) return false;
+      return quickMode
+        ? !!(val('quick_date') || val('quick_quantity') || val('quick_notes') || val('quick_full_name') || val('quick_email') || val('quick_phone'))
+        : !!(val('occasion_for') || val('occasion_type') || val('occasion_date') || val('full_name') || val('email'));
+    };
 
     /* ---- open / close ---- */
     const exitPanel = $('#enqExit', overlay);
     // prefill lets another screen open the enquiry already knowing the occasion.
     // The account calendar uses it for "Order a cake for this", so a date the
     // customer saved months ago does not have to be typed out again.
-    function openOverlay(product, prefill) {
+    function openOverlay(product, prefill, mode = 'custom') {
       if (open) return;
       open = true;
+      quickMode = mode === 'quick';
+      quickProduct = product;
       if (prefill && !submitted) {
         Object.entries(prefill).forEach(([name, value]) => {
           if (!value) return;
@@ -908,7 +916,17 @@ import { createClient } from '@supabase/supabase-js';
       overlay.classList.add('is-open');
       overlay.setAttribute('aria-hidden', 'false');
       exitPanel.hidden = true;
-      if (!submitted) showStep(0, 1);
+      if (!submitted) {
+        if (quickMode) {
+          quickProductEl.textContent = product;
+          quickProductInput.value = product;
+          quickDateEl.min = minDate();
+          showQuickStep();
+        } else {
+          quickStep.classList.remove('is-active');
+          showStep(0, 1);
+        }
+      }
     }
     function hardClose() {
       open = false;
@@ -940,7 +958,7 @@ import { createClient } from '@supabase/supabase-js';
       try {
         await fetch(SB_URL + '/functions/v1/request-callback', {
           method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON },
-          body: JSON.stringify({ phone: phone, name: val('full_name'), contact_method: method, contact_consent: true, occasion_for: val('occasion_for'), occasion_type: val('occasion_type'), occasion_date: val('occasion_date'), website: val('website') }),
+          body: JSON.stringify({ phone: phone, name: quickMode ? val('quick_full_name') : val('full_name'), contact_method: method, contact_consent: true, occasion_for: val('occasion_for'), occasion_type: val('occasion_type'), occasion_date: quickMode ? val('quick_date') : val('occasion_date'), website: val('website') }),
         });
       } catch (e) { /* best effort */ }
       const how = method === 'whatsapp' ? 'send you a WhatsApp message' : 'give you a call';
@@ -1055,12 +1073,63 @@ import { createClient } from '@supabase/supabase-js';
           stage.innerHTML = '<div class="enq__success"><h2 class="enq__title">You are in good hands, ' + esc(out.first_name) + '.</h2><p class="enq__sub">I have received everything I need. Expect a personal reply from me within two days.' + bookLine + '</p><span class="enq__success-line"></span><small class="enq__close-note">I look forward to talking soon.</small></div>';
           fill.style.width = '100%';
         }, reduce ? 0 : 520);
-        setTimeout(closeOverlay, 8000);
+        setTimeout(hardClose, 8000);
       } catch (e) {
         spin.hidden = true; txt.style.opacity = '1'; btn.disabled = false;
         let s = $('.enq__err', overlay);
         if (!s) { s = document.createElement('p'); s.className = 'field__error enq__err'; btn.parentElement.appendChild(s); }
         s.textContent = 'Something went wrong on my side. Please try again, or email hello@hazelscakelounge.co.za.';
+      }
+    });
+
+    /* ---- quick menu enquiry ---- */
+    const validateQuick = () => {
+      $$('.field__error', quickStep).forEach((e) => e.remove());
+      let ok = true;
+      const date = val('quick_date');
+      if (!date) { showErr('quick_date', 'Please choose when you need it.'); ok = false; }
+      else if (date < minDate()) { showErr('quick_date', "I need at least 4 days' notice to bake. Please choose a later date."); ok = false; }
+      if (!val('quick_quantity')) { showErr('quick_quantity', 'Please tell me how many you would like.'); ok = false; }
+      if (!val('quick_full_name')) { showErr('quick_full_name', 'Please tell me your name.'); ok = false; }
+      const email = val('quick_email');
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showErr('quick_email', 'I will need a valid email to reply.'); ok = false; }
+      return ok;
+    };
+
+    $('#enqQuickSubmit', overlay).addEventListener('click', async () => {
+      if (!validateQuick()) return;
+      const btn = $('#enqQuickSubmit', overlay);
+      const txt = $('.enq__submit-txt', btn);
+      const spin = $('.enq__spinner', btn);
+      btn.disabled = true; txt.style.opacity = '0'; spin.hidden = false;
+      const product = quickProduct || val('quick_product') || 'Menu order';
+      const notes = ['Product: ' + product, val('quick_notes')].filter(Boolean).join('\n');
+      const payload = {
+        full_name: val('quick_full_name'), email: val('quick_email').toLowerCase(), whatsapp_number: val('quick_phone'),
+        occasion_for: '', relationship_to_customer: 'Myself', occasion_type: 'Other', occasion_other: product,
+        occasion_date: val('quick_date'), cake_description: notes, number_of_people: val('quick_quantity'),
+        colours_and_themes: '', inspiration_photo_url: '', inspiration_photo_urls: [],
+        email_consent: true, whatsapp_consent: false, occasion_book_opted_in: false, website: val('website'),
+      };
+      try {
+        const res = await fetch(SB_URL + '/functions/v1/process-enquiry', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + await browserAuthToken() }, body: JSON.stringify(payload),
+        });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || out.status !== 'success') throw new Error(out.error || 'failed');
+        spin.hidden = true;
+        btn.innerHTML = '<svg class="enq__check" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>';
+        submitted = true;
+        setTimeout(() => {
+          stage.innerHTML = '<div class="enq__success"><h2 class="enq__title">You are in good hands, ' + esc(out.first_name) + '.</h2><p class="enq__sub">I have received your ' + esc(product.toLowerCase()) + ' enquiry. Expect a personal reply from me within two days.</p><span class="enq__success-line"></span><small class="enq__close-note">I look forward to talking soon.</small></div>';
+          fill.style.width = '100%';
+        }, reduce ? 0 : 520);
+        setTimeout(hardClose, 8000);
+      } catch (e) {
+        spin.hidden = true; txt.style.opacity = '1'; btn.disabled = false;
+        let error = $('.enq__err', quickStep);
+        if (!error) { error = document.createElement('p'); error.className = 'field__error enq__err'; btn.parentElement.appendChild(error); }
+        error.textContent = 'Something went wrong on my side. Please try again, or email hello@hazelscakelounge.co.za.';
       }
     });
 
@@ -1087,7 +1156,7 @@ import { createClient } from '@supabase/supabase-js';
         occasion_for: trigger.dataset.occasionFor || '',
         occasion_date: trigger.dataset.occasionDate || '',
         relationship: trigger.dataset.relationship || '',
-      }), delay);
+      }, trigger.dataset.enquiryMode || 'custom'), delay);
     }, true);
 
     /* ---- My Work: filter the gallery by category ---- */

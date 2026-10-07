@@ -1608,3 +1608,19 @@ deprecation notice confirming this. The publish action is a Console-only, human 
   untouched because this request was made in the context of the menu.
 - Verified the new local image paths and completed `npm run build` successfully. No deployment
   was requested or performed.
+
+### 07/10/2026 Menu quick enquiry path (Codex)
+
+- Menu Enquire buttons for Celebration cakes, Wedding and occasion cakes, Cupcakes and mini
+  treats, Tea-time bakes, and Biscuits and tarts now open an on-page one screen enquiry rather
+  than navigating to Contact. It asks only for the needed by date, quantity, optional notes,
+  name, email and optional phone number.
+- The selected menu product is carried through the existing secure enquiry endpoint as a one
+  time product request, with no Occasion Book reminder. The bespoke card continues to use the
+  detailed four step custom cake flow.
+- Corrected the existing post-submit close callback in the full enquiry flow. JavaScript syntax
+  checks and `npm run build` both pass.
+- A production deployment was attempted from a clean temporary worktree at commit `2b28df3`.
+  The Vercel CLI accepted the project but ended without a deployment URL or Ready result, and a
+  subsequent CLI status check timed out. A direct public menu fetch still served the previous
+  bundle, so this release was not confirmed and production remains unchanged.
