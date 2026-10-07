@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export interface OrderCard {
@@ -37,6 +37,13 @@ function countdown(days: number | null) {
   return { text: `in ${days} days`, tone: days <= 7 ? "text-goldBright" : "text-creamSoft" };
 }
 
+type PaymentEditor = {
+  order: OrderCard;
+  payment_status: string;
+  total_amount_zar: string;
+  amount_paid_zar: string;
+};
+
 export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
@@ -45,6 +52,11 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overStage, setOverStage] = useState<string | null>(null);
   const [optimistic, setOptimistic] = useState<Record<string, string>>({});
+  const [paymentFor, setPaymentFor] = useState<PaymentEditor | null>(null);
+  const [paymentError, setPaymentError] = useState("");
+  const [deleteFor, setDeleteFor] = useState<OrderCard | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [removing, setRemoving] = useState<string | null>(null);
 
   const statusOf = (o: OrderCard) => optimistic[o.id] || o.status || "enquiry";
 
@@ -69,29 +81,68 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
     }
   }
 
-  async function setPayment(id: string, payment_status: string) {
-    const totalRaw = window.prompt("Total order amount in ZAR. Leave blank to keep it unchanged.", "");
-    if (totalRaw === null) return;
-    const paidRaw = window.prompt("Amount paid in ZAR. Leave blank to keep it unchanged.", "");
-    if (paidRaw === null) return;
-    setBusy(id);
+  function openPayment(order: OrderCard, payment_status: string) {
+    setPaymentError("");
+    setPaymentFor({
+      order,
+      payment_status,
+      total_amount_zar: order.total_amount_zar != null ? String(order.total_amount_zar) : "",
+      amount_paid_zar: order.amount_paid_zar ? String(order.amount_paid_zar) : "",
+    });
+  }
+
+  async function savePayment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!paymentFor) return;
+    const { order, payment_status, total_amount_zar, amount_paid_zar } = paymentFor;
+    setPaymentError("");
+    setBusy(order.id);
     try {
       const r = await fetch("/api/orders/payment", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order_id: id, payment_status, total_amount_zar: totalRaw || null, amount_paid_zar: paidRaw || null }),
+        body: JSON.stringify({ order_id: order.id, payment_status, total_amount_zar: total_amount_zar || null, amount_paid_zar: amount_paid_zar || null }),
       });
-      if (r.ok) router.refresh();
-      else {
+      if (r.ok) {
+        setPaymentFor(null);
+        router.refresh();
+      } else {
         const result = await r.json().catch(() => ({}));
-        window.alert(result.error || "The payment update could not be saved.");
+        setPaymentError(result.error || "The payment update could not be saved.");
       }
+    } catch {
+      setPaymentError("The payment update could not be saved.");
+    } finally { setBusy(null); }
+  }
+
+  async function removeProspect() {
+    if (!deleteFor) return;
+    setDeleteError("");
+    setBusy(deleteFor.id);
+    try {
+      const r = await fetch("/api/orders/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: deleteFor.id }),
+      });
+      if (!r.ok) {
+        const result = await r.json().catch(() => ({}));
+        setDeleteError(result.error || "The prospect could not be removed.");
+        return;
+      }
+      const removedId = deleteFor.id;
+      setDeleteFor(null);
+      setRemoving(removedId);
+      window.setTimeout(() => router.refresh(), 280);
+    } catch {
+      setDeleteError("The prospect could not be removed.");
     } finally { setBusy(null); }
   }
 
   const byStage = (k: string) => orders.filter((o) => statusOf(o) === k);
 
   return (
-    <div className="order-board flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
+    <>
+      <div className="order-board flex gap-4 overflow-x-auto pb-4 -mx-1 px-1">
       {STAGES.map((stage) => {
         const cards = byStage(stage.key);
         const isOver = overStage === stage.key;
@@ -129,7 +180,7 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
                     onDragEnd={() => { setDragId(null); setOverStage(null); }}
                     className={`group rounded-xl border bg-ink2 overflow-visible transition-all duration-300 ease-cinematic cursor-grab active:cursor-grabbing ${
                       dragging ? "opacity-40 border-gold" : "border-line hover:border-gold/60"
-                    } ${busy === o.id ? "animate-pulse" : ""}`}
+                    } ${busy === o.id ? "animate-pulse" : ""} ${removing === o.id ? "opacity-0 -translate-y-2 scale-[0.98] pointer-events-none" : ""}`}
                   >
                     <button onClick={() => setOpen(isOpen ? null : o.id)} className="w-full text-left p-4">
                       <div className="flex items-start justify-between gap-2">
@@ -174,7 +225,7 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
                             <div className="pt-2">
                               <label className="text-[11px] text-muted block mb-2">Payment status</label>
                               <div className="flex flex-wrap gap-1.5 mb-3">
-                                {[['unpaid','Unpaid'],['deposit_paid','Deposit paid'],['paid_in_full','Paid in full']].map(([key,label]) => <button key={key} onClick={() => setPayment(o.id,key)} className={`px-2.5 py-1.5 rounded-full text-[11px] border ${o.payment_status === key ? "bg-gold text-ink border-gold" : "border-line text-creamSoft"}`}>{label}</button>)}
+                                {[['unpaid','Unpaid'],['deposit_paid','Deposit paid'],['paid_in_full','Paid in full']].map(([key,label]) => <button key={key} onClick={() => openPayment(o, key)} className={`px-2.5 py-1.5 rounded-full text-[11px] border ${o.payment_status === key ? "bg-gold text-ink border-gold" : "border-line text-creamSoft"}`}>{label}</button>)}
                               </div>
                               <label className="text-[11px] text-muted block mb-2">Move to, or drag the card</label>
                               <div className="flex flex-wrap gap-1.5">
@@ -196,6 +247,16 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
                                   );
                                 })}
                               </div>
+                              {statusOf(o) === "enquiry" && (
+                                <button
+                                  type="button"
+                                  disabled={busy === o.id}
+                                  onClick={() => { setDeleteError(""); setDeleteFor(o); }}
+                                  className="mt-4 text-[11px] text-rose hover:text-rose/80 underline underline-offset-4 disabled:opacity-50"
+                                >
+                                  Remove prospect
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
@@ -208,6 +269,60 @@ export default function OrderBoard({ orders }: { orders: OrderCard[] }) {
           </div>
         );
       })}
-    </div>
+      </div>
+
+      {paymentFor && (
+        <div className="order-modal" role="dialog" aria-modal="true" aria-labelledby="payment-dialog-title">
+          <button type="button" className="order-modal__scrim" aria-label="Close payment editor" onClick={() => !busy && setPaymentFor(null)} />
+          <form className="order-modal__panel" onSubmit={savePayment}>
+            <div className="order-modal__eyebrow">Payment update</div>
+            <h2 id="payment-dialog-title">Record a payment</h2>
+            <p className="order-modal__lede">{paymentFor.order.customer_name} · {paymentFor.order.celebration}</p>
+            <fieldset className="order-modal__statuses">
+              <legend>Payment status</legend>
+              {[['unpaid', 'Unpaid'], ['deposit_paid', 'Deposit paid'], ['paid_in_full', 'Paid in full']].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setPaymentFor((current) => current ? { ...current, payment_status: key } : current)}
+                  className={paymentFor.payment_status === key ? "is-selected" : ""}
+                >
+                  {label}
+                </button>
+              ))}
+            </fieldset>
+            <label className="order-modal__field">
+              <span>Total order amount</span>
+              <div><b>R</b><input type="number" min="0" step="0.01" inputMode="decimal" value={paymentFor.total_amount_zar} onChange={(event) => setPaymentFor((current) => current ? { ...current, total_amount_zar: event.target.value } : current)} placeholder="0.00" /></div>
+            </label>
+            <label className="order-modal__field">
+              <span>Amount paid</span>
+              <div><b>R</b><input type="number" min="0" step="0.01" inputMode="decimal" value={paymentFor.amount_paid_zar} onChange={(event) => setPaymentFor((current) => current ? { ...current, amount_paid_zar: event.target.value } : current)} placeholder="0.00" /></div>
+            </label>
+            {paymentError && <p className="order-modal__error" role="alert">{paymentError}</p>}
+            <div className="order-modal__actions">
+              <button type="button" className="order-modal__cancel" disabled={busy === paymentFor.order.id} onClick={() => setPaymentFor(null)}>Cancel</button>
+              <button type="submit" className="order-modal__submit" disabled={busy === paymentFor.order.id}>{busy === paymentFor.order.id ? "Saving..." : "Save payment"}</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {deleteFor && (
+        <div className="order-modal" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
+          <button type="button" className="order-modal__scrim" aria-label="Close removal confirmation" onClick={() => !busy && setDeleteFor(null)} />
+          <div className="order-modal__panel order-modal__panel--danger">
+            <div className="order-modal__eyebrow">Remove new enquiry</div>
+            <h2 id="delete-dialog-title">Are you sure?</h2>
+            <p className="order-modal__lede">This removes {deleteFor.customer_name}&apos;s new enquiry from the Order Board. Their customer record and any other saved occasions will stay untouched.</p>
+            {deleteError && <p className="order-modal__error" role="alert">{deleteError}</p>}
+            <div className="order-modal__actions">
+              <button type="button" className="order-modal__cancel" disabled={busy === deleteFor.id} onClick={() => setDeleteFor(null)}>Keep prospect</button>
+              <button type="button" className="order-modal__submit order-modal__submit--danger" disabled={busy === deleteFor.id} onClick={removeProspect}>{busy === deleteFor.id ? "Removing..." : "Remove prospect"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
