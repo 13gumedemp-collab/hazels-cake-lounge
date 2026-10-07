@@ -1367,6 +1367,95 @@ with "Just because" and "Other" sharing the brand gold deliberately.
   42 new gallery image URLs; a browser screenshot and console check could not run because no
   browser surface is available in this session. No production deployment was requested.
 
+### 07/10/2026 — The gallery becomes 62 new photographs, and /work stops crawling *(Claude Code)*
+
+**The Drive folder first.** The user first supplied
+`drive/folders/1i9nJQg8JSJzTixDFeJADFX-4jhHJElIP`, asking for the extra images in it and
+specifically for no duplicates. It holds 29 files, and a SHA-256 comparison against every
+image in `public/images` showed **all 29 were already in the repo** — it is the original
+June 2026 ChatGPT set that became `work-ed-*.png`. Two of its own files are byte-identical
+to each other, and three had been re-added under new names by the 02/10 session, so
+`work-ed-27.png` and `work-bakes/scones-on-cooling-rack.png` were the same photograph shown
+twice in the same category on the live page. Nothing new was imported from it.
+
+The correct folder is `drive/folders/1t4mJvF8UhsrTyhhiCTU8RD6cO1RMXVxm`, with four
+subfolders (Cakes 50, Cupcakes 5, Biscuits 5, Scones 2) and **62 photographs**, and the
+user asked for every existing image on the site to be replaced with these. All 62 are
+unique: no byte-identical pairs and no near-duplicates at a 16x16 dHash within 48 bits of
+256. One file is misnamed at source, `mothers_day_biscuits.png` in the Scones folder is
+actually boxed scones; it is stored as `scones-gift-boxes.png`.
+
+**Reading a shared Drive folder when the API cannot see it.** The connected Google Drive
+account is `info@atlascg.co.za`; these folders belong to `13gumedemp@gmail.com` and are
+link-shared, so `search_files` with `parentId = <id>` returns `{}` and the children are
+invisible to the API even though `get_file_metadata` on the folder itself succeeds. The way
+through is to fetch the public folder page with a browser user agent and parse
+`window['_DRIVE_ivd']`, which carries id, name and MIME type for every child. Files then
+download from `https://drive.usercontent.google.com/download?id=<id>&export=download`.
+
+**Why /work was slow.** It was serving 59 PNGs at roughly 2.5 MB each, about **146 MB on
+one page**, every one of them RGBA with a completely opaque alpha channel. Dropping alpha
+is lossless, and the rest is codecs.
+
+**The new pipeline.** Originals now live in `media/gallery/<category>/<slug>.png`, which is
+deliberately **outside `public/`** so the 165 MB of masters is not uploaded on every deploy.
+Two scripts own everything downstream:
+
+- `scripts/optimise-gallery-images.py` writes AVIF, WebP and JPEG at 480/720/1080/1440,
+  capped at native width so nothing is upscaled. AVIF q65 (q72 at the largest width, which
+  is what the lightbox shows), WebP q84, JPEG q86. Verified by eye against a magnified crop
+  of the caramel chocolate cake: q65 is indistinguishable from a Lanczos reference. It runs
+  across `cpu_count() - 1` processes; single threaded it took well over an hour, in parallel
+  about ten minutes.
+- `scripts/build-gallery-html.py` regenerates the gallery between `<!-- GALLERY:START -->`
+  and `<!-- GALLERY:END -->` in `work.html` from `scripts/gallery.json`, which is the
+  editorial source of truth: order, caption, kicker and alt text per photograph.
+
+**Do not hand-edit the gallery block in `work.html`, and do not add images to
+`public/images/gallery/`.** Both are generated. The procedure is in
+`public/images/README.txt`, which has been rewritten to say so.
+
+**Result.** 165 MB of originals becomes 97 MB of derivatives of which the browser touches a
+fraction: the first paint of /work now fetches about **200 KB** of imagery instead of
+several megabytes, and the entire 62-photograph gallery at the width a phone actually uses
+is 5.0 MB rather than 146 MB. Every `<img>` carries `width`/`height` so nothing shifts as
+it loads, the first three are eager and the other 59 are lazy.
+
+**Tapping a cake now opens it.** New lightbox on /work: a real `<button>` covering each
+figure (keyboard reachable, labelled "View <caption> larger"), full-screen viewer at the
+largest available width, prev/next, a counter, Escape and arrow keys, swipe on touch, focus
+trap, focus restored to the photo on close. Paging stays inside whichever category filter is
+active. It carries an "Enquire about this one" button wired to the existing
+`[data-enquire]` + `data-enquiry-mode="quick"` path, so the enquiry arrives tagged with that
+exact cake name; the lightbox closes as the enquiry overlay takes over, since the overlay is
+itself a modal at `z-index: 2000` against the lightbox's 120.
+
+**Replaced site-wide, not just on /work.**
+- `index.html`: the hero is now art directed, a landscape three-cake photo above 700px and
+  a single cake below it, so a phone is not handed a letterboxed landscape. Both crops are
+  preloaded with matching `media` attributes. Carousel, the My Work CTA slide and the story
+  teaser all repointed.
+- `menu.html`: all five card photographs.
+- `contact.html`, `occasion-book.html`, `reviews.html`: social preview images only, as those
+  pages carry no on-page photograph.
+- `story.html` is unchanged: it shows Hazel, and the new folder has no portrait of her.
+- Every `og:image` and `twitter:image` points at a **`-1080.jpg`**, never AVIF or WebP,
+  because Facebook and WhatsApp do not reliably read either.
+- Deleted from `public/images`: `work-cakes/`, `work-cupcakes/`, `work-bakes/`, all
+  `work-ed-*.png`, all `cake-*`, `hero-home*.jpg` and the unreferenced `biscuits.jpg`,
+  `cupcake.png`, `muffins.jpg`, `rusks.png`. The folder went from 334 MB to 102 MB, and
+  almost all of what remains is the new generated gallery.
+
+**Also fixed in passing:** the footer on `work.html` linked to `messaging-/terms`, which has
+been a 404 for as long as it has been there. It is now `/messaging-terms`.
+
+**Verified.** `npm run build` passes. Against `npm run preview`: all 12 public pages return
+200 and all **570 referenced image variants** resolve with no 404. Driven in headless Edge
+at 1440x900 and 390x844 — the gallery renders, AVIF is the format actually served, the
+lightbox opens, pages, closes on Escape, restores focus, scopes itself to the active filter
+and hands off to a pre-filled enquiry, with no console errors and no failed requests. No
+deployment was run.
+
 ## 6. Open threads
 
 | # | Item | Detail |
@@ -1374,7 +1463,7 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 1 | ~~Unshipped Vercel release~~ | Closed 01/09/2026. Both projects were transferred to Atlas Projects Pro and the secured production builds are live on the correct public and admin domains. |
 | 2 | ~~One-time Occasion Book reminders~~ | Closed 31/08/2026. `daily-occasion-checker` now sends the 30, 14 and 7 day customer sequence for future one-time dates and has been deployed. |
 | 3 | ~~Test account cleanup~~ | Closed 01/09/2026. All six previous production Auth accounts and linked customer accounts were removed. The only remaining account is the newly verified `bleazyblue14@gmail.com` journey account. |
-| 4 | Unreferenced images | `work-ed-10`, `-17`, `-19`, `-22`, `-23` are no longer referenced but still ship in `public/images`. Delete only if the user confirms. |
+| 4 | ~~Unreferenced images~~ | Closed 07/10/2026. Every `work-ed-*` file was deleted when the gallery was replaced with the 62 new photographs. One unreferenced image remains: `public/images/hazel-portrait.png`, 2.4 MB, kept because it is Hazel rather than a product. Delete only if the user confirms. |
 | 5 | Resend key hygiene | The rejected credential was replaced in both Edge Functions and Auth SMTP on 08/08/2026. The new sending key was also supplied in chat, so rotate it again directly from the correct Resend profile when practical and update the same two Supabase locations. Do not paste the replacement into chat. |
 | 6 | ~~Email confirmation Gmail visual check~~ | Closed 01/09/2026. The branded code only message appeared in the `bleazyblue14@gmail.com` Primary inbox, the eight digit code confirmed the account, and the signed in customer journey completed. |
 | 7 | Publish the Google OAuth consent screen | Completed on 08/08/2026. The app is In production; no Supabase change was needed. |
@@ -1390,6 +1479,8 @@ with "Just because" and "Other" sharing the brand gold deliberately.
 | 17 | Local search expansion | The public site confirms South Africa but not a collection town, city or address. Obtain Hazel's approved collection area and any public address before targeting area-specific searches or adding those LocalBusiness fields. Do not guess. |
 | 18 | ~~GitHub push access~~ | Closed 25/09/2026. GitHub CLI was switched to the already authenticated `13gumedemp-collab` account and commit `8f84df1` was pushed to `main`. |
 | 19 | ~~Restore Vercel scope access~~ | Closed 25/09/2026. Vercel was re-authenticated to the Atlas Projects Pro team; the public and Command Centre deployments are Ready and aliased to their production domains. |
+| 20 | Gallery is generated, not hand-written | `work.html`'s gallery block and everything in `public/images/gallery/` are produced by `scripts/optimise-gallery-images.py` and `scripts/build-gallery-html.py` from `scripts/gallery.json` and `media/gallery/`. Edit the manifest and re-run both, never the output. |
+| 21 | Other pages still hand-maintained | `index.html` and `menu.html` now carry `<picture>` markup written by hand against the same derivatives. If a slug in `gallery.json` is renamed or removed, those two pages will not notice and will 404 on the image. Worth folding into the generator if the photographs change often. |
 
 ### Handoff: publish the Google OAuth consent screen *(for Codex, opened 08/08/2026)*
 
@@ -1624,3 +1715,19 @@ deprecation notice confirming this. The publish action is a Console-only, human 
   The Vercel CLI accepted the project but ended without a deployment URL or Ready result, and a
   subsequent CLI status check timed out. A direct public menu fetch still served the previous
   bundle, so this release was not confirmed and production remains unchanged.
+
+### 07/10/2026 Menu reference image uploads (Codex)
+
+- The short menu enquiry now accepts up to three optional customer reference images. Each image
+  receives an immediate local preview, a remove control and upload feedback before the enquiry
+  can be submitted.
+- The same private `inspiration-photos` bucket and existing protected order field are used, so
+  Hazel receives the image paths with the enquiry and no new public media surface was added.
+- The image limit is now 20 MB per file to accommodate high quality reference photography while
+  retaining a hard boundary. The detailed bespoke enquiry still permits up to six images.
+- Added migration `0024_increase_inspiration_image_size.sql` to raise the private bucket's
+  matching limit to 20 MB. The local Supabase CLI was unavailable, so the same bounded update
+  was applied and verified directly through the server only Supabase credential in `admin/.env`.
+  The live bucket remains private and retains its existing image only allowlist.
+- `node --check main.js`, `git diff --check` and `npm run build` all pass. No Vercel deployment
+  was performed.

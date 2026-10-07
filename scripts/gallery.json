@@ -1,0 +1,144 @@
+{
+ "_comment": [
+  "The editorial source of truth for the My Work gallery and for every product",
+  "photograph used elsewhere on the site.",
+  "",
+  "Each entry names a file under media/gallery/<category>/<slug>.png. Those are the",
+  "originals supplied by Hazel and they are deliberately NOT inside public/, because",
+  "they are ~2.7 MB each and would otherwise all ship to Vercel. The browser only ever",
+  "sees the derivatives written to public/images/gallery/ by",
+  "scripts/optimise-gallery-images.py.",
+  "",
+  "Order here is the order shown on the page. Captions are the visible label, kicker is",
+  "the small gold line under it, alt is what a screen reader and a failed image show.",
+  "",
+  "After editing this file run, from the repo root:",
+  "  python scripts/optimise-gallery-images.py",
+  "  python scripts/build-gallery-html.py"
+ ],
+
+ "categories": [
+  {
+   "id": "cakes",
+   "filter": "Cakes",
+   "title": "Celebration &amp; custom cakes",
+   "sub": "Birthdays, anniversaries, weddings and the cakes dreamed up from scratch. Each one made to order, in the flavour and finish you choose.",
+   "items": [
+    { "slug": "caramel-chocolate-cake", "caption": "Caramel chocolate cake", "kicker": "Celebration cakes", "alt": "A chocolate celebration cake under a caramel lattice, finished with buttercream swirls and praline" },
+    { "slug": "floral-gold-birthday-cake", "caption": "Ivory and gold birthday cake", "kicker": "Birthday cakes", "alt": "An ivory buttercream birthday cake trailed with gold beads and dressed with deep pink roses" },
+    { "slug": "red-velvet-botanical-cake", "caption": "Red velvet with botanicals", "kicker": "Celebration cakes", "alt": "A red velvet cake crumbed in red velvet, topped with gold and pearl baubles and a butterfly" },
+    { "slug": "pink-ring-cake", "caption": "Pink ring cake", "kicker": "Celebration cakes", "alt": "A pink ring cake piped with rosettes and scattered with sprinkles and gold leaf" },
+    { "slug": "chocolate-oreo-drip-cake", "caption": "Chocolate Oreo drip", "kicker": "Celebration cakes", "alt": "A chocolate drip cake covered in chocolate shavings and topped with Oreo biscuits" },
+    { "slug": "pastel-butterfly-flower-cake", "caption": "Pastel butterflies and flowers", "kicker": "Celebration cakes", "alt": "A pastel square cake piped with green leaves and topped with a white sugar rose and butterflies" },
+    { "slug": "kpop-demon-hunters-cake", "caption": "K-pop Demon Hunters", "kicker": "Custom cakes", "alt": "A purple and blue themed birthday cake with K-pop Demon Hunters character toppers" },
+    { "slug": "heart-red-velvet-cake", "caption": "Red velvet heart", "kicker": "Celebration cakes", "alt": "A heart shaped red velvet cake crumbed in red velvet with cream cheese piping and gold beads" },
+    { "slug": "chocolate-caramel-drip-cake", "caption": "Chocolate caramel drip", "kicker": "Celebration cakes", "alt": "A chocolate layer cake with a caramel drip and piped chocolate buttercream swirls" },
+    { "slug": "princess-crown-cake", "caption": "Princess crown cake", "kicker": "Children's cakes", "alt": "A pink and purple cake topped with a jewelled crown, a ribbon bow and a name in letters" },
+    { "slug": "purple-pink-flower-cake", "caption": "Purple and pink florals", "kicker": "Celebration cakes", "alt": "A cake piped all over with purple and pink buttercream daisies" },
+    { "slug": "black-bow-birthday-cake", "caption": "Black bow birthday cake", "kicker": "Birthday cakes", "alt": "An ivory birthday cake piped with Happy Birthday and tied with a black satin bow" },
+    { "slug": "chocolate-cherry-cake", "caption": "Chocolate cherry cake", "kicker": "Celebration cakes", "alt": "A chocolate cake with piped cream rosettes and glace cherries around the top" },
+    { "slug": "pink-bow-cake", "caption": "Pink bow cake", "kicker": "Celebration cakes", "alt": "A tall pink cake wrapped in a fondant ribbon and finished with a large pink bow" },
+    { "slug": "bluey-nadia-cake", "caption": "Bluey birthday cake", "kicker": "Children's cakes", "alt": "A pink Bluey themed birthday cake with rainbow toppers, sweets and a name plaque" },
+    { "slug": "red-velvet-gold-botanical-cake", "caption": "Red velvet and gold", "kicker": "Celebration cakes", "alt": "A red velvet crumbed cake with cream piping, gold baubles and dried botanicals" },
+    { "slug": "chocolate-nut-cake", "caption": "Chocolate nut cake", "kicker": "Celebration cakes", "alt": "A chocolate buttercream cake topped with chopped nuts and piped swirls" },
+    { "slug": "pastel-rosette-cake", "caption": "Pastel rosette cake", "kicker": "Celebration cakes", "alt": "A cream cake ringed with pink and mint buttercream rosettes and pearl beads" },
+    { "slug": "pikachu-birthday-cake", "caption": "Pikachu birthday cake", "kicker": "Children's cakes", "alt": "A two tier Pikachu birthday cake with sculpted ears and a Pokeball base" },
+    { "slug": "50-years-grace-favour-cake", "caption": "Fifty years of grace", "kicker": "Milestone cakes", "alt": "An ivory milestone cake piped with Happy 50 Years of Grace and Favour and topped with white roses" },
+    { "slug": "chocolate-drip-berry-cake", "caption": "Chocolate drip and berries", "kicker": "Celebration cakes", "alt": "A white buttercream cake with a dark chocolate drip and a berry compote centre" },
+    { "slug": "pink-mint-sprinkle-cake", "caption": "Pink and mint sprinkles", "kicker": "Birthday cakes", "alt": "A cream cake with pink piping, a mint green base shell border and coloured sprinkles" },
+    { "slug": "orlando-pirates-babes-cake", "caption": "Orlando Pirates theme", "kicker": "Custom cakes", "alt": "A black and white Orlando Pirates themed birthday cake with the club badge on top" },
+    { "slug": "red-velvet-ballerina-birthday-cake", "caption": "Red velvet ballerina cake", "kicker": "Birthday cakes", "alt": "A red velvet crumbed birthday cake with cream piping and a ballerina cake topper" },
+    { "slug": "chocolate-caramel-ring-cake", "caption": "Chocolate caramel ring", "kicker": "Celebration cakes", "alt": "A chocolate ring cake filled with caramel, chocolates and piped cream flowers" },
+    { "slug": "peach-white-birthday-cake", "caption": "Peach and ivory ribbons", "kicker": "Celebration cakes", "alt": "A square peach and ivory cake textured with vertical piping and tied with ribbon" },
+    { "slug": "its-a-boy-cake", "caption": "It is a boy cake", "kicker": "Baby showers", "alt": "A pale blue baby shower cake with an It Is A Boy plaque and sugar baby shoes on top" },
+    { "slug": "cherry-chocolate-cake", "caption": "Cherry chocolate cake", "kicker": "Celebration cakes", "alt": "A chocolate cake covered in chocolate shavings with cream rosettes and cherries" },
+    { "slug": "purple-flower-cake", "caption": "Purple floral cake", "kicker": "Celebration cakes", "alt": "A cream buttercream cake scattered with small purple and lilac sugar flowers" },
+    { "slug": "music-theme-cake", "caption": "Music themed cake", "kicker": "Custom cakes", "alt": "A chocolate cake decorated with gold music notes, sheet music and a gold sphere" },
+    { "slug": "strawberry-vanilla-cake", "caption": "Strawberry vanilla cake", "kicker": "Celebration cakes", "alt": "A vanilla cake topped with fresh strawberries arranged in a flower and a pink shell border" },
+    { "slug": "chocolate-birthday-cake", "caption": "Chocolate birthday cake", "kicker": "Birthday cakes", "alt": "A chocolate birthday cake with piped rosettes, pearl baubles and a Happy Birthday plaque" },
+    { "slug": "blue-talia-birthday-cake", "caption": "Blue ruffle birthday cake", "kicker": "Birthday cakes", "alt": "A blue birthday cake piped with ruffles and snowflakes and personalised with a name" },
+    { "slug": "baby-shower-bible-cake", "caption": "Baby shower Bible cake", "kicker": "Custom cakes", "alt": "A cake shaped and iced as an open Bible with a psalm and a sleeping baby in blue" },
+    { "slug": "pink-rosette-pearl-cake", "caption": "Pink rosettes and pearls", "kicker": "Celebration cakes", "alt": "A cake ringed with pink buttercream rosettes and edible pearls around a smooth top" },
+    { "slug": "chocolate-caramel-drizzle-cake", "caption": "Chocolate caramel drizzle", "kicker": "Celebration cakes", "alt": "A chocolate cake drizzled with caramel in a lattice and edged with piped shells" },
+    { "slug": "rea-friends-cake", "caption": "Friends themed birthday", "kicker": "Children's cakes", "alt": "A pink birthday cake with Lego Friends character toppers and a name in letters" },
+    { "slug": "april-heart-cake-dark", "caption": "Calendar heart cake", "kicker": "Custom cakes", "alt": "A white heart shaped cake iced with an April calendar and tied with a black ribbon" },
+    { "slug": "chocolate-shaved-truffle-cake", "caption": "Chocolate truffle cake", "kicker": "Celebration cakes", "alt": "A tall cake covered completely in curled chocolate shavings" },
+    { "slug": "talia-12th-birthday-cake", "caption": "Twelfth birthday cake", "kicker": "Birthday cakes", "alt": "An ivory twelfth birthday cake with a gold name topper, butterflies and a Happy 12th plaque" },
+    { "slug": "red-velvet-cake-2", "caption": "Red velvet cake", "kicker": "Celebration cakes", "alt": "A red velvet cake crumbed in red velvet with cream cheese rosettes around the top" },
+    { "slug": "easter-bunny-cake", "caption": "Easter bunny cake", "kicker": "Seasonal cakes", "alt": "A chocolate Easter cake with a sugar bunny face and pastel eggs around the base" },
+    { "slug": "pastel-chocolate-cake", "caption": "Pastel chocolate cake", "kicker": "Celebration cakes", "alt": "A chocolate cake piped with pastel buttercream flowers and chocolate shavings" },
+    { "slug": "christmas-square-cake", "caption": "Christmas square cake", "kicker": "Seasonal cakes", "alt": "A white fondant Christmas cake decorated with candy canes, a stocking and sugar trees" },
+    { "slug": "red-velvet-birthday-cake", "caption": "Red velvet celebration", "kicker": "Birthday cakes", "alt": "A red velvet cake with gold and pearl baubles, a sugar champagne bottle and a Happy Birthday banner" },
+    { "slug": "chocolate-caramel-cake", "caption": "Chocolate caramel cake", "kicker": "Celebration cakes", "alt": "A textured chocolate buttercream cake dotted with caramel truffles" },
+    { "slug": "christmas-sheet-cake", "caption": "Christmas sheet cake", "kicker": "Seasonal cakes", "alt": "A festive sheet cake piped with red and green rosettes and a heart with initials" },
+    { "slug": "red-velvet-heart-cake", "caption": "Red velvet heart cake", "kicker": "Celebration cakes", "alt": "A heart shaped red velvet cake with a cream shell border and coloured sprinkles" },
+    { "slug": "chocolate-and-vanilla-cakes", "caption": "Chocolate and vanilla", "kicker": "Made to order", "alt": "Three cakes together, one pink vanilla with roses and two chocolate with piped swirls" },
+    { "slug": "cut-cake", "caption": "Cut to show the layers", "kicker": "Made to order", "alt": "A pastel cake cut open to show its sponge layers and filling" }
+   ]
+  },
+  {
+   "id": "cupcakes",
+   "filter": "Cupcakes",
+   "title": "Cupcakes",
+   "sub": "Iced by hand and finished one at a time. By the dozen, or by the dozens.",
+   "items": [
+    { "slug": "assorted-sprinkle-cupcakes", "caption": "Assorted sprinkle cupcakes", "kicker": "By the dozen", "alt": "Vanilla and chocolate cupcakes swirled with buttercream and finished with sprinkles" },
+    { "slug": "pink-flower-vanilla-cupcakes", "caption": "Vanilla blossom cupcakes", "kicker": "By the dozen", "alt": "Vanilla cupcakes piped with cream swirls and topped with pink sugar blossoms" },
+    { "slug": "red-velvet-lavender-cupcakes", "caption": "Red velvet cupcakes", "kicker": "By the dozen", "alt": "Red velvet cupcakes piped with cream and lavender buttercream swirls" },
+    { "slug": "tuxedo-cupcakes", "caption": "Tuxedo cupcakes", "kicker": "By the dozen", "alt": "A tray of tuxedo cupcakes iced in white with dark chocolate centres" },
+    { "slug": "easter-cupcakes", "caption": "Easter cupcakes, boxed", "kicker": "Seasonal cupcakes", "alt": "A box of Easter cupcakes topped with pastel sugar eggs and sprinkles" }
+   ]
+  },
+  {
+   "id": "scones",
+   "filter": "Scones",
+   "title": "Scones",
+   "sub": "The everyday comfort, baked fresh and still warm. Boxed up for a tea table or a slow morning.",
+   "items": [
+    { "slug": "scones-on-cooling-rack", "caption": "Freshly baked scones", "kicker": "Baked fresh", "alt": "Golden scones cooling together on a wire rack" },
+    { "slug": "scones-gift-boxes", "caption": "Scones, boxed to gift", "kicker": "Gift boxes", "alt": "Two white boxes filled with scones and tied with ribbon" }
+   ]
+  },
+  {
+   "id": "biscuits",
+   "filter": "Biscuits &amp; bars",
+   "title": "Biscuits, bars &amp; rusks",
+   "sub": "Crisp, chewy and crumbly, boxed beautifully for gifting, sharing or stocking the pantry.",
+   "items": [
+    { "slug": "chocolate-chip-cookie-tins", "caption": "Choc chip biscuits, tinned", "kicker": "Biscuits", "alt": "Chocolate chip biscuits packed into red and gold gift tins" },
+    { "slug": "jam-crumble-bars", "caption": "Jam crumble squares", "kicker": "Bars", "alt": "A boxed tray of jam crumble squares dusted with icing sugar" },
+    { "slug": "granola-bars", "caption": "Granola bars", "kicker": "Bars", "alt": "Oat and berry granola bars cut into fingers on a cooling rack" },
+    { "slug": "packaged-rusks-display", "caption": "Buttermilk rusks, packed", "kicker": "Rusks", "alt": "Bags of buttermilk rusks packed and stacked on a wooden board" },
+    { "slug": "christmas-decorated-cookies", "caption": "Iced Christmas biscuits", "kicker": "Seasonal biscuits", "alt": "Iced Christmas biscuits decorated as trees, baubles and snowflakes on a plate" }
+   ]
+  }
+ ],
+
+ "pages": {
+  "_comment": "Product photographs used outside the My Work gallery. Keys are referred to by scripts/build-gallery-html.py only as documentation; the markup on those pages is maintained by hand.",
+  "home_hero_wide": "cakes/chocolate-and-vanilla-cakes",
+  "home_hero_narrow": "cakes/floral-gold-birthday-cake",
+  "home_carousel": [
+   "cakes/chocolate-drip-berry-cake",
+   "cakes/red-velvet-botanical-cake",
+   "scones/scones-on-cooling-rack",
+   "biscuits/jam-crumble-bars",
+   "cupcakes/assorted-sprinkle-cupcakes"
+  ],
+  "home_carousel_cta": "cakes/red-velvet-gold-botanical-cake",
+  "home_teaser": "cakes/50-years-grace-favour-cake",
+  "menu_cards": [
+   "cakes/floral-gold-birthday-cake",
+   "cakes/50-years-grace-favour-cake",
+   "cupcakes/tuxedo-cupcakes",
+   "scones/scones-on-cooling-rack",
+   "biscuits/chocolate-chip-cookie-tins"
+  ],
+  "social_home": "cakes/chocolate-and-vanilla-cakes",
+  "social_menu": "cakes/floral-gold-birthday-cake",
+  "social_work": "cakes/caramel-chocolate-cake",
+  "social_contact": "cakes/pink-ring-cake",
+  "social_occasion_book": "cakes/50-years-grace-favour-cake",
+  "social_reviews": "cakes/red-velvet-gold-botanical-cake"
+ }
+}

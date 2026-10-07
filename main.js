@@ -660,7 +660,8 @@ import { createClient } from '@supabase/supabase-js';
     const SB_URL = 'https://qgzpoyyijafblzfiyhoc.supabase.co';
     const SB_ANON = 'sb_publishable_gNm_CC5dBdLLa8q6-XLp3A_Wbsvtgcz';
     const MAX_INSPIRATION_PHOTOS = 6;
-    const MAX_INSPIRATION_IMAGE_BYTES = 10 * 1024 * 1024;
+    const MAX_QUICK_REFERENCE_PHOTOS = 3;
+    const MAX_INSPIRATION_IMAGE_BYTES = 20 * 1024 * 1024;
     const imageMime = (file) => {
       const declared = String(file?.type || '').toLowerCase();
       const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/gif', 'image/avif'];
@@ -698,6 +699,15 @@ import { createClient } from '@supabase/supabase-js';
             <label class="field"><span>When do you need it?</span><input type="date" name="quick_date" /></label>
             <label class="field"><span>How many would you like?</span><input type="text" name="quick_quantity" placeholder="12 cupcakes, a cake for 30, two dozen biscuits" /></label>
             <label class="field"><span>Flavours or anything else I should know? <em class="field__opt">(optional)</em></span><textarea name="quick_notes" rows="2" placeholder="Flavours, colours, dietary needs or a short note"></textarea></label>
+            <div class="field">
+              <span class="field__lbl">Do you have images of what you have in mind? <em class="field__opt">(optional)</em></span>
+              <div class="enq__drop" id="enqQuickDrop" data-cursor="link">
+                <input type="file" id="enqQuickFile" name="quick_reference" accept="image/*" multiple hidden />
+                <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Click to add reference images</span><span class="upload-copy--mobile">Tap to add reference images</span></p><small>Up to three pictures, 20 MB each.</small></div>
+              </div>
+              <div class="enq__thumbs" id="enqQuickThumbs"></div>
+              <div class="enq__drop-status" id="enqQuickUploadStatus" hidden></div>
+            </div>
             <label class="field"><span>Your name</span><input type="text" name="quick_full_name" placeholder="Your full name" autocomplete="name" /></label>
             <label class="field"><span>Your email</span><input type="email" name="quick_email" placeholder="Where I can reach you" autocomplete="email" /></label>
             <label class="field"><span>Your phone or WhatsApp <em class="field__opt">(optional)</em></span><input type="tel" name="quick_phone" placeholder="073 373 4234" autocomplete="tel" /></label>
@@ -725,7 +735,7 @@ import { createClient } from '@supabase/supabase-js';
             <div class="field"><span class="field__lbl">Show me cakes you love (optional)</span>
               <div class="enq__drop" id="enqDrop" data-cursor="link">
                 <input type="file" id="enqFile" accept="image/*" multiple hidden />
-                <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag images here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Up to six pictures, 10 MB each.</small></div>
+                <div class="enq__drop-empty"><p><span class="upload-copy--desktop">Drag images here, or click to browse</span><span class="upload-copy--mobile">Tap to choose pictures</span></p><small>Up to six pictures, 20 MB each.</small></div>
               </div>
               <div class="enq__thumbs" id="enqThumbs"></div>
               <div class="enq__drop-status" hidden></div>
@@ -986,7 +996,7 @@ import { createClient } from '@supabase/supabase-js';
       if (!file) return;
       // Accept any image the device offers, including iPhone HEIC (empty MIME).
       if (!looksImage(file)) { setStatus('One of those was not an image, so I skipped it.'); return; }
-      if (file.size > MAX_INSPIRATION_IMAGE_BYTES) { setStatus(file.name + ' is over 10 MB, try a smaller one.'); return; }
+      if (file.size > MAX_INSPIRATION_IMAGE_BYTES) { setStatus(file.name + ' is over 20 MB, try a smaller one.'); return; }
       if (thumbs.children.length >= MAX_INSPIRATION_PHOTOS) { setStatus('You can add up to six pictures.'); return; }
       // Build a thumbnail with an uploading state straight away.
       const thumb = document.createElement('div');
@@ -1083,6 +1093,95 @@ import { createClient } from '@supabase/supabase-js';
     });
 
     /* ---- quick menu enquiry ---- */
+    const quickDrop = $('#enqQuickDrop', overlay);
+    const quickFileInput = $('#enqQuickFile', overlay);
+    const quickThumbs = $('#enqQuickThumbs', overlay);
+    const quickUploadStatus = $('#enqQuickUploadStatus', overlay);
+    const quickInspirationUrls = [];
+    let quickUploadInProgress = false;
+
+    const setQuickUploadStatus = (message) => {
+      if (!quickUploadStatus) return;
+      quickUploadStatus.hidden = !message;
+      quickUploadStatus.textContent = message || '';
+    };
+
+    const removeQuickReference = (thumb) => {
+      const path = thumb?.dataset.url;
+      const index = quickInspirationUrls.indexOf(path);
+      if (index > -1) quickInspirationUrls.splice(index, 1);
+      thumb?.remove();
+      setQuickUploadStatus('');
+    };
+
+    const uploadQuickReference = async (file) => {
+      if (!file) return;
+      if (!looksImage(file)) { setQuickUploadStatus('Please choose an image file.'); return; }
+      if (file.size > MAX_INSPIRATION_IMAGE_BYTES) { setQuickUploadStatus(file.name + ' is over 20 MB. Please choose a smaller image.'); return; }
+      if (quickUploadInProgress) { setQuickUploadStatus('Your image is still uploading.'); return; }
+      if ((quickThumbs?.children.length || 0) >= MAX_QUICK_REFERENCE_PHOTOS) { setQuickUploadStatus('You can add up to three images.'); return; }
+
+      const thumb = document.createElement('div');
+      thumb.className = 'enq__thumb is-loading';
+      const img = document.createElement('img');
+      img.alt = 'Your reference image';
+      try { img.src = URL.createObjectURL(file); } catch (e) {}
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'enq__thumb-x';
+      remove.setAttribute('aria-label', 'Remove reference image');
+      remove.textContent = '×';
+      const spin = document.createElement('span');
+      spin.className = 'enq__thumb-spin';
+      thumb.appendChild(img); thumb.appendChild(spin); thumb.appendChild(remove);
+      quickThumbs?.appendChild(thumb);
+      quickUploadInProgress = true;
+      setQuickUploadStatus('Uploading your image...');
+
+      const safeName = (file.name || 'reference.jpg').replace(/[^\w.]+/g, '_');
+      const path = 'enq-' + Math.random().toString(36).slice(2) + '-' + safeName;
+      try {
+        const res = await fetch(SB_URL + '/storage/v1/object/inspiration-photos/' + encodeURIComponent(path), {
+          method: 'POST',
+          headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': imageMime(file) },
+          body: file,
+        });
+        if (!res.ok) throw new Error(await res.text());
+        quickInspirationUrls.push(path);
+        thumb.dataset.url = path;
+        thumb.classList.remove('is-loading');
+        setQuickUploadStatus('');
+      } catch (e) {
+        thumb.remove();
+        setQuickUploadStatus('Your image could not upload. You can try again or send the enquiry without it.');
+      } finally {
+        quickUploadInProgress = false;
+      }
+    };
+
+    if (quickThumbs) {
+      quickThumbs.addEventListener('click', (event) => {
+        if (!event.target.closest('.enq__thumb-x')) return;
+        const thumb = event.target.closest('.enq__thumb');
+        if (thumb?.classList.contains('is-loading')) { setQuickUploadStatus('Please wait for your image to finish uploading.'); return; }
+        removeQuickReference(thumb);
+      });
+    }
+    const uploadQuickReferenceFiles = async (files) => {
+      const chosen = Array.from(files || []);
+      const remaining = MAX_QUICK_REFERENCE_PHOTOS - (quickThumbs?.children.length || 0);
+      if (!remaining) { setQuickUploadStatus('You can add up to three images.'); return; }
+      for (const file of chosen.slice(0, remaining)) await uploadQuickReference(file);
+      if (chosen.length > remaining) setQuickUploadStatus('Only the first three images can be added.');
+    };
+    if (quickDrop && quickFileInput) {
+      quickDrop.addEventListener('click', () => quickFileInput.click());
+      quickFileInput.addEventListener('change', () => {
+        uploadQuickReferenceFiles(quickFileInput.files);
+        quickFileInput.value = '';
+      });
+    }
+
     const validateQuick = () => {
       $$('.field__error', quickStep).forEach((e) => e.remove());
       let ok = true;
@@ -1098,6 +1197,7 @@ import { createClient } from '@supabase/supabase-js';
 
     $('#enqQuickSubmit', overlay).addEventListener('click', async () => {
       if (!validateQuick()) return;
+      if (quickUploadInProgress) { setQuickUploadStatus('Please wait for your image to finish uploading.'); return; }
       const btn = $('#enqQuickSubmit', overlay);
       const txt = $('.enq__submit-txt', btn);
       const spin = $('.enq__spinner', btn);
@@ -1108,7 +1208,7 @@ import { createClient } from '@supabase/supabase-js';
         full_name: val('quick_full_name'), email: val('quick_email').toLowerCase(), whatsapp_number: val('quick_phone'),
         occasion_for: '', relationship_to_customer: 'Myself', occasion_type: 'Other', occasion_other: product,
         occasion_date: val('quick_date'), cake_description: notes, number_of_people: val('quick_quantity'),
-        colours_and_themes: '', inspiration_photo_url: '', inspiration_photo_urls: [],
+        colours_and_themes: '', inspiration_photo_url: quickInspirationUrls[0] || '', inspiration_photo_urls: quickInspirationUrls.slice(),
         email_consent: true, whatsapp_consent: false, occasion_book_opted_in: false, website: val('website'),
       };
       try {
@@ -1175,6 +1275,155 @@ import { createClient } from '@supabase/supabase-js';
         });
         window.scrollTo({ top: workFilter.getBoundingClientRect().top + window.scrollY - 90, behavior: reduce ? 'auto' : 'smooth' });
       });
+    }
+
+    /* ---- My Work: open a photo full size ----
+       Every figure carries its own slug, native size and caption, so the viewer
+       builds one <picture> on demand rather than the page shipping a second copy
+       of all 62 photographs. Navigation stays inside the category the visitor is
+       actually looking at, which is what the filter buttons imply. ---- */
+    const lightbox = $('#workLightbox');
+    if (lightbox && $('.work-item__open')) {
+      const lbFigure = $('#lightboxFigure');
+      const lbTitle = $('#lightboxTitle');
+      const lbKicker = $('#lightboxKicker');
+      const lbCount = $('#lightboxCount');
+      const lbEnquire = $('#lightboxEnquire');
+      const lbClose = $('#lightboxClose');
+      const lbPrev = $('#lightboxPrev');
+      const lbNext = $('#lightboxNext');
+      const allItems = $$('.work-item[data-slug]');
+
+      let shown = [];          // the figures currently reachable, in page order
+      let at = -1;             // index into `shown`
+      let lastFocus = null;
+
+      const srcsetFor = (fig, ext) => {
+        const max = Number(fig.dataset.max) || 1080;
+        return [480, 720, 1080, 1440]
+          .filter((w) => w < max).concat(max)
+          .map((w) => `/images/gallery/${fig.dataset.slug}-${w}.${ext} ${w}w`)
+          .join(', ');
+      };
+
+      // The viewer is height constrained on a desktop and width constrained on a
+      // phone. Erring towards the larger file is deliberate: this is the view
+      // someone opened in order to look closely.
+      const SIZES = '(max-width: 900px) 94vw, 72vw';
+
+      const render = () => {
+        const fig = shown[at];
+        if (!fig) return;
+        const slug = fig.dataset.slug;
+        // Carry the real pixel size across so the viewer reserves the right shape
+        // before the photo arrives, instead of snapping when it does.
+        const thumb = fig.querySelector('img');
+        const w = thumb?.getAttribute('width') || fig.dataset.max;
+        const h = thumb?.getAttribute('height') || '';
+        lbFigure.innerHTML =
+          '<picture>'
+          + `<source type="image/avif" srcset="${srcsetFor(fig, 'avif')}" sizes="${SIZES}">`
+          + `<source type="image/webp" srcset="${srcsetFor(fig, 'webp')}" sizes="${SIZES}">`
+          + `<img src="/images/gallery/${slug}-1080.jpg" width="${w}" height="${h}"`
+          + ` alt="${esc(fig.dataset.alt || '')}" decoding="async">`
+          + '</picture>';
+        lbTitle.textContent = fig.dataset.caption || '';
+        lbKicker.textContent = fig.dataset.kicker || '';
+        lbCount.textContent = `${at + 1} / ${shown.length}`;
+        lbEnquire.dataset.product = fig.dataset.caption || '';
+        lightbox.setAttribute('aria-label', fig.dataset.caption || 'Gallery photo');
+        const solo = shown.length < 2;
+        lbPrev.hidden = solo;
+        lbNext.hidden = solo;
+        // Warm the next photo so paging through the gallery does not flash.
+        const ahead = shown[(at + 1) % shown.length];
+        if (ahead && ahead !== fig) {
+          new Image().src = `/images/gallery/${ahead.dataset.slug}-1080.webp`;
+        }
+      };
+
+      const go = (step) => {
+        if (!shown.length) return;
+        at = (at + step + shown.length) % shown.length;
+        render();
+      };
+
+      const open = (fig) => {
+        // Only photographs in a visible group, so paging matches the active filter.
+        shown = allItems.filter((el) => !el.closest('.workgroup')?.hidden);
+        at = shown.indexOf(fig);
+        if (at < 0) { shown = [fig]; at = 0; }
+        lastFocus = document.activeElement;
+        render();
+        document.documentElement.classList.add('lb-open');
+        lightbox.classList.add('is-ready');
+        lightbox.setAttribute('aria-hidden', 'false');
+        requestAnimationFrame(() => lightbox.classList.add('is-open'));
+        lbClose.focus();
+      };
+
+      const close = () => {
+        if (!lightbox.classList.contains('is-ready')) return;
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.documentElement.classList.remove('lb-open');
+        const done = () => {
+          lightbox.classList.remove('is-ready');
+          lbFigure.innerHTML = '';
+        };
+        if (reduce) done(); else setTimeout(done, 340);
+        lastFocus?.focus?.();
+        lastFocus = null;
+      };
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.work-item__open');
+        if (!btn) return;
+        e.preventDefault();
+        const fig = btn.closest('.work-item');
+        if (fig) open(fig);
+      });
+
+      lbClose.addEventListener('click', close);
+      lbPrev.addEventListener('click', () => go(-1));
+      lbNext.addEventListener('click', () => go(1));
+      // A click on the backdrop closes; a click on the photo or controls does not.
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox || e.target === $('.lightbox__stage', lightbox)) close();
+      });
+      // The enquiry overlay is itself a modal, so hand over rather than stack.
+      lbEnquire.addEventListener('click', close);
+
+      document.addEventListener('keydown', (e) => {
+        if (!lightbox.classList.contains('is-ready')) return;
+        if (e.key === 'Escape') { e.preventDefault(); close(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+        else if (e.key === 'Tab') {
+          // Keep the keyboard inside the dialog while it is open.
+          const focusable = $$('button:not([hidden])', lightbox);
+          if (!focusable.length) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+
+      // Swipe between photos on a phone, without hijacking a vertical scroll.
+      let sx = 0, sy = 0, swiping = false;
+      lightbox.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) { swiping = false; return; }
+        sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true;
+      }, { passive: true });
+      lightbox.addEventListener('touchend', (e) => {
+        if (!swiping) return;
+        swiping = false;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - sx;
+        const dy = t.clientY - sy;
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+      }, { passive: true });
     }
 
     /* ---- Occasion Book: add one or many occasions (anyone, order or not) ---- */
